@@ -1,5 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { Gender } from "./enum/gender.enum";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Gender } from './enum/gender.enum';
+import { Account } from 'src/accounts/account.entity';
 
 @Entity()
 export class Person {
@@ -19,5 +26,9 @@ export class Person {
   updatedAt: Date;
 
   @Column({ type: 'enum', enum: Gender })
-  gender: Gender
+  gender: Gender;
+
+  @OneToOne(() => Account, (account) => account.person)
+  @JoinColumn()
+  account: Account;
 }

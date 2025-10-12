@@ -2,18 +2,26 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Person } from './person.entity';
 import { Repository } from 'typeorm';
-import { PersonSave, PersonUpdate } from './dto/persons.dto';
+import { ProfileRequest, ProfileUpdate } from './dto/persons.dto';
+import { Account } from 'src/accounts/account.entity';
 
 @Injectable()
 export class PersonsService {
   constructor(
     @InjectRepository(Person)
-    private personsRepository: Repository<Person>
-  ) { }
+    private personsRepository: Repository<Person>,
+  ) {}
 
-  async create(personSave: PersonSave): Promise<void> {
-    const person = await this.personsRepository.create({ ...personSave, updatedAt: new Date() });
-    await this.personsRepository.save(person);
+  async create(
+    account: Account,
+    profileRequest: ProfileRequest,
+  ): Promise<Person> {
+    const personData = this.personsRepository.create({
+      ...profileRequest,
+      account: { id: account.id },
+      updatedAt: new Date(),
+    });
+    return await this.personsRepository.save(personData);
   }
 
   // TEMPORAL next we will use paginations
@@ -29,14 +37,14 @@ export class PersonsService {
     return person;
   }
 
-  async merge(id: string, personUpdate: PersonUpdate): Promise<void> {
+  async merge(id: string, profileUpdate: ProfileUpdate): Promise<void> {
     const person = await this.personsRepository.findOneBy({ id });
     if (!person) {
       throw new NotFoundException('Person was not Found');
     }
     await this.personsRepository.save({
       ...person,
-      ...personUpdate,
+      ...profileUpdate,
       updatedAt: new Date(),
     });
   }
@@ -44,5 +52,4 @@ export class PersonsService {
   async remove(id: string): Promise<void> {
     await this.personsRepository.delete({ id });
   }
-  
 }

@@ -1,30 +1,40 @@
-import { IsEnum, IsNotEmpty, IsNumberString, IsString, Length, Matches } from "class-validator";
-import { Gender } from "../enum/gender.enum";
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumberString,
+  IsString,
+  Length,
+  Matches,
+} from 'class-validator';
+import { Gender } from '../enum/gender.enum';
 
-export class PersonSave {
+export class ProfileRequest {
   @IsString()
   name: string;
+
   @IsNotEmpty()
   @Matches(/^\d{2}\/\d{2}\/\d{4}$/, {
     message: 'birthDate must be in the format dd/MM/yyyy',
   })
   birthDate: Date;
+
   @IsNumberString()
   @Length(10)
   phoneNumber: string;
+
   @IsEnum(Gender, {
-    message: 'Gender must be one of: "male", "female"'
+    message: 'Gender must be one of: "male", "female"',
   })
   gender: Gender;
 }
 
-export class PersonUpdate {
+export class ProfileUpdate {
   name: string;
   birthDate: Date;
   phoneNumber: string;
 }
 
-export class UserDetails extends PersonSave {
+export class Profile extends ProfileRequest {
   email: string;
   createdAt: Date;
   updatedAt: Date;
@@ -32,7 +42,7 @@ export class UserDetails extends PersonSave {
 }
 
 export class UserItem {
-  name: string; 
+  name: string;
   email: string;
   phoneNumber: string;
   age: number;
