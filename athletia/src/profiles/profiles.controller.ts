@@ -8,9 +8,9 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ProfileUpdate } from './dto/persons.dto';
-import { PersonsService } from './persons.service';
-import { Person } from './person.entity';
+import { ProfileUpdate } from './dto/profiles.dto';
+import { ProfilesService } from './profiles.service';
+import { Profile } from './profile.entity';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { AccountsService } from 'src/accounts/accounts.service';
 import { Request } from 'express';
@@ -21,13 +21,13 @@ import { Role } from 'src/accounts/enum/role.enum';
 @Controller('profiles')
 export class ProfilesController {
   constructor(
-    private personsService: PersonsService,
+    private profilesService: ProfilesService,
     private accountsService: AccountsService,
   ) {}
 
   @Get(':id')
-  async findPerson(@Param('id') id: string): Promise<Person> {
-    return await this.personsService.findById(id);
+  async findProfile(@Param('id') id: string): Promise<Profile> {
+    return await this.profilesService.findById(id);
   }
 
   @Put(':id')
@@ -40,10 +40,10 @@ export class ProfilesController {
     if (!account) {
       throw new ForbiddenException();
     }
-    if (account.person.id !== id && account.role !== Role.ADMIN) {
+    if (account.profile.id !== id && account.role !== Role.ADMIN) {
       throw new ForbiddenException();
     }
 
-    await this.personsService.merge(id, profileUpdate);
+    await this.profilesService.merge(id, profileUpdate);
   }
 }

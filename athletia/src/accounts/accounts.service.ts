@@ -11,21 +11,21 @@ import {
   ChangePasswordRequest,
   RegisterAccountRequest,
 } from 'src/auth/dto/auth.dto';
-import { PersonsService } from 'src/persons/persons.service';
 import { AccountStatus } from './enum/account-status.enum';
-import { ProfileRequest } from 'src/persons/dto/persons.dto';
 import { User, UserItem } from './dto/user-response.dtos';
 import { Role } from './enum/role.enum';
 import { PaginationRequest } from './dto/pagination-request.dto';
 import { PaginationResponse } from 'src/common/interfaces/pagination-response.interface';
 import { ApiResponse } from 'src/common/interfaces/api-response';
+import { ProfilesService } from 'src/profiles/profiles.service';
+import { ProfileRequest } from 'src/profiles/dto/profiles.dto';
 
 @Injectable()
 export class AccountsService {
   constructor(
     @InjectRepository(Account)
     private readonly accountsRepository: Repository<Account>,
-    private readonly personsService: PersonsService,
+    private readonly profilesService: ProfilesService,
   ) {}
 
   async create(registerRequest: RegisterAccountRequest): Promise<Account> {
@@ -58,13 +58,13 @@ export class AccountsService {
       take: limit,
       skip: offset,
       order: { email: 'DESC' },
-      relations: ['person'],
+      relations: ['profile'],
     });
     return {
       total,
       items: list.map((account) => {
-        const { email, id, status, person } = account;
-        return { email, id, status, name: person?.name };
+        const { email, id, status, profile } = account;
+        return { email, id, status, name: profile?.name };
       }),
       limit,
       offset,
@@ -75,9 +75,9 @@ export class AccountsService {
     account: Account,
     profileRequest: ProfileRequest,
   ): Promise<void> {
-    const person = await this.personsService.create(account, profileRequest);
+    const profile = await this.profilesService.create(account, profileRequest);
     account.status = AccountStatus.ACTIVE;
-    account.person = person;
+    account.profile = profile;
     await this.accountsRepository.save(account);
   }
 
@@ -94,21 +94,21 @@ export class AccountsService {
         success: false,
       });
     }
-    const { email, status, role, person } = account;
+    const { email, status, role, profile } = account;
     return {
       email,
       id: account.id,
       status,
       role,
-      name: person?.name || '',
-      birthDate: person?.birthDate || null,
+      name: profile?.name || '',
+      birthDate: profile?.birthDate || null,
     };
   }
 
   async findById(id: string): Promise<Account | null> {
     const account = await this.accountsRepository.findOne({
       where: { id },
-      relations: ['person'],
+      relations: ['profile'],
     });
     return account;
   }
@@ -134,22 +134,24 @@ export class AccountsService {
 
     const account = await this.accountsRepository.findOneBy({ id });
     if (!account) {
-      throw new BadRequestException(
-        ApiResponse.error('Account not found'),
-      );
+      throw new BadRequestException(ApiResponse.error('Account not found'));
     }
     if (account.role === role) {
       throw new BadRequestException(
         ApiResponse.error(`Account already has role ${role}`),
       );
     }
-    if ([
-      AccountStatus.SUSPENDED,
-      AccountStatus.INACTIVE,
-      AccountStatus.UNPROFILED
-    ].includes(account.status)) {
+    if (
+      [
+        AccountStatus.SUSPENDED,
+        AccountStatus.INACTIVE,
+        AccountStatus.UNPROFILED,
+      ].includes(account.status)
+    ) {
       throw new BadRequestException(
-        ApiResponse.error(`Cannot assign role to account in status ${account.status}`),
+        ApiResponse.error(
+          `Cannot assign role to account in status ${account.status}`,
+        ),
       );
     }
     account.role = role;

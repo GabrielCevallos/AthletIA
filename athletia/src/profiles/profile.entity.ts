@@ -9,7 +9,7 @@ import { Gender } from './enum/gender.enum';
 import { Account } from 'src/accounts/account.entity';
 
 @Entity()
-export class Person {
+export class Profile {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -28,7 +28,7 @@ export class Person {
   @Column({ type: 'enum', enum: Gender })
   gender: Gender;
 
-  @OneToOne(() => Account, (account) => account.person)
+  @OneToOne(() => Account, (account) => account.profile)
   @JoinColumn()
   account: Account;
 }

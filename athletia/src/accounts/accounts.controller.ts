@@ -29,7 +29,7 @@ export class AccountsController {
   @Roles(Role.ADMIN, Role.MODERATOR)
   @Get()
   async findAll(
-    @Query() paginationRequest: PaginationRequest
+    @Query() paginationRequest: PaginationRequest,
   ): Promise<ApiResponse<void> & PaginationResponse<UserItem>> {
     const pagination = await this.accountsService.findAll(paginationRequest);
     const success = true;
@@ -47,9 +47,7 @@ export class AccountsController {
 
   @Roles(Role.ADMIN, Role.MODERATOR)
   @Put(':id/suspend')
-  async suspendAccount(
-    @Param('id') id: string
-  ): Promise<ApiResponse<void>> {
+  async suspendAccount(@Param('id') id: string): Promise<ApiResponse<void>> {
     const result = await this.accountsService.suspendAccount(id);
     return ApiResponse.success(undefined, result.message);
   }
@@ -59,7 +57,7 @@ export class AccountsController {
   async giveRole(
     @Req() request: Request & { user: UserPayload },
     @Param('id') id: string,
-    @Body('role') role: Role
+    @Body('role') role: Role,
   ): Promise<ApiResponse<void>> {
     const user = request.user;
     if (user.sub === id) {

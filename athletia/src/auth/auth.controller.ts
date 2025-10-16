@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   ChangePasswordRequest,
@@ -13,9 +7,9 @@ import {
   TokenResponse,
 } from './dto/auth.dto';
 import { Public } from 'src/auth/guards/decorators/public.decorator';
-import { ProfileRequest } from 'src/persons/dto/persons.dto';
 import { AuthGuard } from './guards/auth.guard';
 import { ApiResponse } from 'src/common/interfaces/api-response';
+import { ProfileRequest } from 'src/profiles/dto/profiles.dto';
 // import { GoogleAuthGuard } from './guards/google-auth.guard';
 // import type { Request, Response } from 'express';
 
@@ -33,9 +27,7 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(200)
-  async signIn(
-    @Body() loginRequest: LoginRequest,
-  ): Promise<TokenResponse> {
+  async signIn(@Body() loginRequest: LoginRequest): Promise<TokenResponse> {
     const tokenResponse = await this.authService.signIn(loginRequest);
     return tokenResponse;
   }
@@ -45,11 +37,11 @@ export class AuthController {
   async registerAccount(
     @Body() registerRequest: RegisterAccountRequest,
   ): Promise<ApiResponse<accountIdOnly>> {
-    const accountSaved = 
+    const accountSaved =
       await this.authService.registerAccount(registerRequest);
     return ApiResponse.success(
       { accountId: accountSaved.accountId },
-      accountSaved.message
+      accountSaved.message,
     );
   }
 
@@ -61,7 +53,7 @@ export class AuthController {
   ): Promise<ApiResponse<void>> {
     const result = await this.authService.completeWithProfileSetup(
       accountId,
-      profileRequest
+      profileRequest,
     );
     return ApiResponse.success(undefined, result.message);
   }
@@ -74,7 +66,7 @@ export class AuthController {
   ): Promise<ApiResponse<void>> {
     const result = await this.authService.changePassword(
       accountId,
-      changePasswordRequest
+      changePasswordRequest,
     );
     return ApiResponse.success(undefined, result.message);
   }
@@ -92,7 +84,9 @@ export class AuthController {
   @Public()
   @Post('logout')
   @HttpCode(200)
-  async logout(@Body('accountId') accountId: string): Promise<ApiResponse<void>> {
+  async logout(
+    @Body('accountId') accountId: string,
+  ): Promise<ApiResponse<void>> {
     const result = await this.authService.logout(accountId);
     return ApiResponse.success(undefined, result.message);
   }

@@ -13,22 +13,21 @@ import {
 import * as argon2 from 'argon2';
 import { jwtConstants, messages } from './constants';
 import { JwtService } from '@nestjs/jwt';
-import { ProfileRequest } from 'src/persons/dto/persons.dto';
 import { AccountStatus } from 'src/accounts/enum/account-status.enum';
 import { Account } from 'src/accounts/account.entity';
 import { UserPayload } from './interfaces/user-payload.interface';
 import * as dotenv from 'dotenv';
+import { ProfileRequest } from 'src/profiles/dto/profiles.dto';
 // import { GoogleUser } from './strategies/google.strategy';
 
 dotenv.config();
-
 
 @Injectable()
 export class AuthService {
   constructor(
     private accountsService: AccountsService,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   private createJwtPayload(account: Account): UserPayload {
     return {
@@ -47,7 +46,7 @@ export class AuthService {
       }),
       refreshToken: await this.jwtService.signAsync(payload, {
         expiresIn: jwtConstants.refreshExpiration,
-        secret: process.env.JWT_SECRET_KEY_REFRESH
+        secret: process.env.JWT_SECRET_KEY_REFRESH,
       }),
       accountId: payload.sub,
     };
@@ -105,7 +104,7 @@ export class AuthService {
     ) {
       this.handleAccountStates(account);
     }
-    if (account.person) {
+    if (account.profile) {
       throw new BadRequestException(messages.profileAlreadySetUp);
     }
     if (this.isAccountActive(account)) {
@@ -132,12 +131,8 @@ export class AuthService {
     return { message: messages.passwordChanged };
   }
 
-  async signIn(
-    loginRequest: LoginRequest,
-  ): Promise<TokenResponse> {
-    const account = await this.accountsService.findByEmail(
-      loginRequest.email,
-    );
+  async signIn(loginRequest: LoginRequest): Promise<TokenResponse> {
+    const account = await this.accountsService.findByEmail(loginRequest.email);
     if (!account) {
       throw new UnauthorizedException();
     }
@@ -156,21 +151,23 @@ export class AuthService {
     const payload = this.createJwtPayload(account);
 
     const tokenResponse = await this.createTokenResponse(payload);
-    this.accountsService.updateRefreshToken(
+    await this.accountsService.updateRefreshToken(
       account.id,
       await argon2.hash(tokenResponse.refreshToken),
     );
     return tokenResponse;
-
   }
 
   async refreshToken(refreshToken: string): Promise<TokenResponse> {
     let accountId: string;
     try {
-      const payload =
-        await this.jwtService.verifyAsync<UserPayload>(refreshToken, {
-          secret: process.env.JWT_SECRET_KEY_REFRESH || 'defaultSecretKeyRefresh',
-        });
+      const payload = await this.jwtService.verifyAsync<UserPayload>(
+        refreshToken,
+        {
+          secret:
+            process.env.JWT_SECRET_KEY_REFRESH || 'defaultSecretKeyRefresh',
+        },
+      );
       accountId = payload.sub;
     } catch {
       throw new UnauthorizedException();

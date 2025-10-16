@@ -1,4 +1,3 @@
-import { Person } from 'src/persons/person.entity';
 import {
   Column,
   Entity,
@@ -8,6 +7,7 @@ import {
 } from 'typeorm';
 import { AccountStatus } from './enum/account-status.enum';
 import { Role } from './enum/role.enum';
+import { Profile } from 'src/profiles/profile.entity';
 
 @Entity()
 export class Account {
@@ -34,11 +34,12 @@ export class Account {
   })
   status: AccountStatus;
 
-  @OneToOne(() => Person, (person) => person.account, { onDelete: 'CASCADE' })
+  @OneToOne(() => Profile, (profile) => profile.account, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
-  person: Person;
+  profile: Profile;
 
   @Column({ nullable: true })
   refreshToken?: string;
-
 }
