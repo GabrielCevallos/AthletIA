@@ -22,7 +22,6 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log('AuthGuard#canActivate called');
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -36,7 +35,6 @@ export class AuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      console.log('No token found');
       throw new UnauthorizedException();
     }
 
@@ -51,10 +49,8 @@ export class AuthGuard implements CanActivate {
       if (account.status !== AccountStatus.ACTIVE) {
         throw new UnauthorizedException();
       }
-      console.log('Token verified successfully:', payload);
       request.user = payload;
     } catch {
-      console.log('Token verification failed');
       throw new UnauthorizedException();
     }
 

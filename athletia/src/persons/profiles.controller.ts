@@ -12,36 +12,26 @@ import { ProfileUpdate } from './dto/persons.dto';
 import { PersonsService } from './persons.service';
 import { Person } from './person.entity';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Roles } from 'src/auth/guards/decorators/roles.decorator';
 import { AccountsService } from 'src/accounts/accounts.service';
 import { Request } from 'express';
 import { UserPayload } from 'src/auth/interfaces/user-payload.interface';
 import { Role } from 'src/accounts/enum/role.enum';
 
-@Controller('persons')
-export class PersonsController {
+@UseGuards(AuthGuard)
+@Controller('profiles')
+export class ProfilesController {
   constructor(
     private personsService: PersonsService,
     private accountsService: AccountsService,
   ) {}
-
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin', 'user')
-  @Get()
-  async findAllPersons(): Promise<Person[]> {
-    return await this.personsService.findAll();
-  }
 
   @Get(':id')
   async findPerson(@Param('id') id: string): Promise<Person> {
     return await this.personsService.findById(id);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin', 'user')
   @Put(':id')
-  async updatePerson(
+  async updateProfile(
     @Req() req: Request & { user: UserPayload },
     @Param('id') id: string,
     @Body() profileUpdate: ProfileUpdate,

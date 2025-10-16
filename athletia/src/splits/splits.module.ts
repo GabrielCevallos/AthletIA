@@ -4,6 +4,6 @@ import { SplitsController } from './splits.controller';
 
 @Module({
   providers: [SplitsService],
-  controllers: [SplitsController]
+  controllers: [SplitsController],
 })
 export class SplitsModule {}

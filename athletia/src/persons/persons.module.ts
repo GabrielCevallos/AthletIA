@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { PersonsService } from './persons.service';
-import { PersonsController } from './persons.controller';
+import { ProfilesController } from './profiles.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Person } from './person.entity';
 import { AccountsModule } from 'src/accounts/accounts.module';
@@ -11,7 +11,7 @@ import { AccountsModule } from 'src/accounts/accounts.module';
     TypeOrmModule.forFeature([Person]),
   ],
   providers: [PersonsService],
-  controllers: [PersonsController],
+  controllers: [ProfilesController],
   exports: [PersonsService],
 })
 export class PersonsModule {}

@@ -21,6 +21,7 @@ export class LoginRequest {
 export class TokenResponse {
   accessToken: string;
   refreshToken: string;
+  accountId?: string;
 }
 
 export class ChangePasswordRequest {

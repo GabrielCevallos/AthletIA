@@ -17,13 +17,18 @@ import { ProfileRequest } from 'src/persons/dto/persons.dto';
 import { AccountStatus } from 'src/accounts/enum/account-status.enum';
 import { Account } from 'src/accounts/account.entity';
 import { UserPayload } from './interfaces/user-payload.interface';
+import * as dotenv from 'dotenv';
+// import { GoogleUser } from './strategies/google.strategy';
+
+dotenv.config();
+
 
 @Injectable()
 export class AuthService {
   constructor(
     private accountsService: AccountsService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   private createJwtPayload(account: Account): UserPayload {
     return {
@@ -37,10 +42,14 @@ export class AuthService {
     payload: UserPayload,
   ): Promise<TokenResponse> {
     return {
-      accessToken: await this.jwtService.signAsync(payload),
+      accessToken: await this.jwtService.signAsync(payload, {
+        expiresIn: jwtConstants.accessExpiration,
+      }),
       refreshToken: await this.jwtService.signAsync(payload, {
         expiresIn: jwtConstants.refreshExpiration,
+        secret: process.env.JWT_SECRET_KEY_REFRESH
       }),
+      accountId: payload.sub,
     };
   }
 
@@ -125,36 +134,43 @@ export class AuthService {
 
   async signIn(
     loginRequest: LoginRequest,
-  ): Promise<TokenResponse | { message: string; accountId: string }> {
-    try {
-      const account = await this.accountsService.findByEmail(
-        loginRequest.email,
-      );
-      if (!account) {
-        throw new UnauthorizedException();
-      }
-
-      if (!this.isAccountActive(account)) {
-        this.handleAccountStates(account);
-      }
-
-      const ok = await argon2.verify(account.password, loginRequest.password);
-      if (!ok) {
-        throw new UnauthorizedException();
-      }
-      const payload = this.createJwtPayload(account);
-
-      return this.createTokenResponse(payload);
-    } catch {
-      throw new UnauthorizedException(messages.invalidCredentials);
+  ): Promise<TokenResponse> {
+    const account = await this.accountsService.findByEmail(
+      loginRequest.email,
+    );
+    if (!account) {
+      throw new UnauthorizedException();
     }
+
+    if (!this.isAccountActive(account)) {
+      this.handleAccountStates(account);
+    }
+
+    if (!account.password) {
+      throw new UnauthorizedException();
+    }
+    const ok = await argon2.verify(account.password, loginRequest.password);
+    if (!ok) {
+      throw new UnauthorizedException();
+    }
+    const payload = this.createJwtPayload(account);
+
+    const tokenResponse = await this.createTokenResponse(payload);
+    this.accountsService.updateRefreshToken(
+      account.id,
+      await argon2.hash(tokenResponse.refreshToken),
+    );
+    return tokenResponse;
+
   }
 
   async refreshToken(refreshToken: string): Promise<TokenResponse> {
     let accountId: string;
     try {
       const payload =
-        await this.jwtService.verifyAsync<UserPayload>(refreshToken);
+        await this.jwtService.verifyAsync<UserPayload>(refreshToken, {
+          secret: process.env.JWT_SECRET_KEY_REFRESH || 'defaultSecretKeyRefresh',
+        });
       accountId = payload.sub;
     } catch {
       throw new UnauthorizedException();
@@ -164,10 +180,53 @@ export class AuthService {
     if (!account) {
       throw new UnauthorizedException();
     }
+
+    if (!account.refreshToken) {
+      throw new UnauthorizedException();
+    }
+
+    const ok = await argon2.verify(account.refreshToken, refreshToken);
+    if (!ok) {
+      throw new UnauthorizedException();
+    }
+
     if (!this.isAccountActive(account)) {
       this.handleAccountStates(account);
     }
+
     const payload = this.createJwtPayload(account);
     return this.createTokenResponse(payload);
   }
+
+  async logout(accountId: string): Promise<{ message: string }> {
+    const account = await this.accountsService.findById(accountId);
+    if (!account) {
+      throw new BadRequestException(messages.invalidAccountId);
+    }
+    if (
+      [AccountStatus.INACTIVE, AccountStatus.SUSPENDED].includes(account.status)
+    ) {
+      this.handleAccountStates(account);
+    }
+    await this.accountsService.updateRefreshToken(accountId, null!);
+    return { message: 'Logged out successfully' };
+  }
+
+  /* async signInWithGoogle(googleUser: GoogleUser): Promise<TokenResponse> {
+    if (!googleUser.email) {
+      throw new UnauthorizedException('Google account has no verified email');
+    }
+    // Find account by email
+    let account = await this.accountsService.findByEmail(googleUser.email);
+    if (!account) {
+      // Create minimal account in UNPROFILED state without password
+      account = await this.accountsService.createFromOAuth({
+        email: googleUser.email,
+        name: googleUser.name || 'Usuario',
+      });
+    }
+    this.handleAccountStates(account as any);
+    const payload = this.createJwtPayload(account as any);
+    return this.createTokenResponse(payload);
+  } */
 }

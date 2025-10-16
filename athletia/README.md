@@ -57,6 +57,34 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Environment variables
+
+Create a `.env` file in the project root with at least:
+
+```env
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_NAME=athletia
+JWT_SECRET_KEY=change-me
+# Public domain of this API (used to default Google callback)
+DOMAIN=http://localhost:3001
+
+# Google OAuth 2.0
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+# Optional overrides
+# GOOGLE_CALLBACK_URL=http://localhost:3001/auth/google/callback
+# GOOGLE_SUCCESS_REDIRECT=http://localhost:3000/auth/success
+```
+
+## Google OAuth 2.0
+
+- Start flow: open `GET /auth/google` in the browser.
+- Configure Google Console Authorized redirect URI to `http://localhost:3001/auth/google/callback` (or your deployed URL).
+- On success, the API redirects to `GOOGLE_SUCCESS_REDIRECT` (default `http://localhost:3000/auth/success`) with tokens in the URL fragment: `#accessToken=...&refreshToken=...`.
+- For SPA popup flows, append `?json=true` to the callback URL to receive a JSON body with `{ accessToken, refreshToken }` instead of a redirect.
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

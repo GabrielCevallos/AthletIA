@@ -18,6 +18,7 @@ import { User, UserItem } from './dto/user-response.dtos';
 import { Role } from './enum/role.enum';
 import { PaginationRequest } from './dto/pagination-request.dto';
 import { PaginationResponse } from 'src/common/interfaces/pagination-response.interface';
+import { ApiResponse } from 'src/common/interfaces/api-response';
 
 @Injectable()
 export class AccountsService {
@@ -36,20 +37,17 @@ export class AccountsService {
     return account;
   }
 
-  async save(
-    registerRequest: RegisterAccountRequest,
-    profile: ProfileRequest,
-  ): Promise<Account> {
-    await this.create(registerRequest);
-    const account = await this.findByEmail(registerRequest.email);
-    if (!account) {
-      throw new BadRequestException('Account not found after creation');
-    }
-    await this.personsService.create(account, profile);
-    account.status = AccountStatus.ACTIVE;
+  /* async createFromOAuth(params: { email: string; name: string }): Promise<Account> {
+    // Create account without password in UNPROFILED state
+    const account = this.accountsRepository.create({
+      email: params.email,
+      password: null,
+    });
     await this.accountsRepository.save(account);
+    // Do not create Person yet; force client to complete profile later
     return account;
   }
+ */
 
   async findAll(
     paginationRequest: PaginationRequest,
@@ -115,6 +113,12 @@ export class AccountsService {
     return account;
   }
 
+  async findUserForce(id: string): Promise<User> {
+    const user = await this.findUserById(id);
+    if (!user) throw new BadRequestException('User not found');
+    return user;
+  }
+
   async suspendAccount(id: string): Promise<{ message: string }> {
     const account = await this.accountsRepository.findOneBy({ id });
     if (!account) throw new BadRequestException('Account not found');
@@ -123,12 +127,47 @@ export class AccountsService {
     return { message: 'Account suspended successfully' };
   }
 
+  async giveRole(id: string, role: Role): Promise<{ message: string }> {
+    if (!Object.values(Role).includes(role)) {
+      throw new BadRequestException('Invalid role');
+    }
+
+    const account = await this.accountsRepository.findOneBy({ id });
+    if (!account) {
+      throw new BadRequestException(
+        ApiResponse.error('Account not found'),
+      );
+    }
+    if (account.role === role) {
+      throw new BadRequestException(
+        ApiResponse.error(`Account already has role ${role}`),
+      );
+    }
+    if ([
+      AccountStatus.SUSPENDED,
+      AccountStatus.INACTIVE,
+      AccountStatus.UNPROFILED
+    ].includes(account.status)) {
+      throw new BadRequestException(
+        ApiResponse.error(`Cannot assign role to account in status ${account.status}`),
+      );
+    }
+    account.role = role;
+    await this.accountsRepository.save(account);
+    return { message: `Role ${role} assigned successfully` };
+  }
+
+  async updateRefreshToken(id: string, refreshToken: string): Promise<void> {
+    await this.accountsRepository.update(id, { refreshToken });
+  }
+
   async changePassword(
     id: string,
     changePasswordRequest: ChangePasswordRequest,
   ): Promise<void> {
     const accountSaved = await this.accountsRepository.findOneBy({ id });
     if (!accountSaved) throw new UnauthorizedException();
+    if (!accountSaved.password) throw new UnauthorizedException();
     const ok = await argon2.verify(
       accountSaved.password,
       changePasswordRequest.currentPassword,

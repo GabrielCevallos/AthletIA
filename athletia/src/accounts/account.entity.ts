@@ -37,4 +37,8 @@ export class Account {
   @OneToOne(() => Person, (person) => person.account, { onDelete: 'CASCADE' })
   @JoinColumn()
   person: Person;
+
+  @Column({ nullable: true })
+  refreshToken?: string;
+
 }

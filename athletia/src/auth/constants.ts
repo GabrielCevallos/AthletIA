@@ -20,8 +20,9 @@ export const messages = {
 
 export const jwtConstants = {
   secret: process.env.JWT_SECRET_KEY,
-  refreshExpiration: '7d',
-  accessExpiration: '1h',
+  // expiration in seconds
+  refreshExpiration: 60 * 60 * 24 * 7, // 7 days
+  accessExpiration: 60 * 60, // 1 hour
 };
 
 export const domain = process.env.DOMAIN || 'http://localhost:3000';
