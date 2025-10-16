@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, Patch, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   ChangePasswordRequest,
@@ -59,7 +59,7 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
-  @Post('change-password')
+  @Patch('change-password')
   async changePassword(
     @Body('accountId') accountId: string,
     @Body('changePasswordRequest') changePasswordRequest: ChangePasswordRequest,
@@ -89,13 +89,6 @@ export class AuthController {
   ): Promise<ApiResponse<void>> {
     const result = await this.authService.logout(accountId);
     return ApiResponse.success(undefined, result.message);
-  }
-
-  @Public()
-  @Post('health-check')
-  @HttpCode(200)
-  healthCheck(): systemStatusOnly {
-    return { status: 'OK' };
   }
 
   // Google OAuth
