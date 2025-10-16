@@ -8,6 +8,7 @@ import { AccountsModule } from '../accounts/accounts.module';
 import { AuthModule } from '../auth/auth.module';
 import { BootstrapService } from './bootstrap.service';
 import { ProfilesModule } from 'src/profiles/profiles.module';
+import { ExercisesModule } from 'src/workout/exercises/exercises.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ProfilesModule } from 'src/profiles/profiles.module';
     AuthModule,
     AccountsModule,
     ProfilesModule,
+    ExercisesModule,
   ],
   controllers: [AppController],
   providers: [AppService, BootstrapService],
