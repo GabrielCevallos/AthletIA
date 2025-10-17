@@ -1,4 +1,11 @@
-import { Body, Controller, HttpCode, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   ChangePasswordRequest,
@@ -8,13 +15,12 @@ import {
 } from './dto/auth.dto';
 import { Public } from 'src/auth/guards/decorators/public.decorator';
 import { AuthGuard } from './guards/auth.guard';
-import { ApiResponse } from 'src/common/interfaces/api-response';
-import { ProfileRequest } from 'src/profiles/dto/profiles.dto';
+import { ApiResponse } from 'src/common/response/api.response';
+import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 // import { GoogleAuthGuard } from './guards/google-auth.guard';
 // import type { Request, Response } from 'express';
 
 type accountIdOnly = { accountId: string };
-type systemStatusOnly = { status: string };
 
 @Controller('auth')
 export class AuthController {

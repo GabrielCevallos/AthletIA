@@ -15,11 +15,11 @@ import {
 import { AccountStatus } from './enum/account-status.enum';
 import { User, UserItem } from './dto/user-response.dtos';
 import { Role } from './enum/role.enum';
-import { PaginationRequest } from './dto/pagination-request.dto';
+import { PaginationRequest } from '../../common/request/pagination.request.dto';
 import { PaginationResponse } from 'src/common/interfaces/pagination-response.interface';
-import { ApiResponse } from 'src/common/interfaces/api-response';
-import { ProfilesService } from 'src/profiles/profiles.service';
-import { ProfileRequest } from 'src/profiles/dto/profiles.dto';
+import { ApiResponse } from 'src/common/response/api.response';
+import { ProfilesService } from 'src/users/profiles/profiles.service';
+import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 
 @Injectable()
 export class AccountsService {

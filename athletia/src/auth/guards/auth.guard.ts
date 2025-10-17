@@ -9,8 +9,8 @@ import { Request } from 'express';
 import { jwtConstants } from '../constants';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from 'src/auth/guards/decorators/public.decorator';
-import { AccountsService } from 'src/accounts/accounts.service';
-import { AccountStatus } from 'src/accounts/enum/account-status.enum';
+import { AccountsService } from 'src/users/accounts/accounts.service';
+import { AccountStatus } from 'src/users/accounts/enum/account-status.enum';
 import { UserPayload } from '../interfaces/user-payload.interface';
 
 @Injectable()

@@ -3,7 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AccountsService } from 'src/accounts/accounts.service';
+import { AccountsService } from 'src/users/accounts/accounts.service';
 import {
   ChangePasswordRequest,
   LoginRequest,
@@ -13,11 +13,11 @@ import {
 import * as argon2 from 'argon2';
 import { jwtConstants, messages } from './constants';
 import { JwtService } from '@nestjs/jwt';
-import { AccountStatus } from 'src/accounts/enum/account-status.enum';
-import { Account } from 'src/accounts/account.entity';
+import { AccountStatus } from 'src/users/accounts/enum/account-status.enum';
+import { Account } from 'src/users/accounts/account.entity';
 import { UserPayload } from './interfaces/user-payload.interface';
 import * as dotenv from 'dotenv';
-import { ProfileRequest } from 'src/profiles/dto/profiles.dto';
+import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 // import { GoogleUser } from './strategies/google.strategy';
 
 dotenv.config();

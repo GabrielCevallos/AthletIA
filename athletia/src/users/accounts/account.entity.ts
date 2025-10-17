@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { AccountStatus } from './enum/account-status.enum';
 import { Role } from './enum/role.enum';
-import { Profile } from 'src/profiles/profile.entity';
+import { Profile } from 'src/users/profiles/profile.entity';
 
 @Entity()
 export class Account {
