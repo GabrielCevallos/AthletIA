@@ -1,7 +1,7 @@
 # FitMentor
 
 <p align="center">
-  <img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/14bd5c2d-11ce-490c-a4aa-069f42fc9db3" style="border-radius: 50%;" />
+  <img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/2f025a77-a037-4fec-9d6b-e14a308cb553" style="border-radius: 50%;" />
 </p>
 
 ## 📋 Tabla de Contenidos
