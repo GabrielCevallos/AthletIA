@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -86,7 +87,7 @@ export class AccountsService {
     return account;
   }
 
-  async findUserById(id: string): Promise<User | null> {
+  async findUserById(id: string): Promise<User> {
     const account = await this.findById(id);
     if (!account) {
       throw new BadRequestException({
@@ -115,13 +116,17 @@ export class AccountsService {
 
   async findUserForce(id: string): Promise<User> {
     const user = await this.findUserById(id);
-    if (!user) throw new BadRequestException('User not found');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return user;
   }
 
   async suspendAccount(id: string): Promise<{ message: string }> {
     const account = await this.accountsRepository.findOneBy({ id });
-    if (!account) throw new BadRequestException('Account not found');
+    if (!account) {
+      throw new NotFoundException('Account not found');
+    }
     account.status = AccountStatus.SUSPENDED;
     await this.accountsRepository.save(account);
     return { message: 'Account suspended successfully' };
@@ -134,7 +139,7 @@ export class AccountsService {
 
     const account = await this.accountsRepository.findOneBy({ id });
     if (!account) {
-      throw new BadRequestException(ApiResponse.error('Account not found'));
+      throw new NotFoundException(ApiResponse.error('Account not found'));
     }
     if (account.role === role) {
       throw new BadRequestException(

@@ -4,7 +4,7 @@ import {
   Controller,
   Get,
   Param,
-  Put,
+  Patch,
   Query,
   Req,
   UseGuards,
@@ -46,14 +46,14 @@ export class AccountsController {
   }
 
   @Roles(Role.ADMIN, Role.MODERATOR)
-  @Put(':id/suspend')
+  @Patch(':id/suspend')
   async suspendAccount(@Param('id') id: string): Promise<ApiResponse<void>> {
     const result = await this.accountsService.suspendAccount(id);
     return ApiResponse.success(undefined, result.message);
   }
 
   @Roles(Role.ADMIN)
-  @Put(':id/give-role')
+  @Patch(':id/give-role')
   async giveRole(
     @Req() request: Request & { user: UserPayload },
     @Param('id') id: string,

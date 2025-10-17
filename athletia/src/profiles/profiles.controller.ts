@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   Get,
   Param,
-  Put,
+  Patch,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -30,7 +30,7 @@ export class ProfilesController {
     return await this.profilesService.findById(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   async updateProfile(
     @Req() req: Request & { user: UserPayload },
     @Param('id') id: string,
