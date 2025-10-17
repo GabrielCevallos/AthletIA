@@ -1,8 +1,6 @@
 # AthletIA
 
-<p align="center">
-  <img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/2f025a77-a037-4fec-9d6b-e14a308cb553" style="border-radius: 50%;" />
-</p>
+<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/2f025a77-a037-4fec-9d6b-e14a308cb553" style="border-radius: 50%;" />
 
 ## 📋 Tabla de Contenidos
 
@@ -201,12 +199,12 @@ La arquitectura es **modular**, basada en contenedores lógicos, con separación
 
 ### 1. Clonar el repositorio
 ```bash
-git clone https://github.com/GabrielCevallos/FitMentor
+git clone https://github.com/GabrielCevallos/AthletIA
 ```
 
 ### 2. Entrar al proyecto
 ```bash
-cd FitMentor
+cd Athletia/athletia
 ```
 
 ### 3. Instalar dependencias
