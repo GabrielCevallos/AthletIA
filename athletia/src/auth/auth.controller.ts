@@ -1,9 +1,12 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Patch,
   Post,
+  Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -17,8 +20,9 @@ import { Public } from 'src/auth/guards/decorators/public.decorator';
 import { AuthGuard } from './guards/auth.guard';
 import { ApiResponse } from 'src/common/response/api.response';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
-// import { GoogleAuthGuard } from './guards/google-auth.guard';
-// import type { Request, Response } from 'express';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { GoogleUser } from './strategies/google.strategy';
+import type { Request, Response } from 'express';
 
 type accountIdOnly = { accountId: string };
 
@@ -98,7 +102,7 @@ export class AuthController {
   }
 
   // Google OAuth
-  /* @Public()
+  @Public()
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   async googleAuth() {
@@ -106,19 +110,16 @@ export class AuthController {
   }
 
   @Public()
-  @Get('google/callback')
+  @Get('google/redirect')
   @UseGuards(GoogleAuthGuard)
-  async googleCallback(@Req() req: Request, @Res() res: Response) {
-    // After successful auth, Passport puts user on req.user
-    const tokens = await this.authService.signInWithGoogle(req.user as any);
-    // Option A: return JSON if used by SPA popup
-    if ((req.query as any).json === 'true') {
-      return res.json(tokens);
-    }
-    // Option B: redirect with tokens as fragment (avoid query logging)
-    const redirectUrl = process.env.GOOGLE_SUCCESS_REDIRECT ||
-      'http://localhost:3000/auth/success';
+  async googleCallback(
+    @Req() req: Request & { user: GoogleUser },
+    @Res() res: Response,
+  ) {
+    const tokens = await this.authService.signInWithGoogle(req.user);
+    // Redirige al frontend con los tokens en el fragmento del URL
+    const redirectUrl = process.env.FRONTEND_URL || 'http://localhost:5173/auth/callback';
     const fragment = `#accessToken=${encodeURIComponent(tokens.accessToken)}&refreshToken=${encodeURIComponent(tokens.refreshToken)}`;
     return res.redirect(`${redirectUrl}${fragment}`);
-  } */
+  } 
 }

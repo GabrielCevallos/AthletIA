@@ -17,7 +17,7 @@ export class Account {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
 
   @Column({
@@ -40,6 +40,6 @@ export class Account {
   @JoinColumn()
   profile: Profile;
 
-  @Column({ nullable: true })
-  refreshToken?: string;
+  @Column({ type: 'text', nullable: true })
+  refreshTokenHash: string | null;
 }
