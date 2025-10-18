@@ -4,6 +4,6 @@ import { RestTimeController } from './rest-time.controller';
 
 @Module({
   providers: [RestTimeService],
-  controllers: [RestTimeController]
+  controllers: [RestTimeController],
 })
 export class RestTimeModule {}

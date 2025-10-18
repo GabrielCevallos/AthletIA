@@ -3,7 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AccountsService } from 'src/accounts/accounts.service';
+import { AccountsService } from 'src/users/accounts/accounts.service';
 import {
   ChangePasswordRequest,
   LoginRequest,
@@ -13,11 +13,12 @@ import {
 import * as argon2 from 'argon2';
 import { jwtConstants, messages } from './constants';
 import { JwtService } from '@nestjs/jwt';
-import { AccountStatus } from 'src/accounts/enum/account-status.enum';
-import { Account } from 'src/accounts/account.entity';
+import { AccountStatus } from 'src/users/accounts/enum/account-status.enum';
+import { Account } from 'src/users/accounts/account.entity';
 import { UserPayload } from './interfaces/user-payload.interface';
 import * as dotenv from 'dotenv';
-import { ProfileRequest } from 'src/profiles/dto/profiles.dto';
+import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
+import { GoogleUser } from './strategies/google.strategy';
 // import { GoogleUser } from './strategies/google.strategy';
 
 dotenv.config();
@@ -150,12 +151,9 @@ export class AuthService {
     }
     const payload = this.createJwtPayload(account);
 
-    const tokenResponse = await this.createTokenResponse(payload);
-    await this.accountsService.updateRefreshToken(
-      account.id,
-      await argon2.hash(tokenResponse.refreshToken),
-    );
-    return tokenResponse;
+    const tokens = await this.createTokenResponse(payload);
+    await this.accountsService.setRefreshToken(account.id, tokens.refreshToken);
+    return tokens;
   }
 
   async refreshToken(refreshToken: string): Promise<TokenResponse> {
@@ -178,21 +176,22 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    if (!account.refreshToken) {
-      throw new UnauthorizedException();
-    }
-
-    const ok = await argon2.verify(account.refreshToken, refreshToken);
-    if (!ok) {
-      throw new UnauthorizedException();
-    }
+    // Validate provided refresh token against stored hash
+    const valid = await this.accountsService.verifyRefreshToken(
+      account.id,
+      refreshToken,
+    );
+    if (!valid) throw new UnauthorizedException();
 
     if (!this.isAccountActive(account)) {
       this.handleAccountStates(account);
     }
 
     const payload = this.createJwtPayload(account);
-    return this.createTokenResponse(payload);
+    const tokens = await this.createTokenResponse(payload);
+    // Rotate refresh token
+    await this.accountsService.setRefreshToken(account.id, tokens.refreshToken);
+    return tokens;
   }
 
   async logout(accountId: string): Promise<{ message: string }> {
@@ -205,11 +204,11 @@ export class AuthService {
     ) {
       this.handleAccountStates(account);
     }
-    await this.accountsService.updateRefreshToken(accountId, null!);
+    await this.accountsService.clearRefreshToken(accountId);
     return { message: 'Logged out successfully' };
   }
 
-  /* async signInWithGoogle(googleUser: GoogleUser): Promise<TokenResponse> {
+  async signInWithGoogle(googleUser: GoogleUser): Promise<TokenResponse> {
     if (!googleUser.email) {
       throw new UnauthorizedException('Google account has no verified email');
     }
@@ -222,8 +221,13 @@ export class AuthService {
         name: googleUser.name || 'Usuario',
       });
     }
-    this.handleAccountStates(account as any);
-    const payload = this.createJwtPayload(account as any);
-    return this.createTokenResponse(payload);
-  } */
+    // If unprofiled, throw to let frontend complete profile
+    this.handleAccountStates(account);
+    
+    // Generate JWT tokens (same flow as regular login)
+    const payload = this.createJwtPayload(account);
+    const tokens = await this.createTokenResponse(payload);
+    await this.accountsService.setRefreshToken(account.id, tokens.refreshToken);
+    return tokens;
+  } 
 }

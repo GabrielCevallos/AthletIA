@@ -12,10 +12,10 @@ import { ProfileUpdate } from './dto/profiles.dto';
 import { ProfilesService } from './profiles.service';
 import { Profile } from './profile.entity';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { AccountsService } from 'src/accounts/accounts.service';
+import { AccountsService } from 'src/users/accounts/accounts.service';
 import { Request } from 'express';
 import { UserPayload } from 'src/auth/interfaces/user-payload.interface';
-import { Role } from 'src/accounts/enum/role.enum';
+import { Role } from 'src/users/accounts/enum/role.enum';
 
 @UseGuards(AuthGuard)
 @Controller('profiles')

@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
-import { Gender } from 'src/profiles/enum/gender.enum';
+import { Gender } from 'src/users/profiles/enum/gender.enum';
 
 export class UserRegisterRequest {
   @IsEmail()

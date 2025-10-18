@@ -1,36 +1,33 @@
 import {
-    Column,
-    Entity,
-
-    JoinColumn,
-
-    ManyToMany,
-
-    PrimaryGeneratedColumn
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToMany,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Exercise } from '../exercises/exercises.entity';
 
 @Entity()
 export class Routine {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column()
-    description: string;
+  @Column()
+  description: string;
 
-    @Column()
-    nExercises: number;
+  @Column()
+  nExercises: number;
 
-    @Column()
-    updatedAt: Date;
+  @Column()
+  updatedAt: Date;
 
-    @Column()
-    official: boolean;
+  @Column()
+  official: boolean;
 
-    @ManyToMany(() => Exercise, (exercise) => exercise.routines)
-    @JoinColumn()
-    exercise: Exercise;
+  @ManyToMany(() => Exercise, (exercise) => exercise.routines)
+  @JoinColumn()
+  exercise: Exercise;
 }
