@@ -9,6 +9,7 @@ import { AuthModule } from '../auth/auth.module';
 import { BootstrapService } from './bootstrap.service';
 import { ProfilesModule } from 'src/profiles/profiles.module';
 import { ExercisesModule } from 'src/workout/exercises/exercises.module';
+import { RoutinesModule } from 'src/workout/routines/routines.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ExercisesModule } from 'src/workout/exercises/exercises.module';
     AuthModule,
     AccountsModule,
     ProfilesModule,
+    RoutinesModule,
     ExercisesModule,
   ],
   controllers: [AppController],

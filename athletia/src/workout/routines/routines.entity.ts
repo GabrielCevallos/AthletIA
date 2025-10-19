@@ -9,6 +9,7 @@ import {
     PrimaryGeneratedColumn
 } from 'typeorm';
 import { Exercise } from '../exercises/exercises.entity';
+import { RoutineGoal } from './enum/routine-goal.enum';
 
 @Entity()
 export class Routine {
@@ -23,6 +24,12 @@ export class Routine {
 
     @Column()
     nExercises: number;
+
+    @Column({
+        type: 'enum',
+        enum: RoutineGoal,
+    })
+    routineGoal: RoutineGoal;
 
     @Column()
     updatedAt: Date;
