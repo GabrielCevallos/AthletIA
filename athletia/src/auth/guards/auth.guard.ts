@@ -46,7 +46,7 @@ export class AuthGuard implements CanActivate {
       if (!account) {
         throw new UnauthorizedException();
       }
-      if (account.status !== AccountStatus.ACTIVE) {
+      if ([AccountStatus.SUSPENDED, AccountStatus.INACTIVE].includes(account.status)) {
         throw new UnauthorizedException();
       }
       request.user = payload;
