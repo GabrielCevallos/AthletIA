@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { ProfileUpdate } from './dto/profiles.dto';
 import { ProfilesService } from './profiles.service';
-import { Profile } from './profile.entity';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { AccountsService } from 'src/users/accounts/accounts.service';
 import { Request } from 'express';
