@@ -1,43 +1,45 @@
 import {
-    Column,
-    Entity,
-
-    JoinColumn,
-
-    ManyToMany,
-
-    PrimaryGeneratedColumn
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Exercise } from '../exercises/exercises.entity';
 import { RoutineGoal } from './enum/routine-goal.enum';
 
 @Entity()
 export class Routine {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column()
-    description: string;
+  @Column()
+  description: string;
 
-    @Column()
-    nExercises: number;
+  @Column()
+  nExercises: number;
 
-    @Column({
-        type: 'enum',
-        enum: RoutineGoal,
-    })
-    routineGoal: RoutineGoal;
+  @Column({
+    type: 'enum',
+    enum: RoutineGoal,
+  })
+  routineGoal: RoutineGoal;
 
-    @Column()
-    updatedAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @Column()
-    official: boolean;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-    @ManyToMany(() => Exercise, (exercise) => exercise.routines)
-    @JoinColumn()
-    exercise: Exercise;
+  @Column()
+  official: boolean;
+
+  @ManyToMany(() => Exercise, (exercise) => exercise.routines)
+  @JoinTable()
+  exercises: Exercise[];
 }

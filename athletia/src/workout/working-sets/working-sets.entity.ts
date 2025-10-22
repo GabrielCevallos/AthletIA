@@ -1,29 +1,23 @@
-import {
-    Column,
-    Entity,
-    JoinColumn,
-
-    PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { SetType } from './enum/set-type.enum';
 
 @Entity()
 export class WorkingSet {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column()
-    description: string;
+  @Column()
+  description: string;
 
-    @Column()
-    minSets: number;
+  @Column()
+  minSets: number;
 
-    @Column()
-    maxSets: number;
+  @Column()
+  maxSets: number;
 
-    @Column()
-    updatedAt: Date;
+  @Column()
+  updatedAt: Date;
 
-    @Column({ type: 'enum', enum: SetType })
-    type: SetType;
+  @Column({ type: 'enum', enum: SetType })
+  type: SetType;
 }
