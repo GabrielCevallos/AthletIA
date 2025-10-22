@@ -2,7 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -36,6 +36,6 @@ export class Exercise {
   @Column({ type: 'enum', enum: MuscleTarget, array: true })
   muscleTarget: MuscleTarget[];
 
-  @OneToMany(() => Routine, (routine) => routine.exercise, { cascade: true })
+  @ManyToMany(() => Routine, (routine) => routine.exercises)
   routines: Routine[];
 }
