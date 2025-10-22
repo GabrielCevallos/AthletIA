@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { SplitsService } from './splits.service';
 import { SplitRequest, SplitUpdate } from './dto/splits.dto';
-import { ApiResponse } from '../../common/interfaces/api-response';
+import { ApiResponse } from '../../common/response/api.response';
 import { Split } from './splits.entity';
 
 @Controller('workout/splits')

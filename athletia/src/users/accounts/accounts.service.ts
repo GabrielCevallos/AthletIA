@@ -15,11 +15,11 @@ import {
 import { AccountStatus } from './enum/account-status.enum';
 import { User, UserItem } from './dto/user-response.dtos';
 import { Role } from './enum/role.enum';
-import { PaginationRequest } from './dto/pagination-request.dto';
+import { PaginationRequest } from '../../common/request/pagination.request.dto';
 import { PaginationResponse } from 'src/common/interfaces/pagination-response.interface';
-import { ApiResponse } from 'src/common/interfaces/api-response';
-import { ProfilesService } from 'src/profiles/profiles.service';
-import { ProfileRequest } from 'src/profiles/dto/profiles.dto';
+import { ApiResponse } from 'src/common/response/api.response';
+import { ProfilesService } from 'src/users/profiles/profiles.service';
+import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 
 @Injectable()
 export class AccountsService {
@@ -38,17 +38,17 @@ export class AccountsService {
     return account;
   }
 
-  /* async createFromOAuth(params: { email: string; name: string }): Promise<Account> {
+  async createFromOAuth(params: { email: string; name: string }): Promise<Account> {
     // Create account without password in UNPROFILED state
     const account = this.accountsRepository.create({
       email: params.email,
-      password: null,
+      password: null!,
     });
     await this.accountsRepository.save(account);
     // Do not create Person yet; force client to complete profile later
     return account;
   }
- */
+
 
   async findAll(
     paginationRequest: PaginationRequest,
@@ -164,8 +164,24 @@ export class AccountsService {
     return { message: `Role ${role} assigned successfully` };
   }
 
-  async updateRefreshToken(id: string, refreshToken: string): Promise<void> {
-    await this.accountsRepository.update(id, { refreshToken });
+  async setRefreshToken(id: string, refreshToken: string): Promise<void> {
+    const account = await this.accountsRepository.findOneBy({ id });
+    if (!account) throw new NotFoundException('Account not found');
+    account.refreshTokenHash = await argon2.hash(refreshToken);
+    await this.accountsRepository.save(account);
+  }
+
+  async verifyRefreshToken(id: string, candidate: string): Promise<boolean> {
+    const account = await this.accountsRepository.findOneBy({ id });
+    if (!account || !account.refreshTokenHash) return false;
+    return argon2.verify(account.refreshTokenHash, candidate);
+  }
+
+  async clearRefreshToken(id: string): Promise<void> {
+    const account = await this.accountsRepository.findOneBy({ id });
+    if (!account) return;
+    account.refreshTokenHash = null;
+    await this.accountsRepository.save(account);
   }
 
   async changePassword(

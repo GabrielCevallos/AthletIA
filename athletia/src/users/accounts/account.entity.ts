@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { AccountStatus } from './enum/account-status.enum';
 import { Role } from './enum/role.enum';
-import { Profile } from 'src/profiles/profile.entity';
+import { Profile } from 'src/users/profiles/profile.entity';
 
 @Entity()
 export class Account {
@@ -17,7 +17,7 @@ export class Account {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
 
   @Column({
@@ -40,6 +40,6 @@ export class Account {
   @JoinColumn()
   profile: Profile;
 
-  @Column({ nullable: true })
-  refreshToken?: string;
+  @Column({ type: 'text', nullable: true })
+  refreshTokenHash: string | null;
 }
