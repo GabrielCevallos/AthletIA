@@ -1,12 +1,18 @@
 import {
   Body,
   Controller,
+<<<<<<< HEAD
   Get,
   HttpCode,
   Patch,
   Post,
   Req,
   Res,
+=======
+  HttpCode,
+  Patch,
+  Post,
+>>>>>>> 89bda335372159105f9201dbeea68e9530122f88
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';

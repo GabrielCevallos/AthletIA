@@ -1,11 +1,14 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
-  JoinColumn,
+  JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Exercise } from '../exercises/exercises.entity';
+import { RoutineGoal } from './enum/routine-goal.enum';
 
 @Entity()
 export class Routine {
@@ -18,16 +21,23 @@ export class Routine {
   @Column()
   description: string;
 
-  @Column()
+  @Column({ default: 0 })
   nExercises: number;
 
-  @Column()
+  @Column({ type: 'enum', enum: RoutineGoal, array: true })
+  routineGoal: RoutineGoal[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
   updatedAt: Date;
 
   @Column()
   official: boolean;
 
   @ManyToMany(() => Exercise, (exercise) => exercise.routines)
-  @JoinColumn()
-  exercise: Exercise;
+  @JoinTable()
+  exercises: Exercise[];
+  splits: any;
 }
