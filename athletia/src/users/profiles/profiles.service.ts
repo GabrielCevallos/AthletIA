@@ -48,8 +48,8 @@ export class ProfilesService {
     return profile;
   }
 
-  async merge(id: string, profileUpdate: ProfileUpdate): Promise<void> {
-    const profile = await this.profilesRepository.findOneBy({ id });
+  async merge(accountId: string, profileUpdate: ProfileUpdate): Promise<void> {
+    const profile = await this.profilesRepository.findOneBy({ account: { id: accountId } });
     if (!profile) {
       throw new NotFoundException(ApiResponse.error('Profile was not Found'));
     }

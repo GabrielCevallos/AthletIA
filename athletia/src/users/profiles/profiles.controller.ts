@@ -16,6 +16,7 @@ import { AccountsService } from 'src/users/accounts/accounts.service';
 import { Request } from 'express';
 import { UserPayload } from 'src/auth/interfaces/user-payload.interface';
 import { Role } from 'src/users/accounts/enum/role.enum';
+import { ApiResponse } from 'src/common/response/api.response';
 
 @UseGuards(AuthGuard)
 @Controller('profiles')
@@ -25,25 +26,19 @@ export class ProfilesController {
     private accountsService: AccountsService,
   ) {}
 
-  @Get(':id')
-  async findProfile(@Param('id') id: string): Promise<Profile> {
-    return await this.profilesService.findById(id);
-  }
-
-  @Patch(':id')
+  @Patch()
   async updateProfile(
     @Req() req: Request & { user: UserPayload },
-    @Param('id') id: string,
     @Body() profileUpdate: ProfileUpdate,
-  ): Promise<void> {
-    const account = await this.accountsService.findById(req.user.sub);
+    ): Promise<ApiResponse<undefined>> {
+    const accountId = req.user.sub;
+    const account = await this.accountsService.findById(accountId);
     if (!account) {
       throw new ForbiddenException();
     }
-    if (account.profile.id !== id && account.role !== Role.ADMIN) {
-      throw new ForbiddenException();
-    }
 
-    await this.profilesService.merge(id, profileUpdate);
+    await this.profilesService.merge(accountId, profileUpdate);
+    const message = 'Profile updated successfully';
+    return ApiResponse.success(undefined, message);
   }
 }
