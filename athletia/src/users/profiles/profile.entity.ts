@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Gender } from './enum/gender.enum';
-import { Account } from 'src/accounts/account.entity';
+import { Account } from 'src/users/accounts/account.entity';
 
 @Entity()
 export class Profile {

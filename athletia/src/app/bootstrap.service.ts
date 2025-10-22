@@ -1,8 +1,8 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
-import { Role } from '../accounts/enum/role.enum';
-import { ProfileRequest } from 'src/profiles/dto/profiles.dto';
-import { Gender } from 'src/profiles/enum/gender.enum';
+import { Role } from '../users/accounts/enum/role.enum';
+import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
+import { Gender } from 'src/users/profiles/enum/gender.enum';
 
 @Injectable()
 export class BootstrapService implements OnApplicationBootstrap {

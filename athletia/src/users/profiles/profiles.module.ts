@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { ProfilesController } from './profiles.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AccountsModule } from 'src/accounts/accounts.module';
+import { AccountsModule } from 'src/users/accounts/accounts.module';
 import { Profile } from './profile.entity';
 import { ProfilesService } from './profiles.service';
 

@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ExercisesService } from './exercises.service';
 import { ExerciseRequest, ExerciseUpdate } from './dto/exercises.dto';
-import { ApiResponse } from '../../common/interfaces/api-response';
+import { ApiResponse } from '../../common/response/api.response';
 import { Exercise } from './exercises.entity';
 
 @Controller('workout/exercises')

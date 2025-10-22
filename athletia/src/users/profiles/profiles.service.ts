@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from './profile.entity';
 import { Repository } from 'typeorm';
 import { ProfileRequest, ProfileUpdate } from './dto/profiles.dto';
-import { Account } from 'src/accounts/account.entity';
-import { ApiResponse } from 'src/common/interfaces/api-response';
+import { Account } from 'src/users/accounts/account.entity';
+import { ApiResponse } from 'src/common/response/api.response';
 
 @Injectable()
 export class ProfilesService {
@@ -48,8 +48,8 @@ export class ProfilesService {
     return profile;
   }
 
-  async merge(id: string, profileUpdate: ProfileUpdate): Promise<void> {
-    const profile = await this.profilesRepository.findOneBy({ id });
+  async merge(accountId: string, profileUpdate: ProfileUpdate): Promise<void> {
+    const profile = await this.profilesRepository.findOneBy({ account: { id: accountId } });
     if (!profile) {
       throw new NotFoundException(ApiResponse.error('Profile was not Found'));
     }
