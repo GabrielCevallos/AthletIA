@@ -24,6 +24,9 @@ export class RoutinesService {
       newRoutine.exercises = exercises;
       // Auto-calculate number of exercises
       newRoutine.nExercises = exercises.length;
+    } else {
+      // Ensure DB NOT NULL constraint isn't violated: default to 0 when none provided
+      newRoutine.nExercises = 0;
     }
     return await this.routinesRepository.save(newRoutine);
   }
@@ -48,7 +51,7 @@ export class RoutinesService {
         where: { id: In(routineDto.exerciseIds) },
       });
       routine.exercises = exercises;
-      // Auto-calculate number of exercises based on provided list
+      // Auto-calculate number of exercises
       routine.nExercises = exercises.length;
     }
     return await this.routinesRepository.save(routine);

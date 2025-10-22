@@ -21,14 +21,11 @@ export class Routine {
   @Column()
   description: string;
 
-  @Column()
+  @Column({ default: 0 })
   nExercises: number;
 
-  @Column({
-    type: 'enum',
-    enum: RoutineGoal,
-  })
-  routineGoal: RoutineGoal;
+  @Column({ type: 'enum', enum: RoutineGoal, array: true })
+  routineGoal: RoutineGoal[];
 
   @CreateDateColumn()
   createdAt: Date;
@@ -42,4 +39,5 @@ export class Routine {
   @ManyToMany(() => Exercise, (exercise) => exercise.routines)
   @JoinTable()
   exercises: Exercise[];
+  splits: any;
 }

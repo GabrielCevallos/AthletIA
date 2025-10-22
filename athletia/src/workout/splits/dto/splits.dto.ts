@@ -14,10 +14,10 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { RoutineGoal } from '../enum/routine-goal.enum';
-import { Exercise } from '../../exercises/exercises.entity';
+import { Days } from '../enum/days.enum';
+import { Routine } from '../../routines/routines.entity';
 
-export class RoutineRequest {
+export class SplitRequest {
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
@@ -33,24 +33,23 @@ export class RoutineRequest {
   @IsArray()
   @ArrayNotEmpty()
   @IsUUID('4', { each: true })
-  exerciseIds?: string[];
+  routineIds?: string[];
 
   @IsArray()
   @ArrayNotEmpty()
-  @IsEnum(RoutineGoal, {
+  @IsEnum(Days, {
     each: true,
-    message: `Each routineGoal must be one of: ${Object.values(
-      RoutineGoal,
+    message: `Each day must be one of: ${Object.values(
+      Days,
     ).join(', ')}`,
   })
-  @IsNotEmpty()
-  routineGoal: RoutineGoal[];
+  trainingDays: Days[];
 
   @IsBoolean()
   official: boolean;
 }
 
-export class Routine extends RoutineRequest {
+export class Split extends SplitRequest {
   @IsUUID()
   id: string;
 
@@ -60,10 +59,10 @@ export class Routine extends RoutineRequest {
   @IsDate()
   updatedAt: Date;
 
-  exercises?: Exercise[];
+  routines?: Routine[];
 }
 
-export class RoutineUpdate {
+export class SplitUpdate {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
@@ -81,18 +80,18 @@ export class RoutineUpdate {
   @IsOptional()
   @ArrayNotEmpty()
   @IsUUID('4', { each: true })
-  exerciseIds?: string[];
+  routineIds?: string[];
 
   @IsArray()
   @ArrayNotEmpty()
-  @IsEnum(RoutineGoal, {
+  @IsEnum(Days, {
     each: true,
-    message: `Each routineGoal must be one of: ${Object.values(
-      RoutineGoal,
+    message: `Each day must be one of: ${Object.values(
+      Days,
     ).join(', ')}`,
   })
   @IsOptional()
-  routineGoal?: RoutineGoal[];
+  trainingDays?: Days[];
 
   @IsBoolean()
   @IsOptional()
