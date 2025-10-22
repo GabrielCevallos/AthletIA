@@ -59,11 +59,11 @@ export class AuthService {
 
   handleAccountStates(account: Account): void {
     switch (account.status) {
-      case AccountStatus.UNPROFILED:
+      /* case AccountStatus.UNPROFILED:
         throw new BadRequestException({
           message: messages.unprofiledAccount,
           accountId: account.id,
-        });
+        }); */
       case AccountStatus.INACTIVE:
         throw new UnauthorizedException(messages.inactiveAccount);
       case AccountStatus.SUSPENDED:
@@ -101,7 +101,7 @@ export class AuthService {
       throw new BadRequestException(messages.invalidAccountId);
     }
     if (
-      [AccountStatus.INACTIVE, AccountStatus.SUSPENDED].includes(account.status)
+      account.status !== AccountStatus.UNPROFILED
     ) {
       this.handleAccountStates(account);
     }
