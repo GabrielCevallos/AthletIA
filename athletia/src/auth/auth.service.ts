@@ -106,9 +106,9 @@ export class AuthService {
     const verificationLink = `${frontendBase}/auth/verify-email?token=${verificationToken}`;
 
     // Send verification email (MailService will log if SMTP not configured)
-  await this.mailService.sendVerificationEmail(account.email, verificationLink);
-  // record send metadata
-  await this.accountsService.recordVerificationSend(account.id);
+    await this.mailService.sendVerificationEmail(account.email, verificationLink);
+    // record send metadata
+    await this.accountsService.recordVerificationSend(account.id);
 
     return {
       message: messages.accountSaved,

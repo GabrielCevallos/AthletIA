@@ -29,6 +29,22 @@ export class AccountsService {
     private readonly profilesService: ProfilesService,
   ) {}
 
+  async createAdmin(user: RegisterAccountRequest): Promise<{ accountId: string; message: string }> {
+    const existingAccount = await this.findByEmail(user.email);
+    if (existingAccount) {
+      throw new BadRequestException('Email already registered');
+    }
+    const account = this.accountsRepository.create({
+      ...user,
+      password: await argon2.hash(user.password),
+      isEmailVerified: true, // Admins are assumed to have verified email
+      role: Role.ADMIN,
+      status: AccountStatus.UNPROFILED,
+    });
+    await this.accountsRepository.save(account);
+    return { accountId: account.id, message: 'Account created successfully, please complete profile setup' };
+  }
+
   async create(registerRequest: RegisterAccountRequest): Promise<Account> {
     const account = this.accountsRepository.create({
       ...registerRequest,
