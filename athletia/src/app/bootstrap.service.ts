@@ -9,7 +9,8 @@ export class BootstrapService implements OnApplicationBootstrap {
   constructor(private readonly authService: AuthService) {}
 
   async onApplicationBootstrap(): Promise<void> {
-    const user = {
+    console.log('BootstrapService: Application has started. Performing bootstrap tasks...');
+    /* const user = {
       email: 'admin.jgraso@email.com',
       password: 'administrator123',
       role: Role.ADMIN,
@@ -27,6 +28,6 @@ export class BootstrapService implements OnApplicationBootstrap {
         result.accountId,
         profile,
       );
-    }
+    } */
   }
 }

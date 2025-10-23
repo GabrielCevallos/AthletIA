@@ -16,6 +16,10 @@ export const messages = {
   profileAlreadySetUp: 'Profile is already set up for this account',
   accountAlreadySetUp: 'This account has already been set up',
   passwordChanged: 'Password changed successfully',
+  emailNotVerified: 'Email is not verified',
+  verificationEmailSent: 'Verification email sent',
+  emailAlreadyVerified: 'Email is already verified',
+  tooManyVerificationRequests: 'Too many verification email requests. Try again later.',
 };
 
 export const jwtConstants = {
