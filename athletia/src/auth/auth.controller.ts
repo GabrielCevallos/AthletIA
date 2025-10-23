@@ -60,11 +60,10 @@ export class AuthController {
   async registerAccount(
     @Body() registerRequest: RegisterAccountRequest,
   ): Promise<ApiResponse<accountIdOnly>> {
-    const accountSaved =
-      await this.authService.registerAccount(registerRequest);
+    const result = await this.authService.registerAccount(registerRequest);
     return ApiResponse.success(
-      { accountId: accountSaved.accountId },
-      accountSaved.message,
+      { accountId: result.accountId },
+      result.message,
     );
   }
 
