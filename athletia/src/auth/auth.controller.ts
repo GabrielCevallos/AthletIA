@@ -56,6 +56,27 @@ export class AuthController {
   }
 
   @Public()
+  @Post('verify-email')
+  async verifyEmail(@Body('token') token: string): Promise<ApiResponse<void>> {
+    const result = await this.authService.verifyEmail(token);
+    return ApiResponse.success(undefined, result.message);
+  }
+
+  @Public()
+  @Post('resend-verification')
+  async resendVerification(@Body('email') email: string): Promise<ApiResponse<void>> {
+    const result = await this.authService.resendVerification(email);
+    return ApiResponse.success(undefined, result.message);
+  }
+
+  @Public()
+  @Post('resend-verification-status')
+  async resendVerificationStatus(@Body('email') email: string): Promise<ApiResponse<{ allowed: boolean; secondsToWait?: number }>> {
+    const status = await this.authService.getResendVerificationStatus(email);
+    return ApiResponse.success(status, 'Status fetched');
+  }
+
+  @Public()
   @Post('complete-profile-setup')
   async completeWithProfileSetup(
     @Body('accountId') accountId: string,

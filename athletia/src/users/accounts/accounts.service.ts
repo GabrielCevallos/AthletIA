@@ -201,4 +201,20 @@ export class AccountsService {
     );
     await this.accountsRepository.save(accountSaved);
   }
+
+  async verifyEmail(id: string): Promise<void> {
+    const account = await this.accountsRepository.findOneBy({ id });
+    if (!account) throw new BadRequestException('Account not found');
+    if (account.isEmailVerified) return; // already verified
+    account.isEmailVerified = true;
+    await this.accountsRepository.save(account);
+  }
+
+  async recordVerificationSend(id: string): Promise<void> {
+    const account = await this.accountsRepository.findOneBy({ id });
+    if (!account) throw new BadRequestException('Account not found');
+    account.verificationResendCount = (account.verificationResendCount || 0) + 1;
+    account.lastVerificationSentAt = new Date();
+    await this.accountsRepository.save(account);
+  }
 }
