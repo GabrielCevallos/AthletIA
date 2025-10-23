@@ -40,6 +40,15 @@ export class Account {
   @JoinColumn()
   profile: Profile;
 
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
+  @Column({ type: 'int', default: 0 })
+  verificationResendCount: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastVerificationSentAt: Date | null;
+
   @Column({ type: 'text', nullable: true })
   refreshTokenHash: string | null;
 }

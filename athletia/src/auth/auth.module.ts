@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AccountsModule } from 'src/users/accounts/accounts.module';
 import { PassportModule } from '@nestjs/passport';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { MailService } from 'src/common/mail/mail.service';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
   providers: [
     AuthService,
     GoogleStrategy,
+    MailService,
   ],
   controllers: [AuthController],
   exports: [AuthService],
