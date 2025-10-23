@@ -1,6 +1,7 @@
 import {
-    ArrayNotEmpty,
-    IsArray,
+  ArrayMinSize,
+  ArrayNotEmpty,
+  IsArray,
   IsBoolean,
   IsDate,
   IsEnum,
@@ -32,6 +33,7 @@ export class SplitRequest {
 
   @IsArray()
   @ArrayNotEmpty()
+  @ArrayMinSize(1)
   @IsUUID('4', { each: true })
   routineIds?: string[];
 
@@ -43,6 +45,7 @@ export class SplitRequest {
       Days,
     ).join(', ')}`,
   })
+  @ArrayMinSize(1)
   trainingDays: Days[];
 
   @IsBoolean()
@@ -91,6 +94,7 @@ export class SplitUpdate {
     ).join(', ')}`,
   })
   @IsOptional()
+  @ArrayMinSize(1)
   trainingDays?: Days[];
 
   @IsBoolean()

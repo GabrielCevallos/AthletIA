@@ -24,6 +24,18 @@ export class Exercise {
   @Column()
   video: string;
 
+  @Column({ default: 1 })
+  minSets: number;
+
+  @Column()
+  maxSets: number;
+
+  @Column({ default: 1 })
+  minReps: number;
+
+  @Column()
+  maxReps: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
