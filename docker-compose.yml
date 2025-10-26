@@ -115,8 +115,6 @@ services:
     depends_on:
       user_measurements:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
       recommendations:
         condition: service_healthy
     healthcheck:

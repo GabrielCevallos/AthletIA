@@ -15,17 +15,45 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
 
   async connect(): Promise<void> {
     if (this.connection && this.channel) return;
+
     const host = process.env.RABBITMQ_HOST || 'rabbitmq';
     const port = process.env.RABBITMQ_PORT || '5672';
     const user = process.env.RABBITMQ_USER || 'guest';
     const pass = process.env.RABBITMQ_PASSWORD || 'guest';
     const url = `amqp://${user}:${pass}@${host}:${port}`;
-    this.logger.log(`Connecting to RabbitMQ ${host}:${port}`);
-    this.connection = await amqp.connect(url);
-    this.channel = await this.connection.createConfirmChannel();
-    const exchange = process.env.RABBITMQ_EXCHANGE || 'athletia';
-    await this.channel.assertExchange(exchange, 'topic', { durable: true });
-    this.logger.log('RabbitMQ connected and exchange asserted: ' + exchange);
+
+    const maxAttempts = parseInt(process.env.RABBITMQ_CONNECT_RETRIES || '10', 10);
+    const baseDelayMs = parseInt(process.env.RABBITMQ_CONNECT_DELAY_MS || '500', 10);
+
+    this.logger.log(`Connecting to RabbitMQ ${host}:${port} (will retry up to ${maxAttempts} times)`);
+
+    let attempt = 0;
+    let lastErr: any = null;
+    while (attempt < maxAttempts) {
+      attempt += 1;
+      try {
+        this.connection = await amqp.connect(url);
+        this.channel = await this.connection.createConfirmChannel();
+        const exchange = process.env.RABBITMQ_EXCHANGE || 'athletia';
+        await this.channel.assertExchange(exchange, 'topic', { durable: true });
+        this.logger.log('RabbitMQ connected and exchange asserted: ' + exchange);
+        // set up close handling
+        this.connection.on('close', (err) => {
+          this.logger.warn('RabbitMQ connection closed: ' + String(err));
+          this.connection = null;
+          this.channel = null;
+        });
+        return;
+      } catch (e) {
+        lastErr = e;
+        this.logger.warn(`RabbitMQ connect attempt ${attempt} failed: ${e.message || e}.`);
+        const delay = baseDelayMs * attempt; // linear backoff
+        await new Promise((r) => setTimeout(r, delay));
+      }
+    }
+
+    // All attempts failed
+    throw lastErr || new Error('Failed to connect to RabbitMQ');
   }
 
   async publish(routingKey: string, message: object): Promise<void> {

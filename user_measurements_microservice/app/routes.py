@@ -52,7 +52,7 @@ def parse_datetime(d: str):
     except Exception:
         return None
 
-@bp.route('/user_measurements', methods=['GET'])
+@bp.route('/', methods=['GET'])
 @jwt_required()
 def list_user_measurements():
     current_user = get_jwt_identity()
@@ -66,7 +66,7 @@ def list_user_measurements():
     return jsonify([s.to_dict() for s in items]), 200
 
 
-@bp.route('/user_measurements', methods=['POST'])
+@bp.route('/', methods=['POST'])
 @jwt_required()
 def create_user_measurements():
     current_user = get_jwt_identity()
@@ -118,7 +118,7 @@ def create_user_measurements():
     return jsonify(stat.to_dict()), 201
 
 
-@bp.route('/user_measurements/<stat_id>', methods=['GET'])
+@bp.route('/<stat_id>', methods=['GET'])
 @jwt_required()
 def get_user_measurements(stat_id: str):
     current_user = get_jwt_identity()
@@ -128,7 +128,7 @@ def get_user_measurements(stat_id: str):
     return jsonify(stat.to_dict(include_metrics=True)), 200
 
 
-@bp.route('/user_measurements/<stat_id>', methods=['PUT'])
+@bp.route('/<stat_id>', methods=['PUT'])
 @jwt_required()
 def update_user_measurements(stat_id: str):
     current_user = get_jwt_identity()
@@ -179,7 +179,7 @@ def update_user_measurements(stat_id: str):
     return jsonify(stat.to_dict()), 200
 
 
-@bp.route('/user_measurements/<stat_id>', methods=['DELETE'])
+@bp.route('/<stat_id>', methods=['DELETE'])
 @jwt_required()
 def delete_user_measurements(stat_id: str):
     current_user = get_jwt_identity()
@@ -195,7 +195,7 @@ def delete_user_measurements(stat_id: str):
     return jsonify({'deleted': stat_id}), 200
 
 
-@bp.route('/user_measurements/<stat_id>/progress_metrics', methods=['GET'])
+@bp.route('/<stat_id>/progress_metrics', methods=['GET'])
 @jwt_required()
 def list_metrics_for_user_measurements(stat_id: str):
     current_user = get_jwt_identity()
@@ -206,7 +206,7 @@ def list_metrics_for_user_measurements(stat_id: str):
     return jsonify([m.to_dict() for m in metrics]), 200
 
 
-@bp.route('/user_measurements/<stat_id>/progress_metrics', methods=['POST'])
+@bp.route('/<stat_id>/progress_metrics', methods=['POST'])
 @jwt_required()
 def create_metric_under_user_measurements(stat_id: str):
     current_user = get_jwt_identity()

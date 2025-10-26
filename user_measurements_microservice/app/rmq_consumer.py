@@ -6,7 +6,22 @@ import pika
 from flask import current_app
 
 from . import db
-from .models import UserMeasurements, ProgressMetric
+from .models import UserMeasurements, ProgressMetric, PeriodType
+from datetime import date, datetime
+
+
+def _parse_date(d):
+    if not d:
+        return None
+    if isinstance(d, date):
+        return d
+    try:
+        return date.fromisoformat(d)
+    except Exception:
+        try:
+            return datetime.fromisoformat(d).date()
+        except Exception:
+            return None
 
 
 def _get_rabbit_connection_params():
@@ -33,17 +48,97 @@ def handle_message(body: bytes):
         if typ == 'user_measurements.created' or typ == 'user_measurements.updated':
             # Upsert: if id exists update, else create
             um = None
+            is_new = False
             if 'id' in data:
                 um = UserMeasurements.query.get(data['id'])
-            if not um:
+                if not um:
+                    um = UserMeasurements()
+                    is_new = True
+            else:
                 um = UserMeasurements()
-            # map allowed fields
-            for fld in ['id', 'user_id', 'startDate', 'endDate', 'periodType', 'weight', 'height',
-                        'left_arm', 'right_arm', 'left_forearm', 'right_forearm', 'clavicular_width',
+                is_new = True
+
+            # Ensure required fields are set. user_id should come from the message.
+            # If missing, assign a placeholder string for new records. For updates only set when provided.
+            user_id_val = data.get('user_id') or data.get('userId') or data.get('user')
+            if is_new:
+                if user_id_val is None:
+                    user_id_val = str(data.get('id') or '') or 'unknown'
+                um.user_id = user_id_val
+            else:
+                if user_id_val is not None:
+                    um.user_id = user_id_val
+
+            # startDate / endDate: parse ISO date if provided, otherwise default to today
+            if is_new:
+                sd = _parse_date(data.get('startDate') or data.get('start_date')) or date.today()
+                ed = _parse_date(data.get('endDate') or data.get('end_date')) or date.today()
+                um.startDate = sd
+                um.endDate = ed
+                # if an id was provided in the message, use it for the new record
+                if 'id' in data and data.get('id'):
+                    try:
+                        um.id = str(data.get('id'))
+                    except Exception:
+                        pass
+            else:
+                sd = _parse_date(data.get('startDate') or data.get('start_date'))
+                ed = _parse_date(data.get('endDate') or data.get('end_date'))
+                if sd:
+                    um.startDate = sd
+                if ed:
+                    um.endDate = ed
+
+            # periodType: try to map to PeriodType enum, fallback to custom.
+            pt = data.get('periodType') or data.get('period_type')
+            if is_new:
+                try:
+                    um.periodType = PeriodType(pt) if pt else PeriodType.custom
+                except Exception:
+                    try:
+                        um.periodType = PeriodType(pt)
+                    except Exception:
+                        um.periodType = PeriodType.custom
+            else:
+                if pt:
+                    try:
+                        um.periodType = PeriodType(pt)
+                    except Exception:
+                        # ignore invalid periodType on updates
+                        pass
+
+            # weight/height: use provided or sensible defaults
+            if is_new:
+                try:
+                    um.weight = float(data.get('weight')) if data.get('weight') is not None else 70.0
+                except Exception:
+                    um.weight = 70.0
+                try:
+                    um.height = float(data.get('height')) if data.get('height') is not None else 170.0
+                except Exception:
+                    um.height = 170.0
+            else:
+                if 'weight' in data:
+                    try:
+                        um.weight = float(data.get('weight')) if data.get('weight') is not None else None
+                    except Exception:
+                        pass
+                if 'height' in data:
+                    try:
+                        um.height = float(data.get('height')) if data.get('height') is not None else None
+                    except Exception:
+                        pass
+
+            # Optional measurement fields: allow None if not provided
+            for fld in ['left_arm', 'right_arm', 'left_forearm', 'right_forearm', 'clavicular_width',
                         'neck_diameter', 'chest_size', 'back_width', 'hip_diameter', 'left_leg',
                         'right_leg', 'left_calve', 'right_calve']:
                 if fld in data:
-                    setattr(um, fld, data[fld])
+                    try:
+                        setattr(um, fld, float(data[fld]) if data[fld] is not None else None)
+                    except Exception:
+                        setattr(um, fld, None)
+
             db.session.add(um)
             db.session.commit()
             current_app.logger.info('UserMeasurements upserted via RMQ id=%s', um.id)
