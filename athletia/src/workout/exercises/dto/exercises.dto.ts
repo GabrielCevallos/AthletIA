@@ -3,16 +3,22 @@ import {
   IsArray,
   IsDate,
   IsEnum,
+  IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
+  IsPositive,
   IsString,
   IsUrl,
   IsUUID,
+  Max,
   MaxLength,
+  Min,
   MinLength,
 } from 'class-validator';
 import { MuscleTarget } from '../enum/muscle-target.enum';
 import { ExerciseType } from '../enum/exercise-type.enum';
+import { SetType } from '../enum/set-type.enum';
 
 export class ExerciseRequest {
   @IsString()
@@ -30,6 +36,48 @@ export class ExerciseRequest {
   @IsUrl()
   @IsNotEmpty()
   video: string;
+
+  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @Min(1)
+  minSets: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @Max(10)
+  maxSets: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @Min(1)
+  minReps: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @Max(60)
+  maxReps: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @Min(10)
+  minRestTime: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @Max(600)
+  maxRestTime: number;
 
   @IsArray()
   @IsEnum(MuscleTarget, {
@@ -52,6 +100,17 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @ArrayMinSize(1)
   exerciseType: ExerciseType[];
+
+  @IsArray()
+  @IsEnum(SetType, {
+    each: true,
+    message: `Each setType must be one of: ${Object.values(
+      SetType,
+    ).join(', ')}`,
+  })
+  @IsNotEmpty()
+  @ArrayMinSize(1)
+  setType: SetType[];
 }
 
 export class Exercise extends ExerciseRequest {
@@ -108,4 +167,16 @@ export class ExerciseUpdate {
   @IsOptional()
   @ArrayMinSize(1)
   exerciseType?: ExerciseType[];
+
+  @IsArray()
+  @IsEnum(SetType, {
+    each: true,
+    message: `Each setType must be one of: ${Object.values(
+      SetType,
+    ).join(', ')}`,
+  })
+  @IsNotEmpty()
+  @IsOptional()
+  @ArrayMinSize(1)
+  setType?: SetType[];
 }

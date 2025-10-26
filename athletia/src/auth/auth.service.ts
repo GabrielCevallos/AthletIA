@@ -20,6 +20,7 @@ import { UserPayload } from './interfaces/user-payload.interface';
 import * as dotenv from 'dotenv';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { GoogleUser } from './strategies/google.strategy';
+import { ApiResponse } from 'src/common/response/api.response';
 // import { GoogleUser } from './strategies/google.strategy';
 
 dotenv.config();
@@ -106,9 +107,9 @@ export class AuthService {
     const verificationLink = `${frontendBase}/auth/verify-email?token=${verificationToken}`;
 
     // Send verification email (MailService will log if SMTP not configured)
-  await this.mailService.sendVerificationEmail(account.email, verificationLink);
-  // record send metadata
-  await this.accountsService.recordVerificationSend(account.id);
+    await this.mailService.sendVerificationEmail(account.email, verificationLink);
+    // record send metadata
+    await this.accountsService.recordVerificationSend(account.id);
 
     return {
       message: messages.accountSaved,
@@ -166,11 +167,7 @@ export class AuthService {
   async signIn(loginRequest: LoginRequest): Promise<TokenResponse> {
     const account = await this.accountsService.findByEmail(loginRequest.email);
     if (!account) {
-      throw new UnauthorizedException();
-    }
-
-    if (!account.isEmailVerified) {
-      throw new BadRequestException(messages.emailNotVerified);
+      throw new UnauthorizedException(ApiResponse.error(messages.invalidCredentials));
     }
 
     if (!this.isAccountActive(account)) {
@@ -183,6 +180,9 @@ export class AuthService {
     const ok = await argon2.verify(account.password, loginRequest.password);
     if (!ok) {
       throw new UnauthorizedException();
+    }
+    if (!account.isEmailVerified) {
+      throw new BadRequestException(ApiResponse.error(messages.emailNotVerified));
     }
     const payload = this.createJwtPayload(account);
 

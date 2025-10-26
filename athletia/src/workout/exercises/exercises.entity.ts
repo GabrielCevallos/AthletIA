@@ -9,6 +9,7 @@ import {
 import { ExerciseType } from './enum/exercise-type.enum';
 import { MuscleTarget } from './enum/muscle-target.enum';
 import { Routine } from '../routines/routines.entity';
+import { SetType } from './enum/set-type.enum';
 
 @Entity()
 export class Exercise {
@@ -36,6 +37,12 @@ export class Exercise {
   @Column()
   maxReps: number;
 
+  @Column()
+  minRestTime: number;
+
+  @Column()
+  maxRestTime: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -47,6 +54,9 @@ export class Exercise {
 
   @Column({ type: 'enum', enum: MuscleTarget, array: true })
   muscleTarget: MuscleTarget[];
+
+  @Column({ type: 'enum', enum: SetType, array: true })
+  setType: SetType[];
 
   @ManyToMany(() => Routine, (routine) => routine.exercises)
   routines: Routine[];

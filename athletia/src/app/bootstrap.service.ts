@@ -1,19 +1,17 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
-import { AuthService } from '../auth/auth.service';
-import { Role } from '../users/accounts/enum/role.enum';
+// import { Role } from '../users/accounts/enum/role.enum';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { Gender } from 'src/users/profiles/enum/gender.enum';
+import { AccountsService } from 'src/users/accounts/accounts.service';
 
 @Injectable()
 export class BootstrapService implements OnApplicationBootstrap {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly accountService: AccountsService) {}
 
   async onApplicationBootstrap(): Promise<void> {
-    console.log('BootstrapService: Application has started. Performing bootstrap tasks...');
-    /* const user = {
+    const user = {
       email: 'admin.jgraso@email.com',
       password: 'administrator123',
-      role: Role.ADMIN,
     };
     const profile: ProfileRequest = {
       name: 'JGraso',
@@ -22,12 +20,15 @@ export class BootstrapService implements OnApplicationBootstrap {
       gender: Gender.MALE,
     };
 
-    const result = await this.authService.registerAccount(user);
-    if ('accountId' in result) {
-      await this.authService.completeWithProfileSetup(
-        result.accountId,
-        profile,
-      );
-    } */
+    const result = await this.accountService.createAdmin(user);
+    const account = await this.accountService.findById(result.accountId);
+    if (!account) {
+      throw new Error('Admin account not found after creation');
+    }
+
+    await this.accountService.completeProfileSetup(
+      account,
+      profile,
+    );
   }
 }
