@@ -1,8 +1,8 @@
 export enum SetType {
   WARM_UP = 'warm_up',
   EFFECTIVE = 'effective',
-  PYRAMID = 'pyramid',
-  REVERSE_PYRAMID = 'reverse_pyramid',
+  PYRAMID = 'pyramid', // increasing weight each set, but reps decrease
+  REVERSE_PYRAMID = 'reverse_pyramid', // less weight each set, but reps increase
   SUPERSET = 'superset',
   BISET = 'biset',
   TRISET = 'triset',

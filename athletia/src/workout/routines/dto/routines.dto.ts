@@ -1,4 +1,5 @@
 import {
+    ArrayMinSize,
     ArrayNotEmpty,
     IsArray,
   IsBoolean,
@@ -32,6 +33,7 @@ export class RoutineRequest {
 
   @IsArray()
   @ArrayNotEmpty()
+  @ArrayMinSize(1)
   @IsUUID('4', { each: true })
   exerciseIds?: string[];
 
@@ -44,6 +46,7 @@ export class RoutineRequest {
     ).join(', ')}`,
   })
   @IsNotEmpty()
+  @ArrayMinSize(1)
   routineGoal: RoutineGoal[];
 
   @IsBoolean()
@@ -92,6 +95,7 @@ export class RoutineUpdate {
     ).join(', ')}`,
   })
   @IsOptional()
+  @ArrayMinSize(1)
   routineGoal?: RoutineGoal[];
 
   @IsBoolean()
