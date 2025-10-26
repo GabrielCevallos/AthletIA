@@ -145,7 +145,7 @@ La arquitectura es **modular**, basada en contenedores lógicos, con separación
 
 ### Nivel 3: Componente
 
-<img width="885" height="980" alt="image" src="https://github.com/user-attachments/assets/2b086111-5c2d-4a3c-ba71-7ceee30c2d04" />
+<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/2b086111-5c2d-4a3c-ba71-7ceee30c2d04" />
 
 *   👤 **Actores del sistema**:
     *   **Administrador (Persona)**: Control total sobre la plataforma, gestiona usuarios, configura parámetros del sistema y accede a todas las funcionalidades.
