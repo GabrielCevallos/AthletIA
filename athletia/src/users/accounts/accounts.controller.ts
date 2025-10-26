@@ -21,7 +21,7 @@ import { User, UserItem } from './dto/user-response.dtos';
 import { Request } from 'express';
 import { UserPayload } from 'src/auth/interfaces/user-payload.interface';
 
-@UseGuards(AuthGuard, RolesGuard)
+//@UseGuards(AuthGuard, RolesGuard)
 @Controller('users')
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}

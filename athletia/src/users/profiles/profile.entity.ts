@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Gender } from './enum/gender.enum';
 import { Account } from 'src/users/accounts/account.entity';
+import { RoutineGoal } from 'src/workout/routines/enum/routine-goal.enum';
 
 @Entity()
 export class Profile {
@@ -18,6 +19,9 @@ export class Profile {
 
   @Column()
   birthDate: Date;
+
+  @Column({ type: 'enum', enum: RoutineGoal, array: true, nullable: false })
+  fitGoals: RoutineGoal[];
 
   @Column()
   phoneNumber: string;

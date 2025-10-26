@@ -3,6 +3,7 @@ import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { Gender } from 'src/users/profiles/enum/gender.enum';
 import { AccountsService } from 'src/users/accounts/accounts.service';
+import { RoutineGoal } from 'src/workout/routines/enum/routine-goal.enum';
 
 @Injectable()
 export class BootstrapService implements OnApplicationBootstrap {
@@ -16,6 +17,7 @@ export class BootstrapService implements OnApplicationBootstrap {
     const profile: ProfileRequest = {
       name: 'JGraso',
       birthDate: new Date('1990-01-01'),
+      fitGoals: [RoutineGoal.ENDURANCE, RoutineGoal.FLEXIBILITY],
       phoneNumber: '0000000000',
       gender: Gender.MALE,
     };

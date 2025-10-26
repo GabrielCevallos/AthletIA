@@ -14,6 +14,7 @@ import { SplitsModule } from 'src/workout/splits/splits.module';
 import { WorkingSetsModule } from 'src/workout/working-sets/working-sets.module';
 import { RepetitionModule } from 'src/workout/repetition/repetition.module';
 import { RestTimeModule } from 'src/workout/rest-time/rest-time.module';
+import { StatisticsModule } from 'src/statistics/statistics.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { RestTimeModule } from 'src/workout/rest-time/rest-time.module';
     WorkingSetsModule,
     RepetitionModule,
     RestTimeModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [AppService, BootstrapService],

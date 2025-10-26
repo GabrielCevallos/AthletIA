@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   ForbiddenException,
-  Get,
-  Param,
   Patch,
   Req,
   UseGuards,
@@ -14,7 +12,6 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { AccountsService } from 'src/users/accounts/accounts.service';
 import { Request } from 'express';
 import { UserPayload } from 'src/auth/interfaces/user-payload.interface';
-import { Role } from 'src/users/accounts/enum/role.enum';
 import { ApiResponse } from 'src/common/response/api.response';
 
 @UseGuards(AuthGuard)

@@ -25,11 +25,6 @@ export class ProfilesService {
     return await this.profilesRepository.save(profileData);
   }
 
-  // TEMPORAL next we will use paginations
-  async findAll(): Promise<Profile[]> {
-    return await this.profilesRepository.find();
-  }
-
   async findById(id: string): Promise<Profile> {
     const profile = await this.profilesRepository.findOneBy({ id });
     if (!profile) {
