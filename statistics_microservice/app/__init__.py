@@ -19,6 +19,14 @@ def create_app():
     from .routes import bp as api_bp
     app.register_blueprint(api_bp)
 
+    # Start RabbitMQ consumer if configured
+    try:
+        from .rmq_consumer import start_consumer
+        if app.config.get('RABBITMQ_ENABLED', True):
+            start_consumer(app)
+    except Exception:
+        app.logger.exception('Failed to start RMQ consumer (it may be optional)')
+
     # Ensure database tables exist (for quick development/demo). In production use migrations.
     with app.app_context():
         # Optionally drop all tables at startup when enabled via config (development only).

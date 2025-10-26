@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 from . import db
-from .models import Statistics, ProgressMetric, PeriodType, MetricType
+from .models import UserMeasurements, ProgressMetric, PeriodType
 import requests
 from datetime import date, datetime
 from flask_jwt_extended import (jwt_required, get_jwt_identity, get_jwt)
@@ -52,12 +52,12 @@ def parse_datetime(d: str):
     except Exception:
         return None
 
-@bp.route('/statistics', methods=['GET'])
+@bp.route('/user_measurements', methods=['GET'])
 @jwt_required()
-def list_statistics():
+def list_user_measurements():
     current_user = get_jwt_identity()
     user_id = request.args.get('user_id', type=str)
-    q = Statistics.query
+    q = UserMeasurements.query
     if user_id:
         if str(user_id) != str(current_user):
             return jsonify({'error': 'Unauthorized access to other user statistics'}), 403
@@ -66,18 +66,18 @@ def list_statistics():
     return jsonify([s.to_dict() for s in items]), 200
 
 
-@bp.route('/statistics', methods=['POST'])
+@bp.route('/user_measurements', methods=['POST'])
 @jwt_required()
-def create_statistics():
+def create_user_measurements():
     current_user = get_jwt_identity()
     data = request.get_json() or {}
     required = ['user_id', 'startDate', 'endDate', 'periodType']
     for f in required:
         if f not in data:
             return jsonify({'error': f'Missing field: {f}'}), 400
-    # Ensure the caller is creating statistics only for themselves (basic ownership check)
+    # Ensure the caller is creating user measurements only for themselves (basic ownership check)
     if str(data.get('user_id')) != str(current_user):
-        return jsonify({'error': 'Cannot create statistics for a different user'}), 403
+        return jsonify({'error': 'Cannot create user measurements for a different user'}), 403
 
     if not check_user_exists(data['user_id']):
         return jsonify({'error': 'Referenced user_id not found in user service'}), 400
@@ -92,7 +92,22 @@ def create_statistics():
     except ValueError:
         return jsonify({'error': 'Invalid periodType'}), 400
 
-    stat = Statistics(user_id=data['user_id'], startDate=sd, endDate=ed, periodType=period)
+    # Build UserMeasurements with optional measurement fields
+    stat = UserMeasurements(
+        user_id=data['user_id'],
+        startDate=sd,
+        endDate=ed,
+        periodType=period,
+    )
+    # optional numeric fields
+    for fld in ['weight', 'height', 'left_arm', 'right_arm', 'left_forearm', 'right_forearm',
+                'clavicular_width', 'neck_diameter', 'chest_size', 'back_width', 'hip_diameter',
+                'left_leg', 'right_leg', 'left_calve', 'right_calve']:
+        if fld in data:
+            try:
+                setattr(stat, fld, float(data[fld]))
+            except Exception:
+                return jsonify({'error': f'Invalid numeric value for {fld}'}), 400
     db.session.add(stat)
     try:
         db.session.commit()
@@ -103,21 +118,21 @@ def create_statistics():
     return jsonify(stat.to_dict()), 201
 
 
-@bp.route('/statistics/<stat_id>', methods=['GET'])
+@bp.route('/user_measurements/<stat_id>', methods=['GET'])
 @jwt_required()
-def get_statistics(stat_id: str):
+def get_user_measurements(stat_id: str):
     current_user = get_jwt_identity()
-    stat = Statistics.query.get_or_404(stat_id)
+    stat = UserMeasurements.query.get_or_404(stat_id)
     if str(stat.user_id) != str(current_user):
         return jsonify({'error': 'Unauthorized access to this statistics resource'}), 403
     return jsonify(stat.to_dict(include_metrics=True)), 200
 
 
-@bp.route('/statistics/<stat_id>', methods=['PUT'])
+@bp.route('/user_measurements/<stat_id>', methods=['PUT'])
 @jwt_required()
-def update_statistics(stat_id: str):
+def update_user_measurements(stat_id: str):
     current_user = get_jwt_identity()
-    stat = Statistics.query.get_or_404(stat_id)
+    stat = UserMeasurements.query.get_or_404(stat_id)
     if str(stat.user_id) != str(current_user):
         return jsonify({'error': 'Unauthorized to update this statistics resource'}), 403
     data = request.get_json() or {}
@@ -145,6 +160,16 @@ def update_statistics(stat_id: str):
         except ValueError:
             return jsonify({'error': 'Invalid periodType'}), 400
 
+    # allow updating measurement fields
+    for fld in ['weight', 'height', 'left_arm', 'right_arm', 'left_forearm', 'right_forearm',
+                'clavicular_width', 'neck_diameter', 'chest_size', 'back_width', 'hip_diameter',
+                'left_leg', 'right_leg', 'left_calve', 'right_calve']:
+        if fld in data:
+            try:
+                setattr(stat, fld, float(data[fld]))
+            except Exception:
+                return jsonify({'error': f'Invalid numeric value for {fld}'}), 400
+
     try:
         db.session.commit()
     except Exception as e:
@@ -154,11 +179,11 @@ def update_statistics(stat_id: str):
     return jsonify(stat.to_dict()), 200
 
 
-@bp.route('/statistics/<stat_id>', methods=['DELETE'])
+@bp.route('/user_measurements/<stat_id>', methods=['DELETE'])
 @jwt_required()
-def delete_statistics(stat_id: str):
+def delete_user_measurements(stat_id: str):
     current_user = get_jwt_identity()
-    stat = Statistics.query.get_or_404(stat_id)
+    stat = UserMeasurements.query.get_or_404(stat_id)
     if str(stat.user_id) != str(current_user):
         return jsonify({'error': 'Unauthorized to delete this statistics resource'}), 403
     try:
@@ -170,22 +195,22 @@ def delete_statistics(stat_id: str):
     return jsonify({'deleted': stat_id}), 200
 
 
-@bp.route('/statistics/<stat_id>/progress_metrics', methods=['GET'])
+@bp.route('/user_measurements/<stat_id>/progress_metrics', methods=['GET'])
 @jwt_required()
-def list_metrics_for_statistics(stat_id: str):
+def list_metrics_for_user_measurements(stat_id: str):
     current_user = get_jwt_identity()
-    stat = Statistics.query.get_or_404(stat_id)
+    stat = UserMeasurements.query.get_or_404(stat_id)
     if str(stat.user_id) != str(current_user):
         return jsonify({'error': 'Unauthorized access to metrics for this statistics'}), 403
     metrics = ProgressMetric.query.filter_by(statistics_id=stat_id).all()
     return jsonify([m.to_dict() for m in metrics]), 200
 
 
-@bp.route('/statistics/<stat_id>/progress_metrics', methods=['POST'])
+@bp.route('/user_measurements/<stat_id>/progress_metrics', methods=['POST'])
 @jwt_required()
-def create_metric_under_statistics(stat_id: str):
+def create_metric_under_user_measurements(stat_id: str):
     current_user = get_jwt_identity()
-    _stat = Statistics.query.get_or_404(stat_id)
+    _stat = UserMeasurements.query.get_or_404(stat_id)
     if str(_stat.user_id) != str(current_user):
         return jsonify({'error': 'Unauthorized to add metrics to this statistics'}), 403
     data = request.get_json() or {}
@@ -194,10 +219,8 @@ def create_metric_under_statistics(stat_id: str):
         if f not in data:
             return jsonify({'error': f'Missing field: {f}'}), 400
 
-    try:
-        mtype = MetricType(data['metricType'])
-    except ValueError:
-        return jsonify({'error': 'Invalid metricType'}), 400
+    # metricType is now a free-form string
+    mtype = str(data['metricType'])
 
     dt = parse_datetime(data['recordedAt'])
     if not dt:
@@ -227,7 +250,7 @@ def list_metrics():
     q = ProgressMetric.query
     if stats_id:
         # Ensure the requested statistics belongs to the caller
-        stat = Statistics.query.get_or_404(stats_id)
+        stat = UserMeasurements.query.get_or_404(stats_id)
         if str(stat.user_id) != str(current_user):
             return jsonify({'error': 'Unauthorized access to metrics for this statistics'}), 403
         q = q.filter_by(statistics_id=stats_id)
@@ -240,7 +263,7 @@ def list_metrics():
 def get_metric(metric_id: str):
     current_user = get_jwt_identity()
     metric = ProgressMetric.query.get_or_404(metric_id)
-    stat = Statistics.query.get_or_404(metric.statistics_id)
+    stat = UserMeasurements.query.get_or_404(metric.statistics_id)
     if str(stat.user_id) != str(current_user):
         return jsonify({'error': 'Unauthorized access to this metric'}), 403
     return jsonify(metric.to_dict()), 200
@@ -251,16 +274,13 @@ def get_metric(metric_id: str):
 def update_metric(metric_id: str):
     current_user = get_jwt_identity()
     metric = ProgressMetric.query.get_or_404(metric_id)
-    stat = Statistics.query.get_or_404(metric.statistics_id)
+    stat = UserMeasurements.query.get_or_404(metric.statistics_id)
     if str(stat.user_id) != str(current_user):
         return jsonify({'error': 'Unauthorized to update this metric'}), 403
     data = request.get_json() or {}
 
     if 'metricType' in data:
-        try:
-            metric.metricType = MetricType(data['metricType'])
-        except ValueError:
-            return jsonify({'error': 'Invalid metricType'}), 400
+        metric.metricType = str(data['metricType'])
 
     if 'value' in data:
         try:
@@ -288,7 +308,7 @@ def update_metric(metric_id: str):
 def delete_metric(metric_id: str):
     current_user = get_jwt_identity()
     metric = ProgressMetric.query.get_or_404(metric_id)
-    stat = Statistics.query.get_or_404(metric.statistics_id)
+    stat = UserMeasurements.query.get_or_404(metric.statistics_id)
     if str(stat.user_id) != str(current_user):
         return jsonify({'error': 'Unauthorized to delete this metric'}), 403
     try:

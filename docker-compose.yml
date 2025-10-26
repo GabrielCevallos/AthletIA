@@ -41,9 +41,14 @@ services:
       DB_NAME: athletia_user_statistics
       DROP_SCHEMA_ON_STARTUP: 'false'
       USERS_SERVICE_URL: http://athletia:3000
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: '5672'
+      RABBITMQ_ENABLED: 'true'
     depends_on:
       db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
       interval: 5s
@@ -87,6 +92,8 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: '5672'
     depends_on:
       statistics:
         condition: service_healthy
@@ -98,6 +105,15 @@ services:
       timeout: 3s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
 volumes:
   db_data:
   dbs_data:
+  rabbitmq_data:

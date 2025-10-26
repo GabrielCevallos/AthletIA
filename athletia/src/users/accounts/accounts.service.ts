@@ -4,6 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { RabbitmqService } from 'src/common/rabbitmq/rabbitmq.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account } from './account.entity';
 import { Repository } from 'typeorm';
@@ -27,6 +28,7 @@ export class AccountsService {
     @InjectRepository(Account)
     private readonly accountsRepository: Repository<Account>,
     private readonly profilesService: ProfilesService,
+    private readonly rabbitmqService: RabbitmqService,
   ) {}
 
   async createAdmin(user: RegisterAccountRequest): Promise<{ accountId: string; message: string }> {
@@ -42,6 +44,15 @@ export class AccountsService {
       status: AccountStatus.UNPROFILED,
     });
     await this.accountsRepository.save(account);
+    // notify other services (e.g. statistics) to create related user measurements
+    try {
+      await this.rabbitmqService.publish('user_measurements.created', {
+        type: 'user_measurements.created',
+        data: { user_id: account.id },
+      });
+    } catch (e) {
+      // publishing failures shouldn't block account creation
+    }
     return { accountId: account.id, message: 'Account created successfully, please complete profile setup' };
   }
 
@@ -51,6 +62,14 @@ export class AccountsService {
       password: await argon2.hash(registerRequest.password),
     });
     await this.accountsRepository.save(account);
+    try {
+      await this.rabbitmqService.publish('user_measurements.created', {
+        type: 'user_measurements.created',
+        data: { user_id: account.id },
+      });
+    } catch (e) {
+      // ignore
+    }
     return account;
   }
 
@@ -61,8 +80,32 @@ export class AccountsService {
       password: null!,
     });
     await this.accountsRepository.save(account);
+    try {
+      await this.rabbitmqService.publish('user_measurements.created', {
+        type: 'user_measurements.created',
+        data: { user_id: account.id },
+      });
+    } catch (e) {}
     // Do not create Person yet; force client to complete profile later
     return account;
+  }
+
+  async deleteAccount(id: string): Promise<void> {
+    const account = await this.accountsRepository.findOneBy({ id });
+    if (!account) {
+      throw new NotFoundException('Account not found');
+    }
+    // Delete account (profile has cascade on delete)
+    await this.accountsRepository.delete(id);
+    // notify statistics microservice to remove user measurements by user_id
+    try {
+      await this.rabbitmqService.publish('user_measurements.deleted', {
+        type: 'user_measurements.deleted',
+        data: { user_id: id },
+      });
+    } catch (e) {
+      // do not block
+    }
   }
 
 
