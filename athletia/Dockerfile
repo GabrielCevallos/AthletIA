@@ -14,5 +14,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
 ENV NODE_ENV=production
+# Install curl so Docker healthchecks that use curl work inside the container.
+RUN apk add --no-cache curl
 EXPOSE 3000
 CMD ["node", "dist/main.js"]

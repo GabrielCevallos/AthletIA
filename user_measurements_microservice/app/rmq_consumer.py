@@ -107,13 +107,23 @@ def _consume_loop():
             time.sleep(5)
         finally:
             try:
-                conn.close()
+                if 'conn' in locals() and conn is not None:
+                    try:
+                        conn.close()
+                    except Exception:
+                        pass
             except Exception:
+                # defensive: avoid crashing the loop if locals() access fails
                 pass
 
 
 def start_consumer(app):
-    # run the blocking consumer in a thread
-    thr = threading.Thread(target=lambda: _consume_loop(), daemon=True)
+    # run the blocking consumer in a thread and ensure the Flask application
+    # context is available to the thread so `current_app` and DB operations work.
+    def _run_with_appctx():
+        with app.app_context():
+            _consume_loop()
+
+    thr = threading.Thread(target=_run_with_appctx, daemon=True)
     thr.start()
     app.logger.info('Started RMQ consumer thread')
