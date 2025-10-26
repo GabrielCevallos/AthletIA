@@ -34,6 +34,8 @@
   - [Introducción](#introducción)
   - [Endpoints Desarrollados](#endpoints-desarrollados)
   - [Pruebas Realizadas en Postman](#pruebas-realizadas-en-postman)
+- [🔐 Implementación de Seguridad](#-implementación-de-seguridad)
+  - [Autenticación y Autorización con JWT/OAuth2](#autenticación-y-autorización-con-jwtoauth2)
 ---
 
 # 📋 Requisitos Funcionales - Prioridad Alta
@@ -106,7 +108,7 @@
 
 ### Nivel 1: Contexto
 
-<img width="500" height="500" alt="ModeloC4Context drawio" src="https://github.com/user-attachments/assets/8e1271eb-f30d-46a8-bfb5-b052ac35ee34" />
+<img width="800" height="800" alt="ModeloC4Context drawio" src="https://github.com/user-attachments/assets/8e1271eb-f30d-46a8-bfb5-b052ac35ee34" />
 
 *   👥 **Actores principales**:
     *   **Usuario**: Interactúa con la aplicación móvil (React Native) y web (React).
@@ -120,7 +122,7 @@ La arquitectura es **cliente-servidor con servicios externos** y un backend cent
 
 ### Nivel 2: Contenedor
 
-<img width="500" height="500" alt="ModeloC4Contenedor drawio" src="https://github.com/user-attachments/assets/bc434b33-4297-40e1-9fe6-6c7d31a7f821" />
+<img width="800" height="800" alt="ModeloC4Contenedor drawio" src="https://github.com/user-attachments/assets/bc434b33-4297-40e1-9fe6-6c7d31a7f821" />
 
 *   📱💻 **Frontend Web y Móvil**:
     *   Ambos construidos con **React/React Native**.
@@ -140,6 +142,70 @@ La arquitectura es **cliente-servidor con servicios externos** y un backend cent
 
 **📝 Resumen del nivel de contenedor:**
 La arquitectura es **modular**, basada en contenedores lógicos, con separación clara de responsabilidades: frontend, backend, IA y base de datos. Esto facilita escalabilidad, mantenimiento y pruebas independientes.
+
+### Nivel 3: Componente
+
+<img width="800" height="800" alt="image" src="https://github.com/user-attachments/assets/2b086111-5c2d-4a3c-ba71-7ceee30c2d04" />
+
+*   👤 **Actores del sistema**:
+    *   **Administrador (Persona)**: Control total sobre la plataforma, gestiona usuarios, configura parámetros del sistema y accede a todas las funcionalidades.
+    *   **Moderador (Persona)**: Permisos limitados, puede gestionar usuarios comunes pero no modificar parámetros críticos del sistema.
+    *   **Usuario (Persona)**: Accede a la aplicación para gestionar y registrar sus rutinas de entrenamiento.
+
+*   🌐 **Aplicación AthleteIA**:
+    *   **Aplicación Web (Frontend Web - React)**: Componente frontend para que el usuario interactúe desde navegadores web.
+    *   **Aplicación Móvil (Frontend Movil - React Native)**: Aplicación nativa Android para usuarios en dispositivos móviles.
+    *   Ambas aplicaciones consumen **APIs REST/JSON** del backend.
+
+*   ⚙️ **Backend - Componentes principales**:
+    
+    *   **Controladores (Express)**: 
+        *   Reciben la petición, validan entradas.
+        *   Delegan la lógica de negocio a uno o más servicios.
+        *   Actúan en conjunto con las capas de autenticación y autorización.
+    
+    *   **Capa de Autenticación (Middleware de Autenticación)**:
+        *   Intercepta peticiones HTTP entrantes.
+        *   Identifica usuarios según su usuario en el sistema.
+        *   Actúa en conjunto con la capa de autorización.
+    
+    *   **Capa de Autorización (Middleware de Autorización)**:
+        *   Intercepta peticiones HTTP entrantes.
+        *   Verifica que el usuario tenga acceso a los recursos del sistema.
+    
+    *   **Servicios (Services)**:
+        *   Ejecuta la lógica de negocio y la interacción con otras capas.
+        *   Utiliza los **Repositorios** para el manejo de datos.
+        *   Envía **correos transaccionales** a través del Servicio de Correo Electrónico.
+        *   Solicita **recomendaciones** al Asistente IA.
+    
+    *   **Repositorios (TypeORM Repository)**:
+        *   Se comunican con la **Base de Datos** para realizar operaciones CRUD.
+        *   Utilizan para el modelo de datos.
+
+*   🗄️ **Base de Datos (Sistema PostgreSQL)**:
+    *   Almacena información de usuarios, rutinas y métricas.
+    *   Lee y escribe datos según las operaciones solicitadas por los repositorios.
+
+*   🤖 **Asistente IA (Externo - Python FastAPI)**:
+    *   Proporciona recomendaciones inteligentes y personalización de rutinas.
+    *   Utilizado por los servicios del backend.
+
+*   📧 **Servicio de Correo Electrónico (Software System)**:
+    *   Sistema externo encargado de enviar correos electrónicos.
+    *   Notifica a los usuarios sobre eventos importantes.
+
+*   🔌 **APIs Externas (Externo - APIs De Google)**:
+    *   APIs de inteligencia artificial utilizadas por el Asistente IA.
+
+*   🔄 **Flujo de comunicación**:
+    *   Usuario → Aplicación Web/Móvil → Controladores → Servicios → Repositorios → Base de Datos
+    *   Servicios → Asistente IA → APIs Externas
+    *   Servicios → Servicio de Correo Electrónico
+
+**📝 Resumen del nivel de componente:**
+
+La arquitectura a nivel de componente muestra una **separación clara de responsabilidades** siguiendo el patrón **CSR (Controller-Service-Repository)** y principios de **arquitectura en capas**. Los controladores manejan las peticiones HTTP, las capas de middleware gestionan la seguridad (autenticación/autorización), los servicios implementan la lógica de negocio, y los repositorios abstraen el acceso a datos. Esta estructura facilita el **mantenimiento**, **testing** y **escalabilidad** del sistema, permitiendo modificar componentes individuales sin afectar el resto de la aplicación.
 
 ---
 
@@ -342,3 +408,149 @@ A continuación, se muestran algunas capturas de pantalla de las pruebas ejecuta
 
 <img width="487" height="274" alt="image" src="https://github.com/user-attachments/assets/5e1431ff-d67c-474f-a474-9329696f9d70" />
 
+# 🔐 Implementación de Seguridad
+
+## Autenticación y Autorización con JWT/OAuth2
+
+Esta sección documenta la implementación de seguridad en el backend, incluyendo autenticación JWT, validaciones, CORS y buenas prácticas según OWASP.
+
+---
+
+## 1. 🛠️ Configuración de Entorno
+
+### Instalar dependencias necesarias para la seguridad
+
+**JWT (JSON Web Tokens)**
+
+<img width="886" height="354" alt="image" src="https://github.com/user-attachments/assets/b1d36ac9-3239-465c-b26a-a41a812042c0" />
+
+**CORS (Cross-Origin Resource Sharing)**
+
+<img width="886" height="358" alt="image" src="https://github.com/user-attachments/assets/f0ee7643-9165-4fb1-9eae-9d7abf507893" />
+
+**Argon2 (Hash de Contraseñas)**
+
+<img width="886" height="356" alt="image" src="https://github.com/user-attachments/assets/74ef2d6a-9934-40dd-9930-fbf5a0da682e" />
+
+> Se utilizó Argon2 en lugar de Bcrypt por su mayor seguridad y resistencia a ataques.
+
+
+### Variables de Entorno
+
+<img width="886" height="375" alt="image" src="https://github.com/user-attachments/assets/fc9a10a5-0845-4dfa-bdb1-2862aae824f5" />
+
+
+Se creó un archivo `.env` (no versionado) con las siguientes claves secretas:
+
+---
+
+## 2. 🔑 Implementación del Flujo JWT
+
+### Rutas de Autenticación
+
+**Login (`/auth/login`)**
+
+<img width="886" height="296" alt="image" src="https://github.com/user-attachments/assets/44cd4cd4-b39b-4507-b8d5-fc2772e7106e" />
+
+
+**Registro (`/auth/register-account`)**
+
+<img width="886" height="319" alt="image" src="https://github.com/user-attachments/assets/597f249b-d9ab-4d3f-9f14-6bf90ff1ca2a" />
+
+
+### Generación de Token JWT
+                        Generacion Token JWT dentro de Auth.module
+<img width="886" height="327" alt="image" src="https://github.com/user-attachments/assets/bb390ab0-c923-4e8f-921f-2d28c4bb4480" />
+<img width="886" height="344" alt="image" src="https://github.com/user-attachments/assets/02a4d103-e739-467c-80b4-315a5046f360" />
+
+
+
+**Definicion de iat del token JWT**
+
+<img width="886" height="338" alt="image" src="https://github.com/user-attachments/assets/de32dab5-6573-4014-ac65-c3de15fc7f85" />
+
+
+**Definicion exp del JWT**
+
+<img width="886" height="265" alt="image" src="https://github.com/user-attachments/assets/3e078549-d7ee-4442-be76-f2e0783db6dc" />
+
+
+**JWTPayload con Roles de Usuario**
+
+<img width="886" height="315" alt="image" src="https://github.com/user-attachments/assets/31751f59-d19f-4246-b912-2c917cdb75a6" />
+
+
+### Middleware de Verificación
+
+**Middleware de Verificacion de Token**
+
+<img width="886" height="842" alt="image" src="https://github.com/user-attachments/assets/bc49a580-e1ec-4b12-bb58-d69659b38fe1" />
+
+
+---
+
+## 3. 🛡️ Control de Acceso Basado en Roles (RBAC)
+
+### Roles Implementados
+
+<img width="886" height="294" alt="image" src="https://github.com/user-attachments/assets/bc9ff37c-e3fb-4614-b909-0ea76a639c26" />
+
+
+---
+
+## 4. 🌐 Configuración CORS
+
+### Orígenes Permitidos y Metodos HTTP
+<img width="886" height="727" alt="image" src="https://github.com/user-attachments/assets/aeb17783-7cef-4fd8-a3a8-ecc068ee6350" />
+
+---
+
+## 5. ✅ Validaciones de Entrada
+
+<img width="886" height="148" alt="image" src="https://github.com/user-attachments/assets/28d7b108-a033-4302-bce1-b3e45080f9c3" />
+
+
+### DTOs (Data Transfer Objects)
+
+Todos los endpoints implementan validación mediante DTOs utilizando `class-validator`:
+
+**Ejemplo: Exercise DTO**
+
+<img width="886" height="396" alt="image" src="https://github.com/user-attachments/assets/b086fdcf-589b-42f6-87a8-8685c11f690d" />
+
+
+- Implementar manejo de errores uniforme (codigos HTTP y mensajes Json)
+
+La tecnoligia NestJS permite el manejo de errores de forma automatica.
+
+<img width="886" height="425" alt="image" src="https://github.com/user-attachments/assets/1832a818-ba4d-4b45-bd1b-47b27afd15bd" />
+
+
+
+**Mensajes JSON**
+
+<img width="886" height="352" alt="image" src="https://github.com/user-attachments/assets/98c05961-5eff-422d-bacf-43b6cc68170b" />
+
+
+- Probar login y rutas protegidas con Postman/Swagger
+
+Prueba de login en Postman
+<img width="938" height="523" alt="image" src="https://github.com/user-attachments/assets/7e43c975-3d02-4803-9bc0-e8f293f42231" />
+
+Prueba de Register en Postman
+<img width="940" height="528" alt="image" src="https://github.com/user-attachments/assets/879bf687-3772-49d0-8020-e484998c47aa" />
+
+---
+
+## 6. 🔄 Manejo de Errores
+
+### Documentar resultados (capturas de respuesta 200, 401, 403)
+
+Codigo Exito (200)
+
+<img width="886" height="404" alt="image" src="https://github.com/user-attachments/assets/9aa973cd-a343-490a-98c7-6725de6410e7" />
+
+
+Codigo Error (401)
+
+<img width="886" height="381" alt="image" src="https://github.com/user-attachments/assets/0dbcc2c3-8ef3-4dbf-bbaa-2790ff681767" />
