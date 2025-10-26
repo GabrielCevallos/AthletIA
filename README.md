@@ -143,6 +143,70 @@ La arquitectura es **cliente-servidor con servicios externos** y un backend cent
 **📝 Resumen del nivel de contenedor:**
 La arquitectura es **modular**, basada en contenedores lógicos, con separación clara de responsabilidades: frontend, backend, IA y base de datos. Esto facilita escalabilidad, mantenimiento y pruebas independientes.
 
+### Nivel 3: Componente
+
+<img width="885" height="980" alt="image" src="https://github.com/user-attachments/assets/2b086111-5c2d-4a3c-ba71-7ceee30c2d04" />
+
+*   👤 **Actores del sistema**:
+    *   **Administrador (Persona)**: Control total sobre la plataforma, gestiona usuarios, configura parámetros del sistema y accede a todas las funcionalidades.
+    *   **Moderador (Persona)**: Permisos limitados, puede gestionar usuarios comunes pero no modificar parámetros críticos del sistema.
+    *   **Usuario (Persona)**: Accede a la aplicación para gestionar y registrar sus rutinas de entrenamiento.
+
+*   🌐 **Aplicación AthleteIA**:
+    *   **Aplicación Web (Frontend Web - React)**: Componente frontend para que el usuario interactúe desde navegadores web.
+    *   **Aplicación Móvil (Frontend Movil - React Native)**: Aplicación nativa Android para usuarios en dispositivos móviles.
+    *   Ambas aplicaciones consumen **APIs REST/JSON** del backend.
+
+*   ⚙️ **Backend - Componentes principales**:
+    
+    *   **Controladores (Express)**: 
+        *   Reciben la petición, validan entradas.
+        *   Delegan la lógica de negocio a uno o más servicios.
+        *   Actúan en conjunto con las capas de autenticación y autorización.
+    
+    *   **Capa de Autenticación (Middleware de Autenticación)**:
+        *   Intercepta peticiones HTTP entrantes.
+        *   Identifica usuarios según su usuario en el sistema.
+        *   Actúa en conjunto con la capa de autorización.
+    
+    *   **Capa de Autorización (Middleware de Autorización)**:
+        *   Intercepta peticiones HTTP entrantes.
+        *   Verifica que el usuario tenga acceso a los recursos del sistema.
+    
+    *   **Servicios (Services)**:
+        *   Ejecuta la lógica de negocio y la interacción con otras capas.
+        *   Utiliza los **Repositorios** para el manejo de datos.
+        *   Envía **correos transaccionales** a través del Servicio de Correo Electrónico.
+        *   Solicita **recomendaciones** al Asistente IA.
+    
+    *   **Repositorios (TypeORM Repository)**:
+        *   Se comunican con la **Base de Datos** para realizar operaciones CRUD.
+        *   Utilizan para el modelo de datos.
+
+*   🗄️ **Base de Datos (Sistema PostgreSQL)**:
+    *   Almacena información de usuarios, rutinas y métricas.
+    *   Lee y escribe datos según las operaciones solicitadas por los repositorios.
+
+*   🤖 **Asistente IA (Externo - Python FastAPI)**:
+    *   Proporciona recomendaciones inteligentes y personalización de rutinas.
+    *   Utilizado por los servicios del backend.
+
+*   📧 **Servicio de Correo Electrónico (Software System)**:
+    *   Sistema externo encargado de enviar correos electrónicos.
+    *   Notifica a los usuarios sobre eventos importantes.
+
+*   🔌 **APIs Externas (Externo - APIs De Google)**:
+    *   APIs de inteligencia artificial utilizadas por el Asistente IA.
+
+*   🔄 **Flujo de comunicación**:
+    *   Usuario → Aplicación Web/Móvil → Controladores → Servicios → Repositorios → Base de Datos
+    *   Servicios → Asistente IA → APIs Externas
+    *   Servicios → Servicio de Correo Electrónico
+
+**📝 Resumen del nivel de componente:**
+
+La arquitectura a nivel de componente muestra una **separación clara de responsabilidades** siguiendo el patrón **CSR (Controller-Service-Repository)** y principios de **arquitectura en capas**. Los controladores manejan las peticiones HTTP, las capas de middleware gestionan la seguridad (autenticación/autorización), los servicios implementan la lógica de negocio, y los repositorios abstraen el acceso a datos. Esta estructura facilita el **mantenimiento**, **testing** y **escalabilidad** del sistema, permitiendo modificar componentes individuales sin afectar el resto de la aplicación.
+
 ---
 
 ## ✍️ Estándares de codificación para el proyecto
