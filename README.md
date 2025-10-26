@@ -108,7 +108,7 @@
 
 ### Nivel 1: Contexto
 
-<img width="500" height="500" alt="ModeloC4Context drawio" src="https://github.com/user-attachments/assets/8e1271eb-f30d-46a8-bfb5-b052ac35ee34" />
+<img width="800" height="800" alt="ModeloC4Context drawio" src="https://github.com/user-attachments/assets/8e1271eb-f30d-46a8-bfb5-b052ac35ee34" />
 
 *   👥 **Actores principales**:
     *   **Usuario**: Interactúa con la aplicación móvil (React Native) y web (React).
@@ -122,7 +122,7 @@ La arquitectura es **cliente-servidor con servicios externos** y un backend cent
 
 ### Nivel 2: Contenedor
 
-<img width="500" height="500" alt="ModeloC4Contenedor drawio" src="https://github.com/user-attachments/assets/bc434b33-4297-40e1-9fe6-6c7d31a7f821" />
+<img width="800" height="800" alt="ModeloC4Contenedor drawio" src="https://github.com/user-attachments/assets/bc434b33-4297-40e1-9fe6-6c7d31a7f821" />
 
 *   📱💻 **Frontend Web y Móvil**:
     *   Ambos construidos con **React/React Native**.
@@ -145,7 +145,7 @@ La arquitectura es **modular**, basada en contenedores lógicos, con separación
 
 ### Nivel 3: Componente
 
-<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/2b086111-5c2d-4a3c-ba71-7ceee30c2d04" />
+<img width="800" height="800" alt="image" src="https://github.com/user-attachments/assets/2b086111-5c2d-4a3c-ba71-7ceee30c2d04" />
 
 *   👤 **Actores del sistema**:
     *   **Administrador (Persona)**: Control total sobre la plataforma, gestiona usuarios, configura parámetros del sistema y accede a todas las funcionalidades.
