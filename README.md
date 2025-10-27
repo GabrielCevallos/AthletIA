@@ -122,7 +122,7 @@ La arquitectura es **cliente-servidor con servicios externos** y un backend cent
 
 ### Nivel 2: Contenedor
 
-<img width="800" height="800" alt="ModeloC4Contenedor drawio" src="https://github.com/user-attachments/assets/bc434b33-4297-40e1-9fe6-6c7d31a7f821" />
+<img width="800" height="800" alt="image" src="https://github.com/user-attachments/assets/418fedd0-6c7d-4361-a134-0164db5521cf" />
 
 *   📱💻 **Frontend Web y Móvil**:
     *   Ambos construidos con **React/React Native**.
