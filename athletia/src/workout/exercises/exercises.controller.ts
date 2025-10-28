@@ -10,6 +10,7 @@ import {
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import { ExercisesService } from './exercises.service';
 import { ExerciseRequest, ExerciseUpdate } from './dto/exercises.dto';
 import { ApiResponse } from '../../common/response/api.response';
@@ -21,6 +22,7 @@ export class ExercisesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiBody({ type: ExerciseRequest })
   async create(
     @Body() createExerciseDto: ExerciseRequest,
   ): Promise<ApiResponse<Exercise>> {
@@ -43,6 +45,7 @@ export class ExercisesController {
   }
 
   @Patch(':id')
+  @ApiBody({ type: ExerciseUpdate })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateExerciseDto: ExerciseUpdate,

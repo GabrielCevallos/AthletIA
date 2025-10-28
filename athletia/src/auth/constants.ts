@@ -5,7 +5,7 @@ dotenv.config();
 export const messages = {
   registered: 'Registered successfully!',
   invalidCredentials: 'Invalid credentials',
-  accountSaved: 'Account was registered, continue with profile setup',
+  accountSaved: 'We have sent you an email to verify that the email you entered belongs to you',
   unprofiledAccount:
     'Account exists but profile is not set up, continue with profile setup',
   inactiveAccount: 'Account is inactive, contact support',

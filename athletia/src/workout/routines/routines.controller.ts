@@ -10,6 +10,7 @@ import {
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import { RoutinesService } from './routines.service';
 import { RoutineRequest, RoutineUpdate } from './dto/routines.dto';
 import { ApiResponse } from '../../common/response/api.response';
@@ -21,6 +22,7 @@ export class RoutinesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiBody({ type: RoutineRequest })
   async create(
     @Body() createRoutineDto: RoutineRequest,
   ): Promise<ApiResponse<Routine>> {
@@ -43,6 +45,7 @@ export class RoutinesController {
   }
 
   @Patch(':id')
+  @ApiBody({ type: RoutineUpdate })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateRoutineDto: RoutineUpdate,

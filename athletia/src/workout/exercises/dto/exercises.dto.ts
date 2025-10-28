@@ -16,6 +16,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { MuscleTarget } from '../enum/muscle-target.enum';
 import { ExerciseType } from '../enum/exercise-type.enum';
 import { SetType } from '../enum/set-type.enum';
@@ -25,16 +26,19 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(50)
+  @ApiProperty({ minLength: 3, maxLength: 50 })
   name: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(10)
   @MaxLength(500)
+  @ApiProperty({ minLength: 10, maxLength: 500 })
   description: string;
 
   @IsUrl()
   @IsNotEmpty()
+  @ApiProperty({ format: 'uri' })
   video: string;
 
   @IsNumber()
@@ -42,6 +46,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @IsPositive()
   @Min(1)
+  @ApiProperty({ minimum: 1, example: 3 })
   minSets: number;
 
   @IsNumber()
@@ -49,6 +54,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @IsPositive()
   @Max(10)
+  @ApiProperty({ maximum: 10, example: 5 })
   maxSets: number;
 
   @IsNumber()
@@ -56,6 +62,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @IsPositive()
   @Min(1)
+  @ApiProperty({ minimum: 1, example: 8 })
   minReps: number;
 
   @IsNumber()
@@ -63,6 +70,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @IsPositive()
   @Max(60)
+  @ApiProperty({ maximum: 60, example: 12 })
   maxReps: number;
 
   @IsNumber()
@@ -70,6 +78,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @IsPositive()
   @Min(10)
+  @ApiProperty({ minimum: 10, example: 60 })
   minRestTime: number;
 
   @IsNumber()
@@ -77,6 +86,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @IsPositive()
   @Max(600)
+  @ApiProperty({ maximum: 600, example: 120 })
   maxRestTime: number;
 
   @IsArray()
@@ -88,6 +98,7 @@ export class ExerciseRequest {
   })
   @IsNotEmpty()
   @ArrayMinSize(1)
+  @ApiProperty({ type: 'array', items: { type: 'string', enum: Object.values(MuscleTarget) }, example: [MuscleTarget.CHEST] })
   muscleTarget: MuscleTarget[];
 
   @IsArray()
@@ -99,6 +110,7 @@ export class ExerciseRequest {
   })
   @IsNotEmpty()
   @ArrayMinSize(1)
+  @ApiProperty({ type: 'array', items: { type: 'string', enum: Object.values(ExerciseType) }, example: [ExerciseType.STRENGTH] })
   exerciseType: ExerciseType[];
 
   @IsArray()
@@ -110,6 +122,7 @@ export class ExerciseRequest {
   })
   @IsNotEmpty()
   @ArrayMinSize(1)
+  @ApiProperty({ type: 'array', items: { type: 'string', enum: Object.values(SetType) }, example: [SetType.EFFECTIVE] })
   setType: SetType[];
 }
 

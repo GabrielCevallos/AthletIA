@@ -21,7 +21,6 @@ import * as dotenv from 'dotenv';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { GoogleUser } from './strategies/google.strategy';
 import { ApiResponse } from 'src/common/response/api.response';
-// import { GoogleUser } from './strategies/google.strategy';
 
 dotenv.config();
 
@@ -270,7 +269,7 @@ export class AuthService {
     try {
       const payload = await this.jwtService.verifyAsync<{ sub: string; email: string }>(
         token,
-        { secret: process.env.JWT_SECRET_KEY_ACCESS || 'defaultSecretKey' },
+        { secret: process.env.JWT_SECRET_KEY_EMAIL || 'defaultSecretKey' },
       );
       const accountId = payload.sub;
       if (!accountId) throw new BadRequestException('Invalid token payload');

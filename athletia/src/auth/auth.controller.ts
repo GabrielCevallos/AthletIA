@@ -68,15 +68,18 @@ export class AuthController {
   }
 
   @Public()
+  @HttpCode(200)
   @Post('verify-email')
   @ApiOperation({ summary: 'Verify email using token' })
   @ApiBody({ schema: { example: { token: 'jwt-token' } } })
+  @SwaggerResponse({ status: 200, description: 'Email verified successfully', schema: { example: { success: true, message: 'account was verified successfully'}}})
   async verifyEmail(@Body('token') token: string): Promise<ApiResponse<void>> {
     const result = await this.authService.verifyEmail(token);
     return ApiResponse.success(undefined, result.message);
   }
 
   @Public()
+  @HttpCode(200)
   @Post('resend-verification')
   @ApiOperation({ summary: 'Resend email verification link' })
   @ApiBody({ schema: { example: { email: 'user@example.com' } } })
@@ -86,6 +89,7 @@ export class AuthController {
   }
 
   @Public()
+  @HttpCode(200)
   @Post('resend-verification-status')
   @ApiOperation({ summary: 'Get status for resend verification (allowed / wait time)' })
   @ApiBody({ schema: { example: { email: 'user@example.com' } } })
@@ -97,6 +101,25 @@ export class AuthController {
   @Public()
   @Post('complete-profile-setup')
   @ApiOperation({ summary: 'Complete profile setup for an account' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['accountId','profileRequest'],
+      properties: {
+        accountId: { type: 'string', format: 'uuid' },
+        profileRequest: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            birthDate: { type: 'string', format: 'date' },
+            phoneNumber: { type: 'string' },
+            fitGoals: { type: 'array', items: { type: 'string' } },
+            gender: { type: 'string' },
+          },
+        },
+      },
+    },
+  })
   async completeWithProfileSetup(
     @Body('accountId') accountId: string,
     @Body('profileRequest') profileRequest: ProfileRequest,
@@ -111,6 +134,22 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Patch('change-password')
   @ApiOperation({ summary: 'Change account password' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['accountId','changePasswordRequest'],
+      properties: {
+        accountId: { type: 'string', format: 'uuid' },
+        changePasswordRequest: {
+          type: 'object',
+          properties: {
+            currentPassword: { type: 'string' },
+            newPassword: { type: 'string' },
+          },
+        },
+      },
+    },
+  })
   async changePassword(
     @Body('accountId') accountId: string,
     @Body('changePasswordRequest') changePasswordRequest: ChangePasswordRequest,
@@ -126,6 +165,7 @@ export class AuthController {
   @Post('refresh-token')
   @HttpCode(200)
   @ApiOperation({ summary: 'Refresh tokens using a refresh token' })
+  @ApiBody({ schema: { type: 'object', properties: { refreshToken: { type: 'string' } }, required: ['refreshToken'] } })
   async refreshToken(
     @Body('refreshToken') refreshToken: string,
   ): Promise<TokenResponse> {
@@ -137,6 +177,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(200)
   @ApiOperation({ summary: 'Logout and clear refresh token' })
+  @ApiBody({ schema: { type: 'object', properties: { accountId: { type: 'string', format: 'uuid' } }, required: ['accountId'] } })
   async logout(
     @Body('accountId') accountId: string,
   ): Promise<ApiResponse<void>> {

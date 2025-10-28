@@ -9,6 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import { AccountsService } from './accounts.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -54,6 +55,15 @@ export class AccountsController {
 
   @Roles(Role.ADMIN)
   @Patch(':id/give-role')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        role: { type: 'string', enum: ['user','admin','moderator'] },
+      },
+      required: ['role'],
+    },
+  })
   async giveRole(
     @Req() request: Request & { user: UserPayload },
     @Param('id') id: string,

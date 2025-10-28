@@ -10,6 +10,7 @@ import {
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import { SplitsService } from './splits.service';
 import { SplitRequest, SplitUpdate } from './dto/splits.dto';
 import { ApiResponse } from '../../common/response/api.response';
@@ -21,6 +22,7 @@ export class SplitsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiBody({ type: SplitRequest })
   async create(
     @Body() createSplitDto: SplitRequest,
   ): Promise<ApiResponse<Split>> {
@@ -43,6 +45,7 @@ export class SplitsController {
   }
 
   @Patch(':id')
+  @ApiBody({ type: SplitUpdate })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateSplitDto: SplitUpdate,

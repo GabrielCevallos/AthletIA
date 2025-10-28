@@ -1,0 +1,534 @@
+openapi: 3.0.3
+info:
+  title: AthletIA - Request body schemas (auto-generated from DTOs)
+  version: 1.0.0
+
+paths:
+  /workout/exercises:
+    post:
+      summary: Create exercise
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseRequest'
+  /workout/exercises/{id}:
+    patch:
+      summary: Update exercise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseUpdate'
+
+  /workout/routines:
+    post:
+      summary: Create routine
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutineRequest'
+  /workout/routines/{id}:
+    patch:
+      summary: Update routine
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutineUpdate'
+
+  /workout/splits:
+    post:
+      summary: Create split
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SplitRequest'
+  /workout/splits/{id}:
+    patch:
+      summary: Update split
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SplitUpdate'
+
+  /profiles:
+    patch:
+      summary: Update profile for authenticated user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+
+  /auth/login:
+    post:
+      summary: Sign in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+
+  /auth/register-account:
+    post:
+      summary: Register an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterAccountRequest'
+
+  /auth/verify-email:
+    post:
+      summary: Verify email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+
+  /auth/resend-verification:
+    post:
+      summary: Resend verification email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+
+  /auth/resend-verification-status:
+    post:
+      summary: Get resend verification status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+
+  /auth/complete-profile-setup:
+    post:
+      summary: Complete profile setup for an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [accountId, profileRequest]
+              properties:
+                accountId:
+                  type: string
+                  format: uuid
+                profileRequest:
+                  $ref: '#/components/schemas/ProfileRequest'
+
+  /auth/change-password:
+    patch:
+      summary: Change password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [accountId, changePasswordRequest]
+              properties:
+                accountId:
+                  type: string
+                  format: uuid
+                changePasswordRequest:
+                  $ref: '#/components/schemas/ChangePasswordRequest'
+
+  /auth/refresh-token:
+    post:
+      summary: Refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+
+  /auth/logout:
+    post:
+      summary: Logout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accountId:
+                  type: string
+                  format: uuid
+
+  /users/{id}/give-role:
+    patch:
+      summary: Give role to user (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  enum: [user, admin, moderator]
+
+components:
+  schemas:
+    ExerciseRequest:
+      type: object
+      required:
+        - name
+        - description
+        - video
+        - minSets
+        - maxSets
+        - minReps
+        - maxReps
+        - minRestTime
+        - maxRestTime
+        - muscleTarget
+        - exerciseType
+        - setType
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 50
+        description:
+          type: string
+          minLength: 10
+          maxLength: 500
+        video:
+          type: string
+          format: uri
+        minSets:
+          type: integer
+          minimum: 1
+        maxSets:
+          type: integer
+          minimum: 1
+          maximum: 10
+        minReps:
+          type: integer
+          minimum: 1
+        maxReps:
+          type: integer
+          minimum: 1
+          maximum: 60
+        minRestTime:
+          type: integer
+          minimum: 10
+        maxRestTime:
+          type: integer
+          minimum: 1
+          maximum: 600
+        muscleTarget:
+          type: array
+          items:
+            type: string
+            enum: [chest, core, trapezius, lats, deltoids, triceps, biceps, forearms, quads, hamstrings, glutes, adductors, calves, neck]
+        exerciseType:
+          type: array
+          items:
+            type: string
+            enum: [cardio, strength, flexibility, hiit, pilates, yoga, crossfit, calisthenics, aerobics, endurance, powerlifting, olympic_weightlifting, bodybuilding, functional_training, rehabilitation, sports_specific, warm_up, cool_down]
+        setType:
+          type: array
+          items:
+            type: string
+            enum: [warm_up, effective, pyramid, reverse_pyramid, superset, biset, triset, giant_set, drop_set, rest_pause, cluster]
+
+    ExerciseUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 50
+        description:
+          type: string
+          minLength: 10
+          maxLength: 500
+        video:
+          type: string
+          format: uri
+        muscleTarget:
+          type: array
+          items:
+            type: string
+            enum: [chest, core, trapezius, lats, deltoids, triceps, biceps, forearms, quads, hamstrings, glutes, adductors, calves, neck]
+        exerciseType:
+          type: array
+          items:
+            type: string
+            enum: [cardio, strength, flexibility, hiit, pilates, yoga, crossfit, calisthenics, aerobics, endurance, powerlifting, olympic_weightlifting, bodybuilding, functional_training, rehabilitation, sports_specific, warm_up, cool_down]
+        setType:
+          type: array
+          items:
+            type: string
+            enum: [warm_up, effective, pyramid, reverse_pyramid, superset, biset, triset, giant_set, drop_set, rest_pause, cluster]
+
+    RoutineRequest:
+      type: object
+      required:
+        - name
+        - description
+        - routineGoal
+        - official
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 50
+        description:
+          type: string
+          minLength: 10
+          maxLength: 500
+        exerciseIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        routineGoal:
+          type: array
+          items:
+            type: string
+            enum: [weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement]
+        official:
+          type: boolean
+
+    RoutineUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 50
+        description:
+          type: string
+          minLength: 10
+          maxLength: 500
+        exerciseIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        routineGoal:
+          type: array
+          items:
+            type: string
+            enum: [weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement]
+        official:
+          type: boolean
+
+    SplitRequest:
+      type: object
+      required:
+        - name
+        - description
+        - trainingDays
+        - official
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 50
+        description:
+          type: string
+          minLength: 10
+          maxLength: 500
+        routineIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        trainingDays:
+          type: array
+          items:
+            type: string
+            enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+        official:
+          type: boolean
+
+    SplitUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 50
+        description:
+          type: string
+          minLength: 10
+          maxLength: 500
+        routineIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        trainingDays:
+          type: array
+          items:
+            type: string
+            enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+        official:
+          type: boolean
+
+    ProfileRequest:
+      type: object
+      required:
+        - name
+        - birthDate
+        - phoneNumber
+        - fitGoals
+        - gender
+      properties:
+        name:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        phoneNumber:
+          type: string
+          description: 'Numeric string length 10'
+        fitGoals:
+          type: array
+          items:
+            type: string
+            enum: [weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement]
+        gender:
+          type: string
+          enum: [male, female]
+
+    ProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        fitGoals:
+          type: array
+          items:
+            type: string
+            enum: [weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement]
+        phoneNumber:
+          type: string
+
+    RegisterAccountRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        accountId:
+          type: string
+          format: uuid
+
+    User:
+      type: object
+      properties:
+        email: { type: string }
+        id: { type: string, format: uuid }
+        status: { type: string }
+        role: { type: string, enum: [user, admin, moderator] }
+        name: { type: string }
+        birthDate:
+          oneOf:
+            - type: string
+              format: date
+            - type: 'null'

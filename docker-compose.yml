@@ -2,6 +2,8 @@ services:
   db:
     image: postgres:15
     restart: unless-stopped
+    ports:
+      - "5433:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -17,6 +19,8 @@ services:
   dbs:
     image: postgres:15
     restart: unless-stopped
+    ports:
+      - "5434:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -77,9 +81,6 @@ services:
       - "8000:8000"
     environment:
       USERS_SERVICE_URL: http://athletia:3000
-    depends_on:
-      db:
-        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/docs || exit 1"]
       interval: 5s
@@ -113,10 +114,15 @@ services:
       RABBITMQ_ENABLED: 'true'
       RABBITMQ_PASSWORD: guest
     depends_on:
+      db:
+        condition: service_healthy
       user_measurements:
         condition: service_healthy
       recommendations:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3000/health-check || exit 1"]
       interval: 5s

@@ -6,6 +6,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import { ProfileUpdate } from './dto/profiles.dto';
 import { ProfilesService } from './profiles.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
@@ -23,6 +24,7 @@ export class ProfilesController {
   ) {}
 
   @Patch()
+  @ApiBody({ type: ProfileUpdate })
   async updateProfile(
     @Req() req: Request & { user: UserPayload },
     @Body() profileUpdate: ProfileUpdate,
