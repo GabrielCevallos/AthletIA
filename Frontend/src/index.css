@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:focus-visible {
+  outline: 2px solid theme(colors.primary);
+  outline-offset: 2px;
+}
+
+/* Preferencias de color del sistema al primer render */
+@media (prefers-color-scheme: light) {
+  :root:not(.dark) body { background: theme(colors.background-light); }
+}
+@media (prefers-color-scheme: dark) {
+  :root.dark body { background: theme(colors.background-dark); }
+}
