@@ -18,12 +18,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [accountId])
 
   async function login(email: string, password: string) {
-    const { data } = await api.post('/auth/login', { email, password })
-    localStorage.setItem('accessToken', data.accessToken)
-    localStorage.setItem('refreshToken', data.refreshToken)
-    if (data.accountId) localStorage.setItem('accountId', data.accountId)
-    setAccountId(data.accountId)
-    setIsAuthenticated(true)
+    try {
+      console.log('🔐 Iniciando login con:', email)
+      const { data } = await api.post('/auth/login', { email, password })
+      console.log('✅ Respuesta del backend:', data)
+      localStorage.setItem('accessToken', data.accessToken)
+      localStorage.setItem('refreshToken', data.refreshToken)
+      if (data.accountId) localStorage.setItem('accountId', data.accountId)
+      setAccountId(data.accountId)
+      setIsAuthenticated(true)
+      console.log('✅ Login exitoso')
+    } catch (error: any) {
+      console.error('❌ Error en login:', error)
+      console.error('Status:', error.response?.status)
+      console.error('Data:', error.response?.data)
+      throw error
+    }
   }
 
   async function logout() {

@@ -56,4 +56,10 @@ api.interceptors.response.use(
   }
 )
 
+// Placeholder generator used en UI para prellenar descripciones
+export async function generateExerciseDescription(name: string, muscle?: string, equipment?: string) {
+  const parts = [name, muscle, equipment].filter(Boolean).join(' · ')
+  return `Descripción generada para ${parts || 'ejercicio'} (pendiente de implementación real).`
+}
+
 export default api

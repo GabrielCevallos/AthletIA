@@ -1,9 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
-import Exercises from './pages/Exercises'
 import ProtectedRoute from './components/ProtectedRoute'
 import AuthCallback from './pages/AuthCallback'
+import Exercises from './pages/Exercises/Exercises'
+import ExerciseDetail from './pages/Exercises/ExerciseDetail'
+import CreateExercise from './pages/Exercises/CreateExercise'
+import Routines from './pages/Routines/Routines'
+import RoutineDetail from './pages/Routines/RoutineDetail'
+import RoutineCreator from './pages/Routines/RoutineCreator'
 
 export default function App() {
   return (
@@ -15,6 +20,13 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/exercises" element={<Exercises />} />
+          <Route path="/exercises/new" element={<CreateExercise />} />
+          <Route path="/exercises/:id" element={<ExerciseDetail />} />
+          <Route path="/exercises/:id/edit" element={<CreateExercise />} />
+          <Route path="/routines" element={<Routines />} />
+          <Route path="/routines/new" element={<RoutineCreator />} />
+          <Route path="/routines/:id" element={<RoutineDetail />} />
+          <Route path="/routines/:id/edit" element={<RoutineCreator />} />
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

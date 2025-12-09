@@ -167,7 +167,7 @@ export class AuthService {
   async signIn(loginRequest: LoginRequest): Promise<TokenResponse> {
     const account = await this.accountsService.findByEmail(loginRequest.email);
     if (!account) {
-      throw new UnauthorizedException(ApiResponse.error(messages.invalidCredentials));
+      throw new UnauthorizedException(messages.invalidCredentials);
     }
 
     if (!this.isAccountActive(account)) {
@@ -182,7 +182,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     if (!account.isEmailVerified) {
-      throw new BadRequestException(ApiResponse.error(messages.emailNotVerified));
+      throw new BadRequestException(messages.emailNotVerified);
     }
     const payload = this.createJwtPayload(account);
 
