@@ -1,10 +1,11 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import api from '../lib/api'
 
 type AuthCtx = {
   accountId?: string
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<void>
+  loginWithTokens: (accessToken: string, refreshToken: string, accountId?: string) => void
   logout: () => Promise<void>
 }
 const AuthContext = createContext<AuthCtx | null>(null)
@@ -17,7 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsAuthenticated(!!localStorage.getItem('accessToken'))
   }, [accountId])
 
-  async function login(email: string, password: string) {
+  const login = useCallback(async (email: string, password: string) => {
     try {
       console.log('🔐 Iniciando login con:', email)
       const { data } = await api.post('/auth/login', { email, password })
@@ -34,9 +35,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Data:', error.response?.data)
       throw error
     }
-  }
+  }, [])
 
-  async function logout() {
+  const loginWithTokens = useCallback((accessToken: string, refreshToken: string, accountId?: string) => {
+    console.log('🎫 loginWithTokens llamado con:', { accessToken: accessToken?.substring(0, 20) + '...', accountId })
+    localStorage.setItem('accessToken', accessToken)
+    localStorage.setItem('refreshToken', refreshToken)
+    if (accountId) localStorage.setItem('accountId', accountId)
+    setAccountId(accountId)
+    setIsAuthenticated(true)
+    console.log('✅ Tokens guardados, isAuthenticated:', true)
+  }, [])
+
+  const logout = useCallback(async () => {
     const id = localStorage.getItem('accountId')
     if (id) await api.post('/auth/logout', { accountId: id }).catch(() => {})
     localStorage.removeItem('accessToken')
@@ -44,9 +55,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('accountId')
     setAccountId(undefined)
     setIsAuthenticated(false)
-  }
+  }, [])
 
-  const value = useMemo(() => ({ accountId, isAuthenticated, login, logout }), [accountId, isAuthenticated])
+  const value = useMemo(() => ({ accountId, isAuthenticated, login, loginWithTokens, logout }), [accountId, isAuthenticated, login, loginWithTokens, logout])
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
