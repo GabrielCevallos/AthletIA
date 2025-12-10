@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Eye, EyeOff, Dumbbell, Target, Video, ImageIcon, ListOrdered, Heart, GitBranch, Edit, Trash2 } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import { deleteExercise, getExerciseById, Exercise } from '../../lib/exerciseStore';
+import Swal from 'sweetalert2';
 
 const ExerciseDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,14 +16,37 @@ const ExerciseDetail: React.FC = () => {
     setExercise(found || null);
   }, [id]);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!exercise) return;
     if (exercise.isSeed) {
-      alert('Los ejercicios base no se pueden eliminar.');
+      await Swal.fire({
+        icon: 'info',
+        title: 'Ejercicio protegido',
+        text: 'Los ejercicios base no se pueden eliminar.',
+        confirmButtonText: 'Entendido',
+      });
       return;
     }
-    if (confirm(`¿Estás seguro de eliminar "${exercise.name}"?`)) {
+
+    const result = await Swal.fire({
+      title: '¿Eliminar ejercicio?',
+      text: `Se eliminará "${exercise.name}"`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonText: 'Cancelar',
+      confirmButtonText: 'Sí, eliminar',
+    });
+
+    if (result.isConfirmed) {
       deleteExercise(exercise.id);
+      await Swal.fire({
+        icon: 'success',
+        title: 'Ejercicio eliminado',
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
       navigate('/exercises');
     }
   };
@@ -75,15 +99,15 @@ const ExerciseDetail: React.FC = () => {
       </header>
 
       {/* Main Info */}
-      <section className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+      <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-primary/15 rounded-lg">
               <Target size={24} className="text-primary" />
             </div>
             <div>
-              <p className="text-gray-300 text-sm font-medium mb-1">Grupo Muscular Principal</p>
-              <p className="text-white text-lg font-bold">{exercise.muscle}</p>
+              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-1">Grupo Muscular Principal</p>
+              <p className="text-gray-900 dark:text-white text-lg font-bold">{exercise.muscle}</p>
             </div>
           </div>
           
@@ -120,14 +144,14 @@ const ExerciseDetail: React.FC = () => {
 
       {/* Multimedia */}
       {exercise.mediaFiles && exercise.mediaFiles.length > 0 && (
-        <section className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <Video size={20} className="text-primary" />
-            <h2 className="text-white text-xl font-bold">Contenido Multimedia</h2>
+            <h2 className="text-gray-900 dark:text-white text-xl font-bold">Contenido Multimedia</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {exercise.mediaFiles.map((file: any, idx: number) => (
-              <div key={idx} className="bg-white/5 rounded-lg border border-white/10 overflow-hidden">
+              <div key={idx} className="bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden">
                 {file.data ? (
                   file.type?.startsWith('image/') ? (
                     <img src={file.data} alt={file.name} className="w-full aspect-video object-cover" />
@@ -151,10 +175,10 @@ const ExerciseDetail: React.FC = () => {
 
       {/* Instructions */}
       {exercise.instructions && exercise.instructions.length > 0 && (
-        <section className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <ListOrdered size={20} className="text-primary" />
-            <h2 className="text-white text-xl font-bold">Pasos de Ejecución</h2>
+            <h2 className="text-gray-900 dark:text-white text-xl font-bold">Pasos de Ejecución</h2>
           </div>
           <ol className="space-y-3">
             {exercise.instructions.map((text: string, idx: number) => (
@@ -169,15 +193,15 @@ const ExerciseDetail: React.FC = () => {
 
       {/* Benefits */}
       {exercise.benefit && (
-        <section className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <Heart size={20} className="text-primary" />
-            <h2 className="text-white text-xl font-bold">Beneficios</h2>
+            <h2 className="text-gray-900 dark:text-white text-xl font-bold">Beneficios</h2>
           </div>
-          <div className="bg-white/5 p-4 rounded-lg">
-            <p className="text-white font-bold text-lg mb-2">{exercise.benefit.title}</p>
+          <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg">
+            <p className="text-gray-900 dark:text-white font-bold text-lg mb-2">{exercise.benefit.title}</p>
             {exercise.benefit.description && (
-              <p className="text-white/90 text-sm leading-relaxed mb-3">{exercise.benefit.description}</p>
+              <p className="text-gray-700 dark:text-white/90 text-sm leading-relaxed mb-3">{exercise.benefit.description}</p>
             )}
             {exercise.benefit.categories && exercise.benefit.categories.length > 0 && (
               <div className="flex flex-wrap gap-2">
@@ -192,16 +216,16 @@ const ExerciseDetail: React.FC = () => {
 
       {/* Variants */}
       {exercise.variants && exercise.variants.length > 0 && (
-        <section className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <GitBranch size={20} className="text-primary" />
-            <h2 className="text-white text-xl font-bold">Variantes del Ejercicio</h2>
+            <h2 className="text-gray-900 dark:text-white text-xl font-bold">Variantes del Ejercicio</h2>
           </div>
           <ul className="space-y-3">
             {exercise.variants.map((v: any, idx: number) => (
-              <li key={idx} className="bg-white/5 p-4 rounded-lg text-white">
+              <li key={idx} className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg text-gray-900 dark:text-white">
                 <span className="font-bold">{v.name}</span>
-                {v.notes && <span className="text-white/80 ml-2">— {v.notes}</span>}
+                {v.notes && <span className="text-gray-600 dark:text-white/80 ml-2">— {v.notes}</span>}
               </li>
             ))}
           </ul>

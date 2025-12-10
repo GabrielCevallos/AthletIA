@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '../context/AuthContext'
+import ThemeToggle from '../components/ThemeToggle'
 
 const schema = z.object({
   email: z.string().email('Email inválido'),
@@ -29,9 +30,14 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-xl border border-gray-200 dark:border-[#325567] bg-white dark:bg-[#1a2831] p-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Iniciar sesión</h1>
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gray-50 dark:bg-background-dark relative">
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
+        <ThemeToggle />
+      </div>
+
+      <div className="w-full max-w-md rounded-xl border border-gray-200 dark:border-[#325567] bg-white dark:bg-[#1a2831] p-6 sm:p-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">Iniciar sesión</h1>
         <p className="text-sm text-gray-500 dark:text-[#92b7c9] mb-6">Bienvenido de nuevo</p>
         {serverError && <div className="mb-4 text-red-500 text-sm" role="alert">{serverError}</div>}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>

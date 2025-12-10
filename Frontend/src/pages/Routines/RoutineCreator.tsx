@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
 import { getAllExercises } from '../../lib/exerciseStore';
 import { deleteRoutine, getRoutineById, upsertRoutine, Routine, RoutineExercise } from '../../lib/routineStore';
+import Swal from 'sweetalert2';
 
 const RoutineCreator: React.FC = () => {
   const navigate = useNavigate();
@@ -44,9 +45,14 @@ const RoutineCreator: React.FC = () => {
     setRoutineExercises(routineExercises.filter((ex: any) => ex.uid !== uid));
   };
 
-  const handleSaveRoutine = () => {
+  const handleSaveRoutine = async () => {
     if (routineExercises.length === 0) {
-      alert('Por favor añade al menos un ejercicio a la rutina.');
+      await Swal.fire({
+        icon: 'info',
+        title: 'Añade ejercicios',
+        text: 'Por favor añade al menos un ejercicio a la rutina.',
+        confirmButtonText: 'Entendido',
+      });
       return;
     }
     const record: Routine = {
@@ -65,18 +71,40 @@ const RoutineCreator: React.FC = () => {
       createdAt: new Date().toISOString(),
     };
     upsertRoutine(record);
-    alert(`Rutina "${routineName}" guardada.`);
+    await Swal.fire({
+      icon: 'success',
+      title: 'Rutina guardada',
+      text: `La rutina "${routineName}" ha sido guardada.`,
+      confirmButtonText: 'Continuar',
+    });
     navigate('/routines');
   };
 
-  const handleSaveTemplate = () => {
-    handleSaveRoutine();
+  const handleSaveTemplate = async () => {
+    await handleSaveRoutine();
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!id) return;
-    if (confirm('¿Eliminar rutina?')) {
+    const result = await Swal.fire({
+      title: '¿Eliminar rutina?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonText: 'Cancelar',
+      confirmButtonText: 'Sí, eliminar',
+    });
+
+    if (result.isConfirmed) {
       deleteRoutine(id);
+      await Swal.fire({
+        icon: 'success',
+        title: 'Rutina eliminada',
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
       navigate('/routines');
     }
   };
@@ -100,12 +128,12 @@ const RoutineCreator: React.FC = () => {
 
          <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 flex-1 min-h-0" aria-label="Constructor de rutina">
           {/* Library */}
-          <aside className="bg-background-dark rounded-xl border border-white/10 flex flex-col overflow-hidden" aria-labelledby="library-heading">
-           <div className="p-3 md:p-4 border-b border-white/10">
-            <h2 id="library-heading" className="text-white text-base md:text-lg font-bold mb-3">Biblioteca</h2>
+          <aside className="bg-white dark:bg-background-dark rounded-xl border border-gray-200 dark:border-white/10 flex flex-col overflow-hidden" aria-labelledby="library-heading">
+           <div className="p-3 md:p-4 border-b border-gray-200 dark:border-white/10">
+            <h2 id="library-heading" className="text-gray-900 dark:text-white text-base md:text-lg font-bold mb-3">Biblioteca</h2>
                 <div className="relative">
               <Search className="absolute left-3 top-2.5 text-gray-400" size={18} aria-hidden />
-              <input aria-label="Buscar en biblioteca" className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-white placeholder:text-gray-400 text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Buscar..." />
+              <input aria-label="Buscar en biblioteca" className="w-full bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg py-2 pl-10 pr-4 text-gray-900 dark:text-white placeholder:text-gray-400 text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Buscar..." />
                 </div>
              </div>
              <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-2">
@@ -132,17 +160,17 @@ const RoutineCreator: React.FC = () => {
                   id="routine-name"
                   value={routineName}
                   onChange={(e) => setRoutineName(e.target.value)}
-              className="w-full bg-background-dark border border-white/10 rounded-lg p-2.5 md:p-3 text-sm md:text-base text-white focus:border-primary focus:outline-none" 
+              className="w-full bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 rounded-lg p-2.5 md:p-3 text-sm md:text-base text-gray-900 dark:text-white focus:border-primary focus:outline-none" 
                 />
                 <textarea
-              className="w-full mt-2 bg-background-dark border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-primary focus:outline-none"
+              className="w-full mt-2 bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 rounded-lg p-2.5 text-sm text-gray-900 dark:text-white focus:border-primary focus:outline-none"
                   placeholder="Descripción breve"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
              </div>
              
-           <div className="flex-1 bg-background-dark rounded-xl border-2 border-dashed border-white/15 p-4 flex flex-col gap-3 overflow-y-auto">
+           <div className="flex-1 bg-gray-50 dark:bg-background-dark rounded-xl border-2 border-dashed border-gray-300 dark:border-white/15 p-4 flex flex-col gap-3 overflow-y-auto">
                 {routineExercises.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-gray-400 opacity-70">
                         <GripVertical size={48} />

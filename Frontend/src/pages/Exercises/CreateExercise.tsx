@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
 import { generateExerciseDescription } from '../../lib/api';
 import { upsertExercise, getExerciseById, Exercise, StoredMedia } from '../../lib/exerciseStore';
+import Swal from 'sweetalert2';
 
 const CreateExercise: React.FC = () => {
   const navigate = useNavigate();
@@ -54,7 +55,12 @@ const CreateExercise: React.FC = () => {
 
   const handleGenerateAI = async () => {
     if (!name) {
-      alert("Por favor ingrese al menos el nombre del ejercicio.");
+      await Swal.fire({
+        icon: 'info',
+        title: 'Nombre requerido',
+        text: 'Por favor ingrese al menos el nombre del ejercicio.',
+        confirmButtonText: 'Entendido',
+      });
       return;
     }
     setIsGenerating(true);
@@ -107,9 +113,14 @@ const CreateExercise: React.FC = () => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name) {
-      alert('Por favor completa el nombre del ejercicio.');
+      await Swal.fire({
+        icon: 'info',
+        title: 'Falta el nombre',
+        text: 'Por favor completa el nombre del ejercicio.',
+        confirmButtonText: 'Entendido',
+      });
       return;
     }
     // Ir al paso 2: Grupos Musculares
@@ -121,12 +132,22 @@ const CreateExercise: React.FC = () => {
 
   const handlePublish = async () => {
     if (!name.trim()) {
-      alert('Por favor completa el nombre del ejercicio.');
+      await Swal.fire({
+        icon: 'info',
+        title: 'Nombre requerido',
+        text: 'Por favor completa el nombre del ejercicio.',
+        confirmButtonText: 'Entendido',
+      });
       setStep(1);
       return;
     }
     if (!muscle) {
-      alert('Por favor selecciona al menos un grupo muscular.');
+      await Swal.fire({
+        icon: 'info',
+        title: 'Grupo muscular requerido',
+        text: 'Por favor selecciona al menos un grupo muscular.',
+        confirmButtonText: 'Entendido',
+      });
       setStep(2);
       return;
     }
@@ -183,11 +204,16 @@ const CreateExercise: React.FC = () => {
     setCreatedAt(saved.createdAt);
 
     const action = isEditing ? (isSeedExercise ? 'duplicado' : 'actualizado') : 'creado';
-    alert(`✅ Ejercicio "${saved.name}" ${action}.`);
+    await Swal.fire({
+      icon: 'success',
+      title: 'Ejercicio guardado',
+      text: `✅ Ejercicio "${saved.name}" ${action}.`,
+      confirmButtonText: 'Ver ejercicio',
+    });
     navigate(`/exercises/${saved.id}`);
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (step === 8) {
       setStep(7);
       return;
@@ -217,8 +243,17 @@ const CreateExercise: React.FC = () => {
       return;
     }
     if (name || muscle || equipment || description || mediaFiles.length > 0) {
-      if (confirm('¿Descartar los cambios?')) {
-        // Limpiar URLs de preview
+      const result = await Swal.fire({
+        title: '¿Descartar los cambios?',
+        text: 'Perderás la información no guardada.',
+        icon: 'question',
+        showCancelButton: true,
+        cancelButtonText: 'Seguir editando',
+        confirmButtonText: 'Descartar',
+        confirmButtonColor: '#ef4444',
+      });
+
+      if (result.isConfirmed) {
         mediaPreviewUrls.forEach(url => URL.revokeObjectURL(url));
         setStep(1);
         setName('');
@@ -276,17 +311,17 @@ const CreateExercise: React.FC = () => {
           </div>
         </header>
 
-        <section aria-labelledby="preview-heading" className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
-          <h2 id="preview-heading" className="text-white text-xl md:text-2xl font-bold mb-6">Información del Ejercicio</h2>
+        <section aria-labelledby="preview-heading" className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
+          <h2 id="preview-heading" className="text-gray-900 dark:text-white text-xl md:text-2xl font-bold mb-6">Información del Ejercicio</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
-              <p className="text-gray-300 text-sm font-medium mb-2">Nombre</p>
-              <p className="text-white text-lg font-bold">{name}</p>
+              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-2">Nombre</p>
+              <p className="text-gray-900 dark:text-white text-lg font-bold">{name}</p>
             </div>
             <div>
-              <p className="text-gray-300 text-sm font-medium mb-2">Grupo Muscular</p>
-              <p className="text-white text-lg font-bold">{muscle}{secondaryMuscle ? ' / ' + secondaryMuscle : ''}</p>
+              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-2">Grupo Muscular</p>
+              <p className="text-gray-900 dark:text-white text-lg font-bold">{muscle}{secondaryMuscle ? ' / ' + secondaryMuscle : ''}</p>
             </div>
             <div>
               <p className="text-gray-300 text-sm font-medium mb-2">Equipo</p>
@@ -446,9 +481,9 @@ const CreateExercise: React.FC = () => {
             <p className="text-gray-300 text-sm sm:text-base leading-relaxed">Elige si será público o privado.</p>
           </div>
         </header>
-        <section className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="flex flex-col gap-3">
-            <label className="flex items-start gap-3 p-4 bg-white/5 rounded-lg border-2 border-white/10 hover:border-primary/50 cursor-pointer transition">
+            <label className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-lg border-2 border-gray-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 cursor-pointer transition">
               <input
                 type="radio"
                 name="visibility"
@@ -535,11 +570,11 @@ const CreateExercise: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-white font-medium mb-2 block">Nombre de la Variante</label>
-                      <input value={v.name} onChange={(e) => updateVariant(idx, 'name', e.target.value)} className="w-full h-12 px-4 rounded-xl bg-background-dark border border-white/10 text-white" placeholder="Ej: Press de Banca con Mancuernas" />
+                      <input value={v.name} onChange={(e) => updateVariant(idx, 'name', e.target.value)} className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white" placeholder="Ej: Press de Banca con Mancuernas" />
                     </div>
                     <div>
                       <label className="text-white font-medium mb-2 block">Notas</label>
-                      <input value={v.notes || ''} onChange={(e) => updateVariant(idx, 'notes', e.target.value)} className="w-full h-12 px-4 rounded-xl bg-background-dark border border-white/10 text-white" placeholder="Ej: Enfatiza control del movimiento" />
+                      <input value={v.notes || ''} onChange={(e) => updateVariant(idx, 'notes', e.target.value)} className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white" placeholder="Ej: Enfatiza control del movimiento" />
                     </div>
                   </div>
                   <div className="flex justify-end mt-3">
@@ -581,15 +616,15 @@ const CreateExercise: React.FC = () => {
             <p className="text-gray-300 text-sm sm:text-base leading-relaxed">Define beneficios y categorías.</p>
           </div>
         </header>
-        <section className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="flex flex-col gap-6">
             <div>
-              <label className="text-white font-medium mb-2 block">Título del Beneficio</label>
-              <input value={benefitTitle} onChange={(e) => setBenefitTitle(e.target.value)} className="w-full h-12 px-4 rounded-xl bg-background-dark border border-white/10 text-white" placeholder="Ej: Mejora Cardiovascular" />
+              <label className="text-gray-900 dark:text-white font-medium mb-2 block">Título del Beneficio</label>
+              <input value={benefitTitle} onChange={(e) => setBenefitTitle(e.target.value)} className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white" placeholder="Ej: Mejora Cardiovascular" />
             </div>
             <div>
-              <label className="text-white font-medium mb-2 block">Descripción</label>
-              <textarea value={benefitDescription} onChange={(e) => setBenefitDescription(e.target.value)} className="w-full min-h-[120px] p-4 rounded-xl bg-background-dark border border-white/10 text-white" placeholder="Describe cómo beneficia al usuario" />
+              <label className="text-gray-900 dark:text-white font-medium mb-2 block">Descripción</label>
+              <textarea value={benefitDescription} onChange={(e) => setBenefitDescription(e.target.value)} className="w-full min-h-[120px] p-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white" placeholder="Describe cómo beneficia al usuario" />
             </div>
             <div>
               <label className="text-white font-medium mb-2 block">Categorías</label>
@@ -638,12 +673,12 @@ const CreateExercise: React.FC = () => {
             <p className="text-gray-300 text-sm sm:text-base leading-relaxed">Especifica pasos para ejecutar correctamente el ejercicio.</p>
           </div>
         </header>
-        <section className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="space-y-4">
             {instructions.map((text, idx) => (
-              <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
-                <label className="text-white font-medium mb-2 block">Paso {idx + 1}</label>
-                <textarea value={text} onChange={(e) => updateInstruction(idx, e.target.value)} className="w-full min-h-[80px] p-3 rounded-xl bg-background-dark border border-white/10 text-white" placeholder="Describe el paso..." />
+              <div key={idx} className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">
+                <label className="text-gray-900 dark:text-white font-medium mb-2 block">Paso {idx + 1}</label>
+                <textarea value={text} onChange={(e) => updateInstruction(idx, e.target.value)} className="w-full min-h-[80px] p-3 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white" placeholder="Describe el paso..." />
                 <div className="flex justify-end mt-2">
                   <button onClick={() => removeInstruction(idx)} className="p-2 hover:bg-red-900/30 rounded text-red-400" aria-label="Eliminar paso"><X size={18} /></button>
                 </div>

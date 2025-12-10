@@ -14,3 +14,68 @@
 @media (prefers-color-scheme: dark) {
   :root.dark body { background: theme(colors.background-dark); }
 }
+
+/* ===== CLASES DE ACCESIBILIDAD WCAG ===== */
+
+/* Escala de grises */
+.accessibility-grayscale {
+  filter: grayscale(100%);
+}
+
+/* Alto contraste */
+.accessibility-high-contrast {
+  filter: contrast(1.5) brightness(1.1);
+}
+
+.accessibility-high-contrast * {
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Contraste negativo (inversión de colores) */
+.accessibility-negative-contrast {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.accessibility-negative-contrast img,
+.accessibility-negative-contrast video {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Fuente legible */
+.accessibility-readable-font,
+.accessibility-readable-font * {
+  font-family: 'Arial', 'Helvetica Neue', 'Helvetica', sans-serif !important;
+  letter-spacing: 0.05em !important;
+  line-height: 1.6 !important;
+}
+
+/* Enlaces subrayados */
+.accessibility-underline-links a {
+  text-decoration: underline !important;
+  text-decoration-thickness: 2px !important;
+  text-underline-offset: 3px !important;
+}
+
+/* Mejorar contraste de botones en alto contraste */
+.accessibility-high-contrast button,
+.accessibility-high-contrast a {
+  border: 2px solid currentColor !important;
+}
+
+/* Asegurar que el tamaño de texto se aplique correctamente */
+html {
+  font-size: 100%;
+}
+
+/* Responsive base para mejor accesibilidad */
+@media (max-width: 640px) {
+  html {
+    font-size: 95%;
+  }
+}
+
+@media (min-width: 1920px) {
+  html {
+    font-size: 105%;
+  }
+}

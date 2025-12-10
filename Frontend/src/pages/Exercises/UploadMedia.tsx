@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, X, Check } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 const UploadMedia: React.FC = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -12,23 +13,50 @@ const UploadMedia: React.FC = () => {
     input.onchange = (e) => {
       const files = Array.from((e.target as HTMLInputElement).files || []);
       setSelectedFiles(files);
-      alert(`${files.length} archivo(s) seleccionado(s)`);
+      if (files.length > 0) {
+        Swal.fire({
+          icon: 'success',
+          title: `${files.length} archivo(s) seleccionado(s)`,
+          showConfirmButton: false,
+          timer: 1400,
+          timerProgressBar: true,
+        });
+      }
     };
     input.click();
   };
 
   const handleUpload = () => {
     if (selectedFiles.length === 0) {
-      alert('No hay archivos seleccionados para subir.');
+      Swal.fire({
+        icon: 'info',
+        title: 'Sin archivos',
+        text: 'No hay archivos seleccionados para subir.',
+        confirmButtonText: 'Entendido',
+      });
       return;
     }
-    alert(`Subiendo ${selectedFiles.length} archivo(s)...\nFunción en desarrollo.`);
+    Swal.fire({
+      icon: 'info',
+      title: `Subiendo ${selectedFiles.length} archivo(s)...`,
+      text: 'Función en desarrollo.',
+      confirmButtonText: 'Ok',
+    });
     // TODO: Implement actual upload logic
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (selectedFiles.length > 0) {
-      if (confirm('¿Descartar los archivos seleccionados?')) {
+      const result = await Swal.fire({
+        title: '¿Descartar los archivos seleccionados?',
+        icon: 'question',
+        showCancelButton: true,
+        cancelButtonText: 'Seguir aquí',
+        confirmButtonText: 'Descartar',
+        confirmButtonColor: '#ef4444',
+      });
+
+      if (result.isConfirmed) {
         setSelectedFiles([]);
       }
     }
