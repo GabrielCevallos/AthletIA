@@ -54,7 +54,7 @@ export default function Login() {
           </button>
         </form>
         <div className="mt-4">
-          <a href={((import.meta as any).env?.VITE_GOOGLE_AUTH_URL ?? '')} className="w-full h-10 flex items-center justify-center rounded-lg border border-gray-300 dark:border-[#325567] text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 focus-visible:ring-2 ring-primary">
+          <a href={((import.meta as any).env?.VITE_GOOGLE_AUTH_URL ?? 'http://localhost:3000/auth/google')} className="w-full h-10 flex items-center justify-center rounded-lg border border-gray-300 dark:border-[#325567] text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 focus-visible:ring-2 ring-primary">
             <span className="material-symbols-outlined mr-2" aria-hidden>account_circle</span>
             Entrar con Google
           </a>
