@@ -16,6 +16,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { MuscleTarget } from '../enum/muscle-target.enum';
 import { ExerciseType } from '../enum/exercise-type.enum';
 import { SetType } from '../enum/set-type.enum';
@@ -25,16 +26,19 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(50)
+  @ApiProperty({ description: 'Exercise name', minLength: 3, maxLength: 50, example: 'Bench Press' })
   name: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(10)
   @MaxLength(500)
+  @ApiProperty({ description: 'Exercise description', minLength: 10, maxLength: 500, example: 'Barbell bench press on a flat bench.' })
   description: string;
 
   @IsUrl()
   @IsNotEmpty()
+  @ApiProperty({ description: 'Demo video URL', example: 'https://example.com/video' })
   video: string;
 
   @IsNumber()
@@ -42,6 +46,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @IsPositive()
   @Min(1)
+  @ApiProperty({ description: 'Minimum sets', minimum: 1, example: 3 })
   minSets: number;
 
   @IsNumber()
@@ -49,6 +54,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @IsPositive()
   @Max(10)
+  @ApiProperty({ description: 'Maximum sets', maximum: 10, example: 5 })
   maxSets: number;
 
   @IsNumber()
@@ -56,6 +62,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @IsPositive()
   @Min(1)
+  @ApiProperty({ description: 'Minimum reps', minimum: 1, example: 8 })
   minReps: number;
 
   @IsNumber()
@@ -63,6 +70,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @IsPositive()
   @Max(60)
+  @ApiProperty({ description: 'Maximum reps', maximum: 60, example: 15 })
   maxReps: number;
 
   @IsNumber()
@@ -70,6 +78,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @IsPositive()
   @Min(10)
+  @ApiProperty({ description: 'Minimum rest time in seconds', minimum: 10, example: 60 })
   minRestTime: number;
 
   @IsNumber()
@@ -77,6 +86,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @IsPositive()
   @Max(600)
+  @ApiProperty({ description: 'Maximum rest time in seconds', maximum: 600, example: 120 })
   maxRestTime: number;
 
   @IsArray()
@@ -88,6 +98,7 @@ export class ExerciseRequest {
   })
   @IsNotEmpty()
   @ArrayMinSize(1)
+  @ApiProperty({ description: 'Target muscles', enum: MuscleTarget, isArray: true })
   muscleTarget: MuscleTarget[];
 
   @IsArray()
@@ -99,6 +110,7 @@ export class ExerciseRequest {
   })
   @IsNotEmpty()
   @ArrayMinSize(1)
+  @ApiProperty({ description: 'Exercise types', enum: ExerciseType, isArray: true })
   exerciseType: ExerciseType[];
 
   @IsArray()
@@ -110,17 +122,21 @@ export class ExerciseRequest {
   })
   @IsNotEmpty()
   @ArrayMinSize(1)
+  @ApiProperty({ description: 'Set types', enum: SetType, isArray: true })
   setType: SetType[];
 }
 
 export class Exercise extends ExerciseRequest {
   @IsUUID()
+  @ApiProperty({ description: 'Exercise ID', format: 'uuid' })
   id: string;
 
   @IsDate()
+  @ApiProperty({ description: 'Creation date', type: Date })
   createdAt: Date;
 
   @IsDate()
+  @ApiProperty({ description: 'Last update date', type: Date })
   updatedAt: Date;
 }
 
@@ -130,6 +146,7 @@ export class ExerciseUpdate {
   @IsOptional()
   @MinLength(3)
   @MaxLength(50)
+  @ApiPropertyOptional({ description: 'Exercise name', minLength: 3, maxLength: 50, example: 'Bench Press' })
   name?: string;
 
   @IsString()
@@ -137,11 +154,13 @@ export class ExerciseUpdate {
   @IsOptional()
   @MinLength(10)
   @MaxLength(500)
+  @ApiPropertyOptional({ description: 'Exercise description', minLength: 10, maxLength: 500, example: 'Barbell bench press on a flat bench.' })
   description?: string;
 
   @IsUrl()
   @IsNotEmpty()
   @IsOptional()
+  @ApiPropertyOptional({ description: 'Demo video URL', example: 'https://example.com/video' })
   video?: string;
 
   @IsArray()
@@ -154,6 +173,7 @@ export class ExerciseUpdate {
   @IsNotEmpty()
   @IsOptional()
   @ArrayMinSize(1)
+  @ApiPropertyOptional({ description: 'Target muscles', enum: MuscleTarget, isArray: true })
   muscleTarget?: MuscleTarget[];
 
   @IsArray()
@@ -166,6 +186,7 @@ export class ExerciseUpdate {
   @IsNotEmpty()
   @IsOptional()
   @ArrayMinSize(1)
+  @ApiPropertyOptional({ description: 'Exercise types', enum: ExerciseType, isArray: true })
   exerciseType?: ExerciseType[];
 
   @IsArray()
@@ -178,5 +199,6 @@ export class ExerciseUpdate {
   @IsNotEmpty()
   @IsOptional()
   @ArrayMinSize(1)
+  @ApiPropertyOptional({ description: 'Set types', enum: SetType, isArray: true })
   setType?: SetType[];
 }

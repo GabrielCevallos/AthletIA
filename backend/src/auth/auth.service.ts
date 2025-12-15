@@ -20,8 +20,6 @@ import { UserPayload } from './interfaces/user-payload.interface';
 import * as dotenv from 'dotenv';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { GoogleUser } from './strategies/google.strategy';
-import { ApiResponse } from 'src/common/response/api.response';
-// import { GoogleUser } from './strategies/google.strategy';
 
 dotenv.config();
 

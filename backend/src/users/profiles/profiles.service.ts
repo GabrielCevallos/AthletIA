@@ -4,7 +4,7 @@ import { Profile } from './profile.entity';
 import { Repository } from 'typeorm';
 import { ProfileRequest, ProfileUpdate } from './dto/profiles.dto';
 import { Account } from 'src/users/accounts/account.entity';
-import { ApiResponse } from 'src/common/response/api.response';
+import { ResponseBody } from 'src/common/response/api.response';
 
 @Injectable()
 export class ProfilesService {
@@ -33,7 +33,7 @@ export class ProfilesService {
   async findById(id: string): Promise<Profile> {
     const profile = await this.profilesRepository.findOneBy({ id });
     if (!profile) {
-      throw new NotFoundException(ApiResponse.error('Profile was not Found'));
+      throw new NotFoundException(ResponseBody.error('Profile was not Found'));
     }
     return profile;
   }
@@ -43,7 +43,7 @@ export class ProfilesService {
       where: { account: { id: accountId } },
     });
     if (!profile) {
-      throw new NotFoundException(ApiResponse.error('Profile was not Found'));
+      throw new NotFoundException(ResponseBody.error('Profile was not Found'));
     }
     return profile;
   }
@@ -51,7 +51,7 @@ export class ProfilesService {
   async merge(accountId: string, profileUpdate: ProfileUpdate): Promise<void> {
     const profile = await this.profilesRepository.findOneBy({ account: { id: accountId } });
     if (!profile) {
-      throw new NotFoundException(ApiResponse.error('Profile was not Found'));
+      throw new NotFoundException(ResponseBody.error('Profile was not Found'));
     }
     await this.profilesRepository.save({
       ...profile,

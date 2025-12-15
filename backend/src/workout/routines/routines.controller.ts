@@ -12,8 +12,15 @@ import {
 } from '@nestjs/common';
 import { RoutinesService } from './routines.service';
 import { RoutineRequest, RoutineUpdate } from './dto/routines.dto';
-import { ApiResponse } from '../../common/response/api.response';
+import { ResponseBody } from '../../common/response/api.response';
 import { Routine } from './routines.entity';
+import {
+  ApiCreateRoutine,
+  ApiListRoutines,
+  ApiGetRoutine,
+  ApiUpdateRoutine,
+  ApiDeleteRoutine,
+} from './swagger.decorators';
 
 @Controller('workout/routines')
 export class RoutinesController {
@@ -21,42 +28,47 @@ export class RoutinesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiCreateRoutine()
   async create(
     @Body() createRoutineDto: RoutineRequest,
-  ): Promise<ApiResponse<Routine>> {
+  ): Promise<ResponseBody<Routine>> {
     const data = await this.routinesService.create(createRoutineDto);
-    return new ApiResponse(true, 'Routine created successfully', data);
+    return new ResponseBody(true, 'Routine created successfully', data);
   }
 
   @Get()
-  async findAll(): Promise<ApiResponse<Routine[]>> {
+  @ApiListRoutines()
+  async findAll(): Promise<ResponseBody<Routine[]>> {
     const data = await this.routinesService.findAll();
-    return new ApiResponse(true, 'Routines retrieved successfully', data);
+    return new ResponseBody(true, 'Routines retrieved successfully', data);
   }
 
   @Get(':id')
+  @ApiGetRoutine()
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<ApiResponse<Routine>> {
+  ): Promise<ResponseBody<Routine>> {
     const data = await this.routinesService.findOne(id);
-    return new ApiResponse(true, 'Routine retrieved successfully', data);
+    return new ResponseBody(true, 'Routine retrieved successfully', data);
   }
 
   @Patch(':id')
+  @ApiUpdateRoutine()
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateRoutineDto: RoutineUpdate,
-  ): Promise<ApiResponse<Routine>> {
+  ): Promise<ResponseBody<Routine>> {
     const data = await this.routinesService.update(id, updateRoutineDto);
-    return new ApiResponse(true, 'Routine updated successfully', data);
+    return new ResponseBody(true, 'Routine updated successfully', data);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiDeleteRoutine()
   async remove(
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<ApiResponse<null>> {
+  ): Promise<ResponseBody<null>> {
     await this.routinesService.remove(id);
-    return new ApiResponse(true, 'Routine deleted successfully');
+    return new ResponseBody(true, 'Routine deleted successfully');
   }
 }

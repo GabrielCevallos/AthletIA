@@ -17,7 +17,7 @@ import { User, UserItem } from './dto/user-response.dtos';
 import { Role } from './enum/role.enum';
 import { PaginationRequest } from '../../common/request/pagination.request.dto';
 import { PaginationResponse } from 'src/common/interfaces/pagination-response.interface';
-import { ApiResponse } from 'src/common/response/api.response';
+import { ResponseBody } from 'src/common/response/api.response';
 import { ProfilesService } from 'src/users/profiles/profiles.service';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 
@@ -155,11 +155,11 @@ export class AccountsService {
 
     const account = await this.accountsRepository.findOneBy({ id });
     if (!account) {
-      throw new NotFoundException(ApiResponse.error('Account not found'));
+      throw new NotFoundException(ResponseBody.error('Account not found'));
     }
     if (account.role === role) {
       throw new BadRequestException(
-        ApiResponse.error(`Account already has role ${role}`),
+        ResponseBody.error(`Account already has role ${role}`),
       );
     }
     if (
@@ -170,7 +170,7 @@ export class AccountsService {
       ].includes(account.status)
     ) {
       throw new BadRequestException(
-        ApiResponse.error(
+        ResponseBody.error(
           `Cannot assign role to account in status ${account.status}`,
         ),
       );

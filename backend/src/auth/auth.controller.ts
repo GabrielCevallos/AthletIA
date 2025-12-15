@@ -9,12 +9,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse as SwaggerResponse,
-  ApiBody,
-} from '@nestjs/swagger';
+import { ApiTags, ApiExtraModels } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
   ChangePasswordRequest,
@@ -24,16 +19,30 @@ import {
 } from './dto/auth.dto';
 import { Public } from 'src/auth/guards/decorators/public.decorator';
 import { AuthGuard } from './guards/auth.guard';
-import { ApiResponse } from 'src/common/response/api.response';
+import { ResponseBody } from 'src/common/response/api.response';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GoogleUser } from './strategies/google.strategy';
 import type { Request, Response } from 'express';
+import {
+  ApiAuthSignIn,
+  ApiAuthRegisterAccount,
+  ApiAuthVerifyEmail,
+  ApiAuthResendVerification,
+  ApiAuthResendVerificationStatus,
+  ApiAuthCompleteProfileSetup,
+  ApiAuthChangePassword,
+  ApiAuthRefreshToken,
+  ApiAuthLogout,
+  ApiAuthGoogleStart,
+  ApiAuthGoogleCallback,
+} from './swagger.decorators';
 
 type accountIdOnly = { accountId: string };
 
 @Controller('auth')
 @ApiTags('auth')
+@ApiExtraModels(ProfileRequest, ChangePasswordRequest)
 export class AuthController {
   constructor(private authService: AuthService) {}
 
@@ -43,9 +52,7 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  @ApiOperation({ summary: 'Sign in with email and password' })
-  @ApiBody({ type: LoginRequest })
-  @SwaggerResponse({ status: 200, description: 'Token response', type: TokenResponse })
+  @ApiAuthSignIn()
   @HttpCode(200)
   async signIn(@Body() loginRequest: LoginRequest): Promise<TokenResponse> {
     const tokenResponse = await this.authService.signIn(loginRequest);
@@ -54,14 +61,12 @@ export class AuthController {
 
   @Public()
   @Post('register-account')
-  @ApiOperation({ summary: 'Register a new account' })
-  @ApiBody({ type: RegisterAccountRequest })
-  @SwaggerResponse({ status: 201, description: 'Account created', schema: { example: { success: true, data: { accountId: 'uuid' }, message: 'Account was registered, continue with profile setup' } } })
+  @ApiAuthRegisterAccount()
   async registerAccount(
     @Body() registerRequest: RegisterAccountRequest,
-  ): Promise<ApiResponse<accountIdOnly>> {
+  ): Promise<ResponseBody<accountIdOnly>> {
     const result = await this.authService.registerAccount(registerRequest);
-    return ApiResponse.success(
+    return ResponseBody.success(
       { accountId: result.accountId },
       result.message,
     );
@@ -69,63 +74,60 @@ export class AuthController {
 
   @Public()
   @Post('verify-email')
-  @ApiOperation({ summary: 'Verify email using token' })
-  @ApiBody({ schema: { example: { token: 'jwt-token' } } })
-  async verifyEmail(@Body('token') token: string): Promise<ApiResponse<void>> {
+  @ApiAuthVerifyEmail()
+  async verifyEmail(@Body('token') token: string): Promise<ResponseBody<void>> {
     const result = await this.authService.verifyEmail(token);
-    return ApiResponse.success(undefined, result.message);
+    return ResponseBody.success(undefined, result.message);
   }
 
   @Public()
   @Post('resend-verification')
-  @ApiOperation({ summary: 'Resend email verification link' })
-  @ApiBody({ schema: { example: { email: 'user@example.com' } } })
-  async resendVerification(@Body('email') email: string): Promise<ApiResponse<void>> {
+  @ApiAuthResendVerification()
+  async resendVerification(@Body('email') email: string): Promise<ResponseBody<void>> {
     const result = await this.authService.resendVerification(email);
-    return ApiResponse.success(undefined, result.message);
+    return ResponseBody.success(undefined, result.message);
   }
 
   @Public()
   @Post('resend-verification-status')
-  @ApiOperation({ summary: 'Get status for resend verification (allowed / wait time)' })
-  @ApiBody({ schema: { example: { email: 'user@example.com' } } })
-  async resendVerificationStatus(@Body('email') email: string): Promise<ApiResponse<{ allowed: boolean; secondsToWait?: number }>> {
+  @ApiAuthResendVerificationStatus()
+  async resendVerificationStatus(@Body('email') email: string): Promise<ResponseBody<{ allowed: boolean; secondsToWait?: number }>> {
     const status = await this.authService.getResendVerificationStatus(email);
-    return ApiResponse.success(status, 'Status fetched');
+    return ResponseBody.success(status, 'Status fetched');
   }
 
   @Public()
   @Post('complete-profile-setup')
-  @ApiOperation({ summary: 'Complete profile setup for an account' })
+  @ApiAuthCompleteProfileSetup()
   async completeWithProfileSetup(
     @Body('accountId') accountId: string,
     @Body('profileRequest') profileRequest: ProfileRequest,
-  ): Promise<ApiResponse<void>> {
+  ): Promise<ResponseBody<void>> {
     const result = await this.authService.completeWithProfileSetup(
       accountId,
       profileRequest,
     );
-    return ApiResponse.success(undefined, result.message);
+    return ResponseBody.success(undefined, result.message);
   }
 
   @UseGuards(AuthGuard)
   @Patch('change-password')
-  @ApiOperation({ summary: 'Change account password' })
+  @ApiAuthChangePassword()
   async changePassword(
     @Body('accountId') accountId: string,
     @Body('changePasswordRequest') changePasswordRequest: ChangePasswordRequest,
-  ): Promise<ApiResponse<void>> {
+  ): Promise<ResponseBody<void>> {
     const result = await this.authService.changePassword(
       accountId,
       changePasswordRequest,
     );
-    return ApiResponse.success(undefined, result.message);
+    return ResponseBody.success(undefined, result.message);
   }
 
   @Public()
   @Post('refresh-token')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Refresh tokens using a refresh token' })
+  @ApiAuthRefreshToken()
   async refreshToken(
     @Body('refreshToken') refreshToken: string,
   ): Promise<TokenResponse> {
@@ -136,19 +138,19 @@ export class AuthController {
   @Public()
   @Post('logout')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Logout and clear refresh token' })
+  @ApiAuthLogout()
   async logout(
     @Body('accountId') accountId: string,
-  ): Promise<ApiResponse<void>> {
+  ): Promise<ResponseBody<void>> {
     const result = await this.authService.logout(accountId);
-    return ApiResponse.success(undefined, result.message);
+    return ResponseBody.success(undefined, result.message);
   }
 
   // Google OAuth
   @Public()
   @Get('google')
   @UseGuards(GoogleAuthGuard)
-  @ApiOperation({ summary: 'Start Google OAuth flow' })
+  @ApiAuthGoogleStart()
   async googleAuth() {
     // Guard redirects to Google
   }
@@ -156,7 +158,7 @@ export class AuthController {
   @Public()
   @Get('google/redirect')
   @UseGuards(GoogleAuthGuard)
-  @ApiOperation({ summary: 'Google OAuth callback' })
+  @ApiAuthGoogleCallback()
   async googleCallback(
     @Req() req: Request & { user: GoogleUser },
     @Res() res: Response,

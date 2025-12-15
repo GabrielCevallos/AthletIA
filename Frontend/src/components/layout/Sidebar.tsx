@@ -78,6 +78,15 @@ export default function Sidebar() {
               <span className="material-symbols-outlined text-gray-900 dark:text-white">event_note</span>
               <p className="text-gray-900 dark:text-white text-sm font-medium">Rutinas</p>
             </NavLink>
+            <NavLink 
+              to="/users" 
+              className={linkCls} 
+              aria-label="Ir a usuarios"
+              onClick={closeSidebar}
+            >
+              <span className="material-symbols-outlined text-gray-900 dark:text-white">group</span>
+              <p className="text-gray-900 dark:text-white text-sm font-medium">Usuarios</p>
+            </NavLink>
           </nav>
         </div>
       </aside>

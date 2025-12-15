@@ -15,11 +15,17 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/guards/decorators/roles.decorator';
 import { PaginationRequest } from '../../common/request/pagination.request.dto';
 import { Role } from './enum/role.enum';
-import { ApiResponse } from 'src/common/response/api.response';
+import { ResponseBody } from 'src/common/response/api.response';
 import { PaginationResponse } from 'src/common/interfaces/pagination-response.interface';
 import { User, UserItem } from './dto/user-response.dtos';
 import { Request } from 'express';
 import { UserPayload } from 'src/auth/interfaces/user-payload.interface';
+import {
+  ApiFindAllUsers,
+  ApiFindUserById,
+  ApiSuspendUser,
+  ApiGiveRole,
+} from './swagger.decorators';
 
 @UseGuards(AuthGuard, RolesGuard)
 @Controller('users')
@@ -28,9 +34,10 @@ export class AccountsController {
 
   @Roles(Role.ADMIN, Role.MODERATOR)
   @Get()
+  @ApiFindAllUsers()
   async findAll(
     @Query() paginationRequest: PaginationRequest,
-  ): Promise<ApiResponse<void> & PaginationResponse<UserItem>> {
+  ): Promise<ResponseBody<void> & PaginationResponse<UserItem>> {
     const pagination = await this.accountsService.findAll(paginationRequest);
     const success = true;
     const message = 'User list fetched successfully';
@@ -39,33 +46,36 @@ export class AccountsController {
 
   @Roles(Role.ADMIN, Role.MODERATOR)
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<ApiResponse<User>> {
+  @ApiFindUserById()
+  async findOne(@Param('id') id: string): Promise<ResponseBody<User>> {
     const user = await this.accountsService.findUserForce(id);
     const message = 'User fetched successfully';
-    return ApiResponse.success(user, message);
+    return ResponseBody.success(user, message);
   }
 
   @Roles(Role.ADMIN, Role.MODERATOR)
   @Patch(':id/suspend')
-  async suspendAccount(@Param('id') id: string): Promise<ApiResponse<void>> {
+  @ApiSuspendUser()
+  async suspendAccount(@Param('id') id: string): Promise<ResponseBody<void>> {
     const result = await this.accountsService.suspendAccount(id);
-    return ApiResponse.success(undefined, result.message);
+    return ResponseBody.success(undefined, result.message);
   }
 
   @Roles(Role.ADMIN)
   @Patch(':id/give-role')
+  @ApiGiveRole()
   async giveRole(
     @Req() request: Request & { user: UserPayload },
     @Param('id') id: string,
     @Body('role') role: Role,
-  ): Promise<ApiResponse<void>> {
+  ): Promise<ResponseBody<void>> {
     const user = request.user;
     if (user.sub === id) {
       throw new BadRequestException(
-        ApiResponse.error('You cannot change your own role'),
+        ResponseBody.error('You cannot change your own role'),
       );
     }
     const result = await this.accountsService.giveRole(id, role);
-    return ApiResponse.success(undefined, result.message);
+    return ResponseBody.success(undefined, result.message);
   }
 }

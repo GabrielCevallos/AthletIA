@@ -1,4 +1,4 @@
-export class ApiResponse<T> {
+export class ResponseBody<T> {
   success: boolean;
   message: string;
   data?: T;
@@ -11,11 +11,11 @@ export class ApiResponse<T> {
     this.errors = errors;
   }
 
-  static success<T>(data: T, message = 'Request successful'): ApiResponse<T> {
-    return new ApiResponse<T>(true, message, data);
+  static success<T>(data: T, message = 'Request successful'): ResponseBody<T> {
+    return new ResponseBody<T>(true, message, data);
   }
 
-  static error<T>(message: string, errors?: string[]): ApiResponse<T> {
-    return new ApiResponse<T>(false, message, undefined, errors);
+  static error<T>(message: string, errors?: string[]): ResponseBody<T> {
+    return new ResponseBody<T>(false, message, undefined, errors);
   }
 }
