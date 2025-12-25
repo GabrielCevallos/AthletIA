@@ -48,7 +48,7 @@ export class AccountsController {
   @Get(':id')
   @ApiFindUserById()
   async findOne(@Param('id') id: string): Promise<ResponseBody<User>> {
-    const user = await this.accountsService.findUserForce(id);
+    const user = await this.accountsService.findUser(id);
     const message = 'User fetched successfully';
     return ResponseBody.success(user, message);
   }

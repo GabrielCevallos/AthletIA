@@ -10,7 +10,7 @@ import { jwtConstants } from '../constants';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from 'src/auth/guards/decorators/public.decorator';
 import { AccountsService } from 'src/users/accounts/accounts.service';
-import { AccountStatus } from 'src/users/accounts/enum/account-status.enum';
+import { AccountState } from 'src/users/accounts/enum/account-states.enum';
 import { UserPayload } from '../interfaces/user-payload.interface';
 
 @Injectable()
@@ -46,7 +46,11 @@ export class AuthGuard implements CanActivate {
       if (!account) {
         throw new UnauthorizedException();
       }
-      if ([AccountStatus.SUSPENDED, AccountStatus.INACTIVE].includes(account.status)) {
+      if (
+        [AccountState.SUSPENDED, AccountState.DEACTIVATED].includes(
+          account.status,
+        )
+      ) {
         throw new UnauthorizedException();
       }
       request.user = payload;

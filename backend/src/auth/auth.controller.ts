@@ -54,14 +54,15 @@ export class AuthController {
   @Post('login')
   @ApiAuthSignIn()
   @HttpCode(200)
-  async signIn(@Body() loginRequest: LoginRequest): Promise<TokenResponse> {
+  async signIn(@Body() loginRequest: LoginRequest): Promise<ResponseBody<TokenResponse>> {
     const tokenResponse = await this.authService.signIn(loginRequest);
-    return tokenResponse;
+    return ResponseBody.success(tokenResponse, 'Login successful');
   }
 
   @Public()
   @Post('register-account')
   @ApiAuthRegisterAccount()
+  @HttpCode(201)
   async registerAccount(
     @Body() registerRequest: RegisterAccountRequest,
   ): Promise<ResponseBody<accountIdOnly>> {
@@ -83,7 +84,9 @@ export class AuthController {
   @Public()
   @Post('resend-verification')
   @ApiAuthResendVerification()
-  async resendVerification(@Body('email') email: string): Promise<ResponseBody<void>> {
+  async resendVerification(
+    @Body('email') email: string,
+  ): Promise<ResponseBody<void>> {
     const result = await this.authService.resendVerification(email);
     return ResponseBody.success(undefined, result.message);
   }
@@ -91,7 +94,9 @@ export class AuthController {
   @Public()
   @Post('resend-verification-status')
   @ApiAuthResendVerificationStatus()
-  async resendVerificationStatus(@Body('email') email: string): Promise<ResponseBody<{ allowed: boolean; secondsToWait?: number }>> {
+  async resendVerificationStatus(
+    @Body('email') email: string,
+  ): Promise<ResponseBody<{ allowed: boolean; secondsToWait?: number }>> {
     const status = await this.authService.getResendVerificationStatus(email);
     return ResponseBody.success(status, 'Status fetched');
   }
@@ -99,6 +104,7 @@ export class AuthController {
   @Public()
   @Post('complete-profile-setup')
   @ApiAuthCompleteProfileSetup()
+  @HttpCode(200)
   async completeWithProfileSetup(
     @Body('accountId') accountId: string,
     @Body('profileRequest') profileRequest: ProfileRequest,
@@ -130,9 +136,9 @@ export class AuthController {
   @ApiAuthRefreshToken()
   async refreshToken(
     @Body('refreshToken') refreshToken: string,
-  ): Promise<TokenResponse> {
+  ): Promise<ResponseBody<TokenResponse>> {
     const tokenResponse = await this.authService.refreshToken(refreshToken);
-    return tokenResponse;
+    return ResponseBody.success(tokenResponse, 'Token refreshed');
   }
 
   @Public()
@@ -165,8 +171,9 @@ export class AuthController {
   ) {
     const tokens = await this.authService.signInWithGoogle(req.user);
     // Redirige al frontend con los tokens en el fragmento del URL
-    const redirectUrl = process.env.FRONTEND_URL || 'http://localhost:5173/auth/callback';
+    const redirectUrl =
+      process.env.FRONTEND_URL || 'http://localhost:5173/auth/callback';
     const fragment = `#accessToken=${encodeURIComponent(tokens.accessToken)}&refreshToken=${encodeURIComponent(tokens.refreshToken)}`;
     return res.redirect(`${redirectUrl}${fragment}`);
-  } 
+  }
 }

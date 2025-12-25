@@ -13,7 +13,12 @@ export function ApiCreateSplit() {
 export function ApiListSplits() {
   return applyDecorators(
     ApiOperation({ summary: 'List splits' }),
-    ApiResponse({ status: 200, description: 'Split list', type: Split, isArray: true }),
+    ApiResponse({
+      status: 200,
+      description: 'Split list',
+      type: Split,
+      isArray: true,
+    }),
   );
 }
 

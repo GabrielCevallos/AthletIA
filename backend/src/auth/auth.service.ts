@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AccountsService } from 'src/users/accounts/accounts.service';
@@ -14,7 +15,7 @@ import * as argon2 from 'argon2';
 import { jwtConstants, messages } from './constants';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/mail/mail.service';
-import { AccountStatus } from 'src/users/accounts/enum/account-status.enum';
+import { AccountState } from 'src/users/accounts/enum/account-states.enum';
 import { Account } from 'src/users/accounts/account.entity';
 import { UserPayload } from './interfaces/user-payload.interface';
 import * as dotenv from 'dotenv';
@@ -25,11 +26,16 @@ dotenv.config();
 
 @Injectable()
 export class AuthService {
+  logger: Logger;
+
   constructor(
     private accountsService: AccountsService,
     private jwtService: JwtService,
     private mailService: MailService,
-  ) {}
+  ) {
+    this.logger = new Logger(AuthService.name);
+    this.logger.log('AuthService initialized');
+  }
 
   private createJwtPayload(account: Account): UserPayload {
     return {
@@ -55,14 +61,14 @@ export class AuthService {
   }
 
   private isAccountActive(account: Account): boolean {
-    return account.status === AccountStatus.ACTIVE;
+    return account.status === AccountState.ACTIVE;
   }
 
   handleAccountStates(account: Account): void {
     switch (account.status) {
-      case AccountStatus.INACTIVE:
-        throw new UnauthorizedException(messages.inactiveAccount);
-      case AccountStatus.SUSPENDED:
+      case AccountState.DEACTIVATED:
+        throw new UnauthorizedException(messages.deactivatedAccount);
+      case AccountState.SUSPENDED:
         throw new UnauthorizedException(messages.suspendedAccount);
     }
   }
@@ -85,27 +91,40 @@ export class AuthService {
 
     // Rate-limit check for initial verification send
     const resendLimit = Number(process.env.VERIFICATION_RESEND_LIMIT || 5);
-    const resendWindowMinutes = Number(process.env.VERIFICATION_RESEND_WINDOW_MINUTES || 60);
+    const resendWindowMinutes = Number(
+      process.env.VERIFICATION_RESEND_WINDOW_MINUTES || 60,
+    );
     if (account.verificationResendCount && account.lastVerificationSentAt) {
-      const elapsedMs = Date.now() - new Date(account.lastVerificationSentAt).getTime();
-      if (elapsedMs <= resendWindowMinutes * 60 * 1000 && account.verificationResendCount >= resendLimit) {
+      const elapsedMs =
+        Date.now() - new Date(account.lastVerificationSentAt).getTime();
+      if (
+        elapsedMs <= resendWindowMinutes * 60 * 1000 &&
+        account.verificationResendCount >= resendLimit
+      ) {
         throw new BadRequestException(messages.tooManyVerificationRequests);
       }
     }
 
     // Generate a signed JWT as verification token (short lived) using email-specific secret
-    const emailSecret = process.env.JWT_SECRET_KEY_EMAIL || process.env.JWT_SECRET_KEY_ACCESS || 'defaultEmailSecret';
+    const emailSecret =
+      process.env.JWT_SECRET_KEY_EMAIL ||
+      process.env.JWT_SECRET_KEY_ACCESS ||
+      'defaultEmailSecret';
     const verificationToken = await this.jwtService.signAsync(
       { sub: account.id, email: account.email },
       { expiresIn: '24h', secret: emailSecret },
     );
 
     // Build verification link (frontend should provide base URL via env)
-    const frontendBase = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
+    const frontendBase =
+      process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
     const verificationLink = `${frontendBase}/auth/verify-email?token=${verificationToken}`;
 
     // Send verification email (MailService will log if SMTP not configured)
-    await this.mailService.sendVerificationEmail(account.email, verificationLink);
+    await this.mailService.sendVerificationEmail(
+      account.email,
+      verificationLink,
+    );
     // record send metadata
     await this.accountsService.recordVerificationSend(account.id);
 
@@ -126,17 +145,10 @@ export class AuthService {
     if (!account.isEmailVerified) {
       throw new BadRequestException(messages.emailNotVerified);
     }
-    if (
-      account.status !== AccountStatus.UNPROFILED
-    ) {
-      this.handleAccountStates(account);
-    }
-    if (account.profile) {
+    if (account.hasProfile) {
       throw new BadRequestException(messages.profileAlreadySetUp);
     }
-    if (this.isAccountActive(account)) {
-      throw new BadRequestException(messages.accountAlreadySetUp);
-    }
+
     await this.accountsService.completeProfileSetup(account, profileRequest);
     return { message: messages.profileSetupCompleted };
   }
@@ -150,7 +162,7 @@ export class AuthService {
       throw new BadRequestException(messages.invalidAccountId);
     }
     if (
-      [AccountStatus.INACTIVE, AccountStatus.SUSPENDED].includes(account.status)
+      [AccountState.SUSPENDED, AccountState.DEACTIVATED].includes(account.status)
     ) {
       this.handleAccountStates(account);
     }
@@ -233,7 +245,7 @@ export class AuthService {
       throw new BadRequestException(messages.invalidAccountId);
     }
     if (
-      [AccountStatus.INACTIVE, AccountStatus.SUSPENDED].includes(account.status)
+      [AccountState.SUSPENDED, AccountState.DEACTIVATED].includes(account.status)
     ) {
       this.handleAccountStates(account);
     }
@@ -256,25 +268,28 @@ export class AuthService {
     }
     // If unprofiled, throw to let frontend complete profile
     this.handleAccountStates(account);
-    
+
     // Generate JWT tokens (same flow as regular login)
     const payload = this.createJwtPayload(account);
     const tokens = await this.createTokenResponse(payload);
     await this.accountsService.setRefreshToken(account.id, tokens.refreshToken);
     return tokens;
-  } 
+  }
 
   async verifyEmail(token: string): Promise<{ message: string }> {
     try {
-      const payload = await this.jwtService.verifyAsync<{ sub: string; email: string }>(
-        token,
-        { secret: process.env.JWT_SECRET_KEY_ACCESS || 'defaultSecretKey' },
-      );
+      const payload = await this.jwtService.verifyAsync<{
+        sub: string;
+        email: string;
+      }>(token, {
+        secret: process.env.JWT_SECRET_KEY_ACCESS || 'defaultSecretKey',
+      });
       const accountId = payload.sub;
       if (!accountId) throw new BadRequestException('Invalid token payload');
       await this.accountsService.verifyEmail(accountId);
       return { message: 'Email verified successfully' };
     } catch (e) {
+      this.logger.error('Email verification failed', e);
       throw new BadRequestException('Invalid or expired token');
     }
   }
@@ -291,40 +306,60 @@ export class AuthService {
 
     // Rate-limit check
     const resendLimit = Number(process.env.VERIFICATION_RESEND_LIMIT || 5);
-    const resendWindowMinutes = Number(process.env.VERIFICATION_RESEND_WINDOW_MINUTES || 60);
+    const resendWindowMinutes = Number(
+      process.env.VERIFICATION_RESEND_WINDOW_MINUTES || 60,
+    );
     if (account.verificationResendCount && account.lastVerificationSentAt) {
-      const elapsedMs = Date.now() - new Date(account.lastVerificationSentAt).getTime();
-      if (elapsedMs <= resendWindowMinutes * 60 * 1000 && account.verificationResendCount >= resendLimit) {
+      const elapsedMs =
+        Date.now() - new Date(account.lastVerificationSentAt).getTime();
+      if (
+        elapsedMs <= resendWindowMinutes * 60 * 1000 &&
+        account.verificationResendCount >= resendLimit
+      ) {
         throw new BadRequestException(messages.tooManyVerificationRequests);
       }
     }
 
-    const emailSecret = process.env.JWT_SECRET_KEY_EMAIL || process.env.JWT_SECRET_KEY_ACCESS || 'defaultEmailSecret';
+    const emailSecret =
+      process.env.JWT_SECRET_KEY_EMAIL ||
+      process.env.JWT_SECRET_KEY_ACCESS ||
+      'defaultEmailSecret';
     const verificationToken = await this.jwtService.signAsync(
       { sub: account.id, email: account.email },
       { expiresIn: '24h', secret: emailSecret },
     );
-    const frontendBase = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
+    const frontendBase =
+      process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
     const verificationLink = `${frontendBase}/auth/verify-email?token=${verificationToken}`;
-    await this.mailService.sendVerificationEmail(account.email, verificationLink);
+    await this.mailService.sendVerificationEmail(
+      account.email,
+      verificationLink,
+    );
     await this.accountsService.recordVerificationSend(account.id);
     return { message: messages.verificationEmailSent };
   }
 
-  async getResendVerificationStatus(email: string): Promise<{ allowed: boolean; secondsToWait?: number }> {
+  async getResendVerificationStatus(
+    email: string,
+  ): Promise<{ allowed: boolean; secondsToWait?: number }> {
     const account = await this.accountsService.findByEmail(email);
     const resendLimit = Number(process.env.VERIFICATION_RESEND_LIMIT || 5);
-    const resendWindowMinutes = Number(process.env.VERIFICATION_RESEND_WINDOW_MINUTES || 60);
+    const resendWindowMinutes = Number(
+      process.env.VERIFICATION_RESEND_WINDOW_MINUTES || 60,
+    );
 
     // If account doesn't exist, we return allowed=true to not reveal existence
     if (!account) return { allowed: true };
     if (account.isEmailVerified) return { allowed: false, secondsToWait: 0 };
 
-    const last = account.lastVerificationSentAt ? new Date(account.lastVerificationSentAt).getTime() : 0;
+    const last = account.lastVerificationSentAt
+      ? new Date(account.lastVerificationSentAt).getTime()
+      : 0;
     const windowMs = resendWindowMinutes * 60 * 1000;
     const elapsed = Date.now() - last;
 
-    if (!account.verificationResendCount || last === 0) return { allowed: true };
+    if (!account.verificationResendCount || last === 0)
+      return { allowed: true };
 
     if (elapsed > windowMs) return { allowed: true };
 

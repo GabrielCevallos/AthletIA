@@ -15,7 +15,12 @@ export function ApiFindAllUsers() {
     ApiQuery({ name: 'page', required: false, type: Number }),
     ApiQuery({ name: 'limit', required: false, type: Number }),
     ApiQuery({ name: 'search', required: false, type: String }),
-    ApiResponse({ status: 200, description: 'Users retrieved', type: UserItem, isArray: true }),
+    ApiResponse({
+      status: 200,
+      description: 'Users retrieved',
+      type: UserItem,
+      isArray: true,
+    }),
   );
 }
 
@@ -41,7 +46,11 @@ export function ApiGiveRole() {
   return applyDecorators(
     ApiOperation({ summary: 'Assign role to user' }),
     ApiParam({ name: 'id', type: String }),
-    ApiBody({ schema: { properties: { role: { type: 'string', enum: Object.values(Role) } } } }),
+    ApiBody({
+      schema: {
+        properties: { role: { type: 'string', enum: Object.values(Role) } },
+      },
+    }),
     ApiResponse({ status: 200, description: 'Role assigned' }),
     ApiResponse({ status: 400, description: 'Invalid operation' }),
     ApiResponse({ status: 404, description: 'User not found' }),

@@ -36,7 +36,10 @@ export class RoutinesService {
   }
 
   async findOne(id: string): Promise<Routine> {
-  const routine = await this.routinesRepository.findOne({ where: { id }, relations: ['exercises'] });
+    const routine = await this.routinesRepository.findOne({
+      where: { id },
+      relations: ['exercises'],
+    });
     if (!routine) {
       throw new NotFoundException(`Routine with id ${id} not found`);
     }

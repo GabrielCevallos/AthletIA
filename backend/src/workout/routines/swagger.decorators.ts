@@ -13,7 +13,12 @@ export function ApiCreateRoutine() {
 export function ApiListRoutines() {
   return applyDecorators(
     ApiOperation({ summary: 'List routines' }),
-    ApiResponse({ status: 200, description: 'Routine list', type: Routine, isArray: true }),
+    ApiResponse({
+      status: 200,
+      description: 'Routine list',
+      type: Routine,
+      isArray: true,
+    }),
   );
 }
 
@@ -21,7 +26,11 @@ export function ApiGetRoutine() {
   return applyDecorators(
     ApiOperation({ summary: 'Get routine by ID' }),
     ApiParam({ name: 'id', type: String, format: 'uuid' }),
-    ApiResponse({ status: 200, description: 'Routine retrieved', type: Routine }),
+    ApiResponse({
+      status: 200,
+      description: 'Routine retrieved',
+      type: Routine,
+    }),
     ApiResponse({ status: 404, description: 'Routine not found' }),
   );
 }

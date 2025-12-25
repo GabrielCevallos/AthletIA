@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Gender } from './enum/gender.enum';
 import { Account } from 'src/users/accounts/account.entity';
+import { RoutineGoal } from 'src/workout/routines/enum/routine-goal.enum';
 
 @Entity()
 export class Profile {
@@ -27,6 +28,9 @@ export class Profile {
 
   @Column({ type: 'enum', enum: Gender })
   gender: Gender;
+
+  @Column({ type: 'enum', enum: RoutineGoal, array: true })
+  fitGoals: RoutineGoal[];
 
   @OneToOne(() => Account, (account) => account.profile)
   @JoinColumn()

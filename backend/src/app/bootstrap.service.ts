@@ -3,6 +3,7 @@ import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { Gender } from 'src/users/profiles/enum/gender.enum';
 import { AccountsService } from 'src/users/accounts/accounts.service';
+import { RoutineGoal } from 'src/workout/routines/enum/routine-goal.enum';
 
 @Injectable()
 export class BootstrapService implements OnApplicationBootstrap {
@@ -18,6 +19,7 @@ export class BootstrapService implements OnApplicationBootstrap {
       birthDate: new Date('1990-01-01'),
       phoneNumber: '0000000000',
       gender: Gender.MALE,
+      fitGoals: [RoutineGoal.GENERAL_FITNESS],
     };
 
     const result = await this.accountService.createAdmin(user);
@@ -26,9 +28,6 @@ export class BootstrapService implements OnApplicationBootstrap {
       throw new Error('Admin account not found after creation');
     }
 
-    await this.accountService.completeProfileSetup(
-      account,
-      profile,
-    );
+    await this.accountService.completeProfileSetup(account, profile);
   }
 }

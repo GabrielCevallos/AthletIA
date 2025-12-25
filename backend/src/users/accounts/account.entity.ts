@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { AccountStatus } from './enum/account-status.enum';
+import { AccountState } from './enum/account-states.enum';
 import { Role } from './enum/role.enum';
 import { Profile } from 'src/users/profiles/profile.entity';
 
@@ -29,10 +29,9 @@ export class Account {
 
   @Column({
     type: 'enum',
-    enum: AccountStatus,
-    default: AccountStatus.UNPROFILED,
+    enum: AccountState,
   })
-  status: AccountStatus;
+  status: AccountState;
 
   @OneToOne(() => Profile, (profile) => profile.account, {
     onDelete: 'CASCADE',
@@ -42,6 +41,9 @@ export class Account {
 
   @Column({ default: false })
   isEmailVerified: boolean;
+
+  @Column({ default: false})
+  hasProfile: boolean;
 
   @Column({ type: 'int', default: 0 })
   verificationResendCount: number;

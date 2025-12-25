@@ -19,7 +19,9 @@ export const messages = {
   emailNotVerified: 'Email is not verified',
   verificationEmailSent: 'Verification email sent',
   emailAlreadyVerified: 'Email is already verified',
-  tooManyVerificationRequests: 'Too many verification email requests. Try again later.',
+  tooManyVerificationRequests:
+    'Too many verification email requests. Try again later.',
+  deactivatedAccount: 'Account is deactivated, contact support',
 };
 
 export const jwtConstants = {

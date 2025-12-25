@@ -22,13 +22,18 @@ async function bootstrap() {
   );
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // elimina propiedades que no estén en el DTO
-      forbidNonWhitelisted: true, // lanza error si hay propiedades extra
-      transform: true, // convierte los objetos a clases (útil para usar `class-transformer`)
+      whitelist: true, // remove properties that do not have any decorators
+      forbidNonWhitelisted: true, // throw an error if non-whitelisted properties are present
+      transform: true, // automatically transform payloads to be objects typed according to their DTO classes
     }),
   );
   app.enableCors({
-    origin: ['http://localhost:3001', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
+    origin: [
+      'http://localhost:3001',
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:5175',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,
@@ -40,7 +45,10 @@ async function bootstrap() {
     .setTitle('AthletIA API')
     .setDescription('API documentation for AthletIA')
     .setVersion(process.env.npm_package_version || '0.0.1')
-    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'access-token',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

@@ -16,11 +16,7 @@ import { MailService } from 'src/common/mail/mail.service';
     }),
     AccountsModule,
   ],
-  providers: [
-    AuthService,
-    GoogleStrategy,
-    MailService,
-  ],
+  providers: [AuthService, GoogleStrategy, MailService],
   controllers: [AuthController],
   exports: [AuthService],
 })

@@ -12,14 +12,14 @@ import { Days } from './enum/days.enum';
 
 @Entity()
 export class Split {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column()
-    description: string;
+  @Column()
+  description: string;
 
   @Column({ default: 0 })
   nTrainingDays: number;
@@ -30,16 +30,16 @@ export class Split {
   @Column({ type: 'enum', enum: Days, array: true, default: '{}' })
   trainingDays: Days[];
 
-    @CreateDateColumn()
-    createdAt: Date;
-    
-    @UpdateDateColumn()
-    updatedAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @Column()
-    official: boolean;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-    @ManyToMany(() => Routine, (routine) => routine.splits)
-    @JoinTable()
-    routines: Routine[];
+  @Column()
+  official: boolean;
+
+  @ManyToMany(() => Routine, (routine) => routine.splits)
+  @JoinTable()
+  routines: Routine[];
 }

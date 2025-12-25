@@ -1,4 +1,6 @@
 import {
+  ArrayNotEmpty,
+  IsArray,
   IsDateString,
   IsEnum,
   IsNotEmpty,
@@ -6,10 +8,10 @@ import {
   IsOptional,
   IsString,
   Length,
-  Matches,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Gender } from '../enum/gender.enum';
+import { RoutineGoal } from 'src/workout/routines/enum/routine-goal.enum';
 
 export class ProfileRequest {
   @IsString()
@@ -18,7 +20,10 @@ export class ProfileRequest {
 
   @IsNotEmpty()
   @IsDateString()
-  @ApiProperty({ description: 'Birth date in ISO format', example: '1990-01-01' })
+  @ApiProperty({
+    description: 'Birth date in ISO format',
+    example: '1990-01-01',
+  })
   birthDate: Date;
 
   @IsNumberString()
@@ -31,6 +36,16 @@ export class ProfileRequest {
   })
   @ApiProperty({ description: 'Gender', enum: Gender })
   gender: Gender;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsEnum(RoutineGoal, { each: true })
+  @ApiProperty({
+    description: 'Fitness goals',
+    isArray: true,
+    example: ['lose_weight', 'build_muscle'],
+  })
+  fitGoals: RoutineGoal[];
 }
 
 export class ProfileUpdate {
@@ -43,13 +58,19 @@ export class ProfileUpdate {
   @IsNotEmpty()
   @IsDateString()
   @IsOptional()
-  @ApiPropertyOptional({ description: 'Birth date in ISO format', example: '1990-01-01' })
+  @ApiPropertyOptional({
+    description: 'Birth date in ISO format',
+    example: '1990-01-01',
+  })
   birthDate: Date;
 
   @IsNumberString()
   @Length(10)
   @IsOptional()
-  @ApiPropertyOptional({ description: '10-digit phone number', example: '5512345678' })
+  @ApiPropertyOptional({
+    description: '10-digit phone number',
+    example: '5512345678',
+  })
   phoneNumber: string;
 }
 

@@ -12,7 +12,7 @@ import {
   ChangePasswordRequest,
   RegisterAccountRequest,
 } from 'src/auth/dto/auth.dto';
-import { AccountStatus } from './enum/account-status.enum';
+import { AccountState } from './enum/account-states.enum';
 import { User, UserItem } from './dto/user-response.dtos';
 import { Role } from './enum/role.enum';
 import { PaginationRequest } from '../../common/request/pagination.request.dto';
@@ -29,7 +29,9 @@ export class AccountsService {
     private readonly profilesService: ProfilesService,
   ) {}
 
-  async createAdmin(user: RegisterAccountRequest): Promise<{ accountId: string; message: string }> {
+  async createAdmin(
+    user: RegisterAccountRequest,
+  ): Promise<{ accountId: string; message: string }> {
     const existingAccount = await this.findByEmail(user.email);
     if (existingAccount) {
       throw new BadRequestException('Email already registered');
@@ -39,32 +41,43 @@ export class AccountsService {
       password: await argon2.hash(user.password),
       isEmailVerified: true, // Admins are assumed to have verified email
       role: Role.ADMIN,
-      status: AccountStatus.UNPROFILED,
+      status: AccountState.ACTIVE,
+      hasProfile: false,
     });
     await this.accountsRepository.save(account);
-    return { accountId: account.id, message: 'Account created successfully, please complete profile setup' };
+    return {
+      accountId: account.id,
+      message: 'Account created successfully, please complete profile setup',
+    };
   }
 
   async create(registerRequest: RegisterAccountRequest): Promise<Account> {
     const account = this.accountsRepository.create({
       ...registerRequest,
       password: await argon2.hash(registerRequest.password),
+      status: AccountState.ACTIVE,
+      isEmailVerified: true, // Temporary: set to true, email verification to be implemented
     });
     await this.accountsRepository.save(account);
     return account;
   }
 
-  async createFromOAuth(params: { email: string; name: string }): Promise<Account> {
+  async createFromOAuth(params: {
+    email: string;
+    name: string;
+  }): Promise<Account> {
     // Create account without password in UNPROFILED state
     const account = this.accountsRepository.create({
       email: params.email,
+      isEmailVerified: true,
       password: null!,
+      hasProfile: false,
+      status: AccountState.ACTIVE,
     });
     await this.accountsRepository.save(account);
     // Do not create Person yet; force client to complete profile later
     return account;
   }
-
 
   async findAll(
     paginationRequest: PaginationRequest,
@@ -93,7 +106,8 @@ export class AccountsService {
     profileRequest: ProfileRequest,
   ): Promise<void> {
     const profile = await this.profilesService.create(account, profileRequest);
-    account.status = AccountStatus.ACTIVE;
+    account.status = AccountState.ACTIVE;
+    account.hasProfile = true;
     account.profile = profile;
     await this.accountsRepository.save(account);
   }
@@ -130,7 +144,7 @@ export class AccountsService {
     return account;
   }
 
-  async findUserForce(id: string): Promise<User> {
+  async findUser(id: string): Promise<User> {
     const user = await this.findUserById(id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -143,7 +157,7 @@ export class AccountsService {
     if (!account) {
       throw new NotFoundException('Account not found');
     }
-    account.status = AccountStatus.SUSPENDED;
+    account.status = AccountState.SUSPENDED;
     await this.accountsRepository.save(account);
     return { message: 'Account suspended successfully' };
   }
@@ -164,9 +178,8 @@ export class AccountsService {
     }
     if (
       [
-        AccountStatus.SUSPENDED,
-        AccountStatus.INACTIVE,
-        AccountStatus.UNPROFILED,
+        AccountState.SUSPENDED,
+        AccountState.DEACTIVATED,
       ].includes(account.status)
     ) {
       throw new BadRequestException(
@@ -229,7 +242,8 @@ export class AccountsService {
   async recordVerificationSend(id: string): Promise<void> {
     const account = await this.accountsRepository.findOneBy({ id });
     if (!account) throw new BadRequestException('Account not found');
-    account.verificationResendCount = (account.verificationResendCount || 0) + 1;
+    account.verificationResendCount =
+      (account.verificationResendCount || 0) + 1;
     account.lastVerificationSentAt = new Date();
     await this.accountsRepository.save(account);
   }

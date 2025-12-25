@@ -35,7 +35,10 @@ export class SplitsService {
   }
 
   async findOne(id: string): Promise<Split> {
-  const split = await this.splitsRepository.findOne({ where: { id }, relations: ['routines'] });
+    const split = await this.splitsRepository.findOne({
+      where: { id },
+      relations: ['routines'],
+    });
     if (!split) {
       throw new NotFoundException(`Split with id ${id} not found`);
     }
