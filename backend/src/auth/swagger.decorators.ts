@@ -7,6 +7,7 @@ import {
   TokenResponse,
 } from './dto/auth.dto';
 import { ProfileRequest } from '../users/profiles/dto/profiles.dto';
+import { User } from '../users/accounts/dto/user-response.dtos';
 
 export function ApiAuthSignIn() {
   return applyDecorators(
@@ -260,6 +261,45 @@ export function ApiAuthGoogleCallback() {
     ApiResponse({
       status: 302,
       description: 'Redirect to frontend with tokens',
+    }),
+  );
+}
+
+export function ApiAuthMe() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get authenticated user' }),
+    ApiResponse({
+      status: 200,
+      description: 'Authenticated user returned',
+      schema: {
+        properties: {
+          success: { type: 'boolean' },
+          data: getSchemaRef(User),
+          message: { type: 'string' },
+        },
+        example: {
+          success: true,
+          data: {
+            id: '123e4567-e89b-12d3-a456-426614174000',
+            email: 'user@example.com',
+            status: 'ACTIVE',
+            role: 'USER',
+            name: 'Jane Doe',
+            birthDate: null,
+          },
+          message: 'Authenticated user fetched',
+        },
+      },
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'Unauthorized',
+      schema: {
+        example: {
+          success: false,
+          message: 'Unauthorized',
+        },
+      },
     }),
   );
 }

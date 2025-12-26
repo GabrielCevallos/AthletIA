@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Patch,
   Post,
   Req,
@@ -36,7 +37,9 @@ import {
   ApiAuthLogout,
   ApiAuthGoogleStart,
   ApiAuthGoogleCallback,
+  ApiAuthMe,
 } from './swagger.decorators';
+import { User } from 'src/users/accounts/dto/user-response.dtos';
 
 type accountIdOnly = { accountId: string };
 
@@ -53,7 +56,7 @@ export class AuthController {
   @Public()
   @Post('login')
   @ApiAuthSignIn()
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async signIn(@Body() loginRequest: LoginRequest): Promise<ResponseBody<TokenResponse>> {
     const tokenResponse = await this.authService.signIn(loginRequest);
     return ResponseBody.success(tokenResponse, 'Login successful');
@@ -62,7 +65,7 @@ export class AuthController {
   @Public()
   @Post('register-account')
   @ApiAuthRegisterAccount()
-  @HttpCode(201)
+  @HttpCode(HttpStatus.CREATED)
   async registerAccount(
     @Body() registerRequest: RegisterAccountRequest,
   ): Promise<ResponseBody<accountIdOnly>> {
@@ -104,7 +107,7 @@ export class AuthController {
   @Public()
   @Post('complete-profile-setup')
   @ApiAuthCompleteProfileSetup()
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async completeWithProfileSetup(
     @Body('accountId') accountId: string,
     @Body('profileRequest') profileRequest: ProfileRequest,
@@ -132,7 +135,7 @@ export class AuthController {
 
   @Public()
   @Post('refresh-token')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @ApiAuthRefreshToken()
   async refreshToken(
     @Body('refreshToken') refreshToken: string,
@@ -143,7 +146,7 @@ export class AuthController {
 
   @Public()
   @Post('logout')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @ApiAuthLogout()
   async logout(
     @Body('accountId') accountId: string,
@@ -175,5 +178,13 @@ export class AuthController {
       process.env.FRONTEND_URL || 'http://localhost:5173/auth/callback';
     const fragment = `#accessToken=${encodeURIComponent(tokens.accessToken)}&refreshToken=${encodeURIComponent(tokens.refreshToken)}`;
     return res.redirect(`${redirectUrl}${fragment}`);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('me')
+  @ApiAuthMe()
+  async me(@Req() req: Request): Promise<ResponseBody<User>> {
+    const user = await this.authService.getCurrentUser(req.user);
+    return ResponseBody.success(user, 'Authenticated user fetched');
   }
 }

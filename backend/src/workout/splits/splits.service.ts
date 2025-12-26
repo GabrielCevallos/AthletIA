@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { SplitRequest, SplitUpdate } from './dto/splits.dto';
 import { Routine } from '../routines/routines.entity';
 import { In } from 'typeorm';
+import { PaginationRequest } from '../../common/request/pagination.request.dto';
+import { PaginationResponse } from '../../common/interfaces/pagination-response.interface';
 
 @Injectable()
 export class SplitsService {
@@ -15,8 +17,11 @@ export class SplitsService {
     private routinesRepository: Repository<Routine>,
   ) {}
 
-  async create(splitDto: SplitRequest): Promise<Split> {
+  async create(splitDto: SplitRequest, userId: string): Promise<Split> {
     const newSplit = this.splitsRepository.create(splitDto);
+    newSplit.userId = userId;
+    newSplit.official = false;
+
     if (splitDto.routineIds && splitDto.routineIds.length) {
       const routines = await this.routinesRepository.find({
         where: { id: In(splitDto.routineIds) },
@@ -30,8 +35,24 @@ export class SplitsService {
     return await this.splitsRepository.save(newSplit);
   }
 
-  async findAll(): Promise<Split[]> {
-    return await this.splitsRepository.find({ relations: ['routines'] });
+  async findAll(
+    pagination: PaginationRequest,
+  ): Promise<PaginationResponse<Split>> {
+    const limit = pagination.limit || 10;
+    const offset = pagination.offset || 0;
+
+    const [items, total] = await this.splitsRepository.findAndCount({
+      relations: ['routines'],
+      take: limit,
+      skip: offset,
+    });
+
+    return {
+      items,
+      total,
+      limit,
+      offset,
+    };
   }
 
   async findOne(id: string): Promise<Split> {

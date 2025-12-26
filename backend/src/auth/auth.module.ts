@@ -6,6 +6,8 @@ import { AccountsModule } from 'src/users/accounts/accounts.module';
 import { PassportModule } from '@nestjs/passport';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { MailService } from 'src/common/mail/mail.service';
+import { AdminGuard } from './guards/admin.guard';
+import { OwnershipGuard } from './guards/ownership.guard';
 
 @Module({
   imports: [
@@ -16,8 +18,8 @@ import { MailService } from 'src/common/mail/mail.service';
     }),
     AccountsModule,
   ],
-  providers: [AuthService, GoogleStrategy, MailService],
+  providers: [AuthService, GoogleStrategy, MailService, AdminGuard, OwnershipGuard],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, AdminGuard, OwnershipGuard],
 })
 export class AuthModule {}

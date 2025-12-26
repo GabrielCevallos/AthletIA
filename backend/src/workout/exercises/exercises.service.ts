@@ -3,6 +3,8 @@ import { Exercise } from './exercises.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExerciseRequest, ExerciseUpdate } from './dto/exercises.dto';
+import { PaginationRequest } from '../../common/request/pagination.request.dto';
+import { PaginationResponse } from '../../common/interfaces/pagination-response.interface';
 
 @Injectable()
 export class ExercisesService {
@@ -16,8 +18,23 @@ export class ExercisesService {
     return await this.exercisesRepository.save(newExercise);
   }
 
-  async findAll(): Promise<Exercise[]> {
-    return await this.exercisesRepository.find();
+  async findAll(
+    pagination: PaginationRequest,
+  ): Promise<PaginationResponse<Exercise>> {
+    const limit = pagination.limit || 10;
+    const offset = pagination.offset || 0;
+
+    const [items, total] = await this.exercisesRepository.findAndCount({
+      take: limit,
+      skip: offset,
+    });
+
+    return {
+      items,
+      total,
+      limit,
+      offset,
+    };
   }
 
   async findOne(id: string): Promise<Exercise> {

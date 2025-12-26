@@ -4,11 +4,13 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Exercise } from '../exercises/exercises.entity';
 import { RoutineGoal } from './enum/routine-goal.enum';
+import { Account } from 'src/users/accounts/account.entity';
 
 @Entity()
 export class Routine {
@@ -33,8 +35,14 @@ export class Routine {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column()
+  @Column({ default: false })
   official: boolean;
+
+  @Column()
+  userId: string;
+
+  @ManyToOne(() => Account)
+  user: Account;
 
   @ManyToMany(() => Exercise, (exercise) => exercise.routines)
   @JoinTable()

@@ -21,6 +21,7 @@ import { UserPayload } from './interfaces/user-payload.interface';
 import * as dotenv from 'dotenv';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { GoogleUser } from './strategies/google.strategy';
+import { User } from 'src/users/accounts/dto/user-response.dtos';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ export class AuthService {
   private createJwtPayload(account: Account): UserPayload {
     return {
       sub: account.id,
+      id: account.id,
       email: account.email,
       role: account.role,
     };
@@ -337,6 +339,30 @@ export class AuthService {
     );
     await this.accountsService.recordVerificationSend(account.id);
     return { message: messages.verificationEmailSent };
+  }
+
+  async getCurrentUser(payload: UserPayload): Promise<User> {
+    const account = await this.accountsService.findById(payload.sub);
+    if (!account) {
+      throw new UnauthorizedException();
+    }
+    if (
+      [AccountState.SUSPENDED, AccountState.DEACTIVATED].includes(
+        account.status,
+      )
+    ) {
+      throw new UnauthorizedException();
+    }
+
+    const { email, id, status, role, profile } = account;
+    return {
+      email,
+      id,
+      status,
+      role,
+      name: profile?.name || '',
+      birthDate: profile?.birthDate || null,
+    };
   }
 
   async getResendVerificationStatus(

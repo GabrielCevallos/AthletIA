@@ -9,6 +9,8 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ExercisesService } from './exercises.service';
 import { ExerciseRequest, ExerciseUpdate } from './dto/exercises.dto';
@@ -21,12 +23,20 @@ import {
   ApiUpdateExercise,
   ApiDeleteExercise,
 } from './swagger.decorators';
+import { AuthGuard } from '../../auth/guards/auth.guard';
+import { AdminGuard } from '../../auth/guards/admin.guard';
+import { PaginationRequest } from '../../common/request/pagination.request.dto';
+import { PaginationResponse } from '../../common/interfaces/pagination-response.interface';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Exercises')
 @Controller('workout/exercises')
+@UseGuards(AuthGuard)
 export class ExercisesController {
   constructor(private readonly exercisesService: ExercisesService) {}
 
   @Post()
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateExercise()
   async create(
@@ -38,8 +48,10 @@ export class ExercisesController {
 
   @Get()
   @ApiListExercises()
-  async findAll(): Promise<ResponseBody<Exercise[]>> {
-    const data = await this.exercisesService.findAll();
+  async findAll(
+    @Query() pagination: PaginationRequest,
+  ): Promise<ResponseBody<PaginationResponse<Exercise>>> {
+    const data = await this.exercisesService.findAll(pagination);
     return new ResponseBody(true, 'Exercises retrieved successfully', data);
   }
 
@@ -53,6 +65,7 @@ export class ExercisesController {
   }
 
   @Patch(':id')
+  @UseGuards(AdminGuard)
   @ApiUpdateExercise()
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -63,6 +76,7 @@ export class ExercisesController {
   }
 
   @Delete(':id')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiDeleteExercise()
   async remove(

@@ -4,11 +4,13 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Routine } from '../routines/routines.entity';
 import { Days } from './enum/days.enum';
+import { Account } from 'src/users/accounts/account.entity';
 
 @Entity()
 export class Split {
@@ -36,8 +38,14 @@ export class Split {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column()
+  @Column({ default: false })
   official: boolean;
+
+  @Column()
+  userId: string;
+
+  @ManyToOne(() => Account)
+  user: Account;
 
   @ManyToMany(() => Routine, (routine) => routine.splits)
   @JoinTable()
