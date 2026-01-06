@@ -300,14 +300,14 @@ const CreateExercise: React.FC = () => {
         <header className="flex items-center gap-4">
           <button 
             onClick={goPrev}
-            className="p-2 hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
             aria-label="Volver"
           >
-            <ArrowLeft size={24} className="text-white" />
+            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-2">
-            <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 8: Vista Previa y Confirmación</h1>
-            <p className="text-gray-300 text-sm sm:text-base leading-relaxed">Revisa la información antes de publicar.</p>
+            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 8: Vista Previa y Confirmación</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Revisa la información antes de publicar.</p>
           </div>
         </header>
 
@@ -316,44 +316,44 @@ const CreateExercise: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
-              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-2">Nombre</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Nombre</p>
               <p className="text-gray-900 dark:text-white text-lg font-bold">{name}</p>
             </div>
             <div>
-              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-2">Grupo Muscular</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Grupo Muscular</p>
               <p className="text-gray-900 dark:text-white text-lg font-bold">{muscle}{secondaryMuscle ? ' / ' + secondaryMuscle : ''}</p>
             </div>
             <div>
-              <p className="text-gray-300 text-sm font-medium mb-2">Equipo</p>
-              <p className="text-white text-lg font-bold">{equipment || 'No especificado'}</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Equipo</p>
+              <p className="text-gray-900 dark:text-white text-lg font-bold">{equipment || 'No especificado'}</p>
             </div>
             <div>
-              <p className="text-gray-300 text-sm font-medium mb-2">Archivos Multimedia</p>
-              <p className="text-white text-lg font-bold">{previewMedia.length} archivo(s)</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Archivos Multimedia</p>
+              <p className="text-gray-900 dark:text-white text-lg font-bold">{previewMedia.length} archivo(s)</p>
             </div>
           </div>
 
           {description && (
             <div className="mb-8">
-              <p className="text-gray-300 text-sm font-medium mb-2">Descripción</p>
-              <p className="text-white text-base leading-relaxed bg-white/5 p-4 rounded-lg">{description}</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Descripción</p>
+              <p className="text-gray-900 dark:text-white text-base leading-relaxed bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">{description}</p>
             </div>
           )}
 
           {previewMedia.length > 0 && (
             <div className="mb-8">
-              <p className="text-gray-300 text-sm font-medium mb-3">Archivos Multimedia</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-3">Archivos Multimedia</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {previewMedia.map((file) => (
-                  <div key={file.key} className="bg-white/5 rounded-lg border border-white/10 overflow-hidden">
+                  <div key={file.key} className="bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden">
                     {file.type.startsWith('image/') ? (
                       <img src={file.url} alt={file.name} className="w-full aspect-video object-cover" />
                     ) : (
                       <video src={file.url} controls className="w-full aspect-video bg-black" />
                     )}
                     <div className="p-3">
-                      <p className="text-white text-xs font-medium truncate">{file.name}</p>
-                      <p className="text-[#a9d8b9] text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                      <p className="text-gray-900 dark:text-white text-xs font-medium truncate">{file.name}</p>
+                      <p className="text-gray-600 dark:text-gray-300 text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                     </div>
                   </div>
                 ))}
@@ -363,10 +363,10 @@ const CreateExercise: React.FC = () => {
 
           {instructions.filter(i => i.trim()).length > 0 && (
             <div className="mb-8">
-              <p className="text-gray-300 text-sm font-medium mb-2">Pasos de Ejecución</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Pasos de Ejecución</p>
               <ol className="space-y-2">
                 {instructions.filter(i => i.trim()).map((text, idx) => (
-                  <li key={idx} className="text-white text-sm leading-relaxed bg-white/5 p-3 rounded-lg border border-white/10">
+                  <li key={idx} className="text-gray-900 dark:text-white text-sm leading-relaxed bg-gray-50 dark:bg-white/5 p-3 rounded-lg border border-gray-200 dark:border-white/10">
                     <span className="text-primary font-bold mr-2">{idx + 1}.</span>{text}
                   </li>
                 ))}
@@ -376,14 +376,14 @@ const CreateExercise: React.FC = () => {
 
           {(benefitTitle || benefitDescription) && (
             <div className="mb-8">
-              <p className="text-gray-300 text-sm font-medium mb-2">Beneficios</p>
-              <div className="bg-white/5 p-4 rounded-lg border border-white/10">
-                {benefitTitle && <p className="text-white font-bold mb-1">{benefitTitle}</p>}
-                {benefitDescription && <p className="text-white/90 text-sm leading-relaxed">{benefitDescription}</p>}
+              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Beneficios</p>
+              <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">
+                {benefitTitle && <p className="text-gray-900 dark:text-white font-bold mb-1">{benefitTitle}</p>}
+                {benefitDescription && <p className="text-gray-800 dark:text-white/90 text-sm leading-relaxed">{benefitDescription}</p>}
                 {benefitCategories.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-3">
                     {benefitCategories.map((cat, idx) => (
-                      <span key={idx} className="px-2 py-1 text-xs rounded-full bg-white/10 text-white border border-white/10">{cat}</span>
+                      <span key={idx} className="px-2 py-1 text-xs rounded-full bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white border border-gray-300 dark:border-white/10">{cat}</span>
                     ))}
                   </div>
                 )}
@@ -393,10 +393,10 @@ const CreateExercise: React.FC = () => {
 
           {variants.length > 0 && (
             <div className="mb-8">
-              <p className="text-gray-300 text-sm font-medium mb-2">Variantes</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Variantes</p>
               <ul className="space-y-2">
                 {variants.map((v, idx) => (
-                  <li key={idx} className="bg-white/5 p-3 rounded-lg text-white border border-white/10">
+                  <li key={idx} className="bg-gray-50 dark:bg-white/5 p-3 rounded-lg text-gray-900 dark:text-white border border-gray-200 dark:border-white/10">
                     <span className="font-bold">{v.name}</span>{v.notes ? ` — ${v.notes}` : ''}
                   </li>
                 ))}
@@ -404,10 +404,10 @@ const CreateExercise: React.FC = () => {
             </div>
           )}
 
-          <div className="border-t border-white/10 pt-6">
-            <h3 className="text-white text-lg font-bold mb-4">Visibilidad</h3>
+          <div className="border-t border-gray-200 dark:border-white/10 pt-6">
+            <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4">Visibilidad</h3>
             <div className="flex flex-col gap-3">
-              <label className="flex items-start gap-3 p-4 bg-white/5 rounded-lg border-2 border-white/10 hover:border-primary/50 cursor-pointer transition">
+              <label className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-lg border-2 border-gray-200 dark:border-white/10 hover:border-primary/50 cursor-pointer transition">
                 <input
                   type="radio"
                   name="visibility"
@@ -418,13 +418,13 @@ const CreateExercise: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Eye size={20} className="text-primary" />
-                    <p className="text-white font-bold">Público</p>
+                    <p className="text-gray-900 dark:text-white font-bold">Público</p>
                   </div>
-                  <p className="text-gray-300 text-sm">Visible para todos los usuarios de la aplicación móvil</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">Visible para todos los usuarios de la aplicación móvil</p>
                 </div>
               </label>
 
-              <label className="flex items-start gap-3 p-4 bg-white/5 rounded-lg border-2 border-white/10 hover:border-primary/50 cursor-pointer transition">
+              <label className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-lg border-2 border-gray-200 dark:border-white/10 hover:border-primary/50 cursor-pointer transition">
                 <input
                   type="radio"
                   name="visibility"
@@ -435,24 +435,24 @@ const CreateExercise: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <EyeOff size={20} className="text-gray-400" />
-                    <p className="text-white font-bold">Privado</p>
+                    <p className="text-gray-900 dark:text-white font-bold">Privado</p>
                   </div>
-                  <p className="text-gray-300 text-sm">Solo visible para administradores, no aparecerá en la app de usuarios</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">Solo visible para administradores, no aparecerá en la app de usuarios</p>
                 </div>
               </label>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 pt-6 border-t border-white/10">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
             <button 
               onClick={handleCancel} 
-              className="flex items-center justify-center h-12 px-6 rounded-xl border border-white/10 text-white font-bold hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
+              className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
             >
               <ArrowLeft size={18} className="mr-2" /> Volver a Editar
             </button>
             <button 
               onClick={handlePublish} 
-              className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-background-dark font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
+              className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
             >
               <Check size={18} className="mr-2" /> {isPublic ? 'Confirmar Publicación' : 'Confirmar Guardado Privado'}
             </button>
@@ -471,14 +471,14 @@ const CreateExercise: React.FC = () => {
         <header className="flex items-center gap-4">
           <button 
             onClick={goPrev}
-            className="p-2 hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
             aria-label="Volver"
           >
-            <ArrowLeft size={24} className="text-white" />
+            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-2">
-            <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 7: Visualización</h1>
-            <p className="text-gray-300 text-sm sm:text-base leading-relaxed">Elige si será público o privado.</p>
+            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 7: Visualización</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Elige si será público o privado.</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
@@ -492,15 +492,15 @@ const CreateExercise: React.FC = () => {
                 className="mt-1"
               />
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Eye size={20} className="text-primary" />
-                  <p className="text-white font-bold">Público</p>
-                </div>
-                <p className="text-gray-300 text-sm">Visible para todos los usuarios de la aplicación móvil</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Eye size={20} className="text-primary" />
+                    <p className="text-gray-900 dark:text-white font-bold">Público</p>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">Visible para todos los usuarios de la aplicación móvil</p>
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-4 bg-white/5 rounded-lg border-2 border-white/10 hover:border-primary/50 cursor-pointer transition">
+            <label className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-lg border-2 border-gray-200 dark:border-white/10 hover:border-primary/50 cursor-pointer transition">
               <input
                 type="radio"
                 name="visibility"
@@ -509,25 +509,25 @@ const CreateExercise: React.FC = () => {
                 className="mt-1"
               />
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <EyeOff size={20} className="text-gray-400" />
-                  <p className="text-white font-bold">Privado</p>
-                </div>
-                <p className="text-gray-300 text-sm">Solo visible para administradores, no aparecerá en la app de usuarios</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <EyeOff size={20} className="text-gray-400" />
+                    <p className="text-gray-900 dark:text-white font-bold">Privado</p>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">Solo visible para administradores, no aparecerá en la app de usuarios</p>
               </div>
             </label>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-between gap-3 mt-8 pt-6 border-t border-white/10">
+          <div className="flex flex-col sm:flex-row justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
             <button 
               onClick={goPrev} 
-              className="flex items-center justify-center h-12 px-6 rounded-xl border border-white/10 text-white font-bold hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
+              className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
             >
               <ArrowLeft size={18} className="mr-2" /> Anterior
             </button>
             <button 
               onClick={goNext} 
-              className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-background-dark font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
+              className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
             >
               Continuar <ArrowRight size={18} className="ml-2" />
             </button>
@@ -549,32 +549,32 @@ const CreateExercise: React.FC = () => {
       <Layout>
         <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
         <header className="flex items-center gap-4">
-          <button onClick={goPrev} className="p-2 hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
-            <ArrowLeft size={24} className="text-white" />
+          <button onClick={goPrev} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-2">
-            <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 6: Variantes del Ejercicio</h1>
-            <p className="text-gray-300 text-sm sm:text-base leading-relaxed">Gestiona versiones alternativas del ejercicio.</p>
+            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 6: Variantes del Ejercicio</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Gestiona versiones alternativas del ejercicio.</p>
           </div>
         </header>
-        <section className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="flex justify-end mb-4">
-            <button onClick={addVariant} className="px-4 py-2 bg-white/10 text-white rounded-lg font-bold hover:bg-white/20">Añadir Variante</button>
+            <button onClick={addVariant} className="px-4 py-2 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white rounded-lg font-bold hover:bg-gray-200 dark:hover:bg-white/20">Añadir Variante</button>
           </div>
           {variants.length === 0 ? (
-            <p className="text-gray-300">Aún no hay variantes.</p>
+            <p className="text-gray-600 dark:text-gray-300">Aún no hay variantes.</p>
           ) : (
             <div className="space-y-4">
               {variants.map((v, idx) => (
-                <div key={idx} className="bg-white/5 p-4 rounded-lg border border-white/10">
+                <div key={idx} className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-white font-medium mb-2 block">Nombre de la Variante</label>
-                      <input value={v.name} onChange={(e) => updateVariant(idx, 'name', e.target.value)} className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white" placeholder="Ej: Press de Banca con Mancuernas" />
+                      <label className="text-gray-900 dark:text-white font-medium mb-2 block">Nombre de la Variante</label>
+                      <input value={v.name} onChange={(e) => updateVariant(idx, 'name', e.target.value)} className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="Ej: Press de Banca con Mancuernas" />
                     </div>
                     <div>
-                      <label className="text-white font-medium mb-2 block">Notas</label>
-                      <input value={v.notes || ''} onChange={(e) => updateVariant(idx, 'notes', e.target.value)} className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white" placeholder="Ej: Enfatiza control del movimiento" />
+                      <label className="text-gray-900 dark:text-white font-medium mb-2 block">Notas</label>
+                      <input value={v.notes || ''} onChange={(e) => updateVariant(idx, 'notes', e.target.value)} className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="Ej: Enfatiza control del movimiento" />
                     </div>
                   </div>
                   <div className="flex justify-end mt-3">
@@ -584,9 +584,9 @@ const CreateExercise: React.FC = () => {
               ))}
             </div>
           )}
-          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-white/10">
-            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-white/10 text-white font-bold hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
-            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-background-dark font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
+          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
+            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
+            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
           </div>
         </section>
       </div>
@@ -608,27 +608,27 @@ const CreateExercise: React.FC = () => {
       <Layout>
         <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
         <header className="flex items-center gap-4">
-          <button onClick={goPrev} className="p-2 hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
-            <ArrowLeft size={24} className="text-white" />
+          <button onClick={goPrev} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-2">
-            <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 5: Beneficios del Ejercicio</h1>
-            <p className="text-gray-300 text-sm sm:text-base leading-relaxed">Define beneficios y categorías.</p>
+            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 5: Beneficios del Ejercicio</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Define beneficios y categorías.</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="flex flex-col gap-6">
             <div>
               <label className="text-gray-900 dark:text-white font-medium mb-2 block">Título del Beneficio</label>
-              <input value={benefitTitle} onChange={(e) => setBenefitTitle(e.target.value)} className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white" placeholder="Ej: Mejora Cardiovascular" />
+              <input value={benefitTitle} onChange={(e) => setBenefitTitle(e.target.value)} className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="Ej: Mejora Cardiovascular" />
             </div>
             <div>
               <label className="text-gray-900 dark:text-white font-medium mb-2 block">Descripción</label>
-              <textarea value={benefitDescription} onChange={(e) => setBenefitDescription(e.target.value)} className="w-full min-h-[120px] p-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white" placeholder="Describe cómo beneficia al usuario" />
+              <textarea value={benefitDescription} onChange={(e) => setBenefitDescription(e.target.value)} className="w-full min-h-[120px] p-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="Describe cómo beneficia al usuario" />
             </div>
             <div>
-              <label className="text-white font-medium mb-2 block">Categorías</label>
-              <p className="text-gray-300 text-sm mb-3">Selecciona las categorías que aplican:</p>
+              <label className="text-gray-900 dark:text-white font-medium mb-2 block">Categorías</label>
+              <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">Selecciona las categorías que aplican:</p>
               <div className="flex flex-wrap gap-2">
                 {availableCategories.map((cat) => (
                   <button
@@ -637,7 +637,7 @@ const CreateExercise: React.FC = () => {
                     className={`px-3 py-2 rounded-full text-sm font-medium transition ${
                       benefitCategories.includes(cat)
                         ? 'bg-primary text-background-dark border-2 border-primary'
-                        : 'bg-white/5 text-white border-2 border-white/10 hover:border-primary/50'
+                        : 'bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white border-2 border-gray-200 dark:border-white/10 hover:border-primary/50'
                     }`}
                   >
                     {cat}
@@ -646,9 +646,9 @@ const CreateExercise: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-white/10">
-            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-white/10 text-white font-bold hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
-            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-background-dark font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
+          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
+            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
+            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
           </div>
         </section>
       </div>
@@ -665,12 +665,12 @@ const CreateExercise: React.FC = () => {
       <Layout>
         <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
         <header className="flex items-center gap-4">
-          <button onClick={goPrev} className="p-2 hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
-            <ArrowLeft size={24} className="text-white" />
+          <button onClick={goPrev} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-2">
-            <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 4: Instrucciones</h1>
-            <p className="text-gray-300 text-sm sm:text-base leading-relaxed">Especifica pasos para ejecutar correctamente el ejercicio.</p>
+            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 4: Instrucciones</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Especifica pasos para ejecutar correctamente el ejercicio.</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
@@ -678,19 +678,19 @@ const CreateExercise: React.FC = () => {
             {instructions.map((text, idx) => (
               <div key={idx} className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">
                 <label className="text-gray-900 dark:text-white font-medium mb-2 block">Paso {idx + 1}</label>
-                <textarea value={text} onChange={(e) => updateInstruction(idx, e.target.value)} className="w-full min-h-[80px] p-3 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white" placeholder="Describe el paso..." />
+                <textarea value={text} onChange={(e) => updateInstruction(idx, e.target.value)} className="w-full min-h-[80px] p-3 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="Describe el paso..." />
                 <div className="flex justify-end mt-2">
                   <button onClick={() => removeInstruction(idx)} className="p-2 hover:bg-red-900/30 rounded text-red-400" aria-label="Eliminar paso"><X size={18} /></button>
                 </div>
               </div>
             ))}
             <div className="flex justify-end">
-              <button onClick={addInstruction} className="px-4 py-2 bg-white/10 text-white rounded-lg font-bold hover:bg-white/20">Añadir Paso</button>
+              <button onClick={addInstruction} className="px-4 py-2 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white rounded-lg font-bold hover:bg-gray-200 dark:hover:bg-white/20">Añadir Paso</button>
             </div>
           </div>
-          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-white/10">
-            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-white/10 text-white font-bold hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
-            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-background-dark font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
+          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
+            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
+            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
           </div>
         </section>
       </div>
@@ -706,37 +706,37 @@ const CreateExercise: React.FC = () => {
         <header className="flex items-center gap-4">
           <button 
             onClick={goPrev}
-            className="p-2 hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
             aria-label="Volver a información básica"
           >
-            <ArrowLeft size={24} className="text-white" />
+            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-2">
-            <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 3: Contenido Multimedia</h1>
-            <p className="text-gray-300 text-sm sm:text-base leading-relaxed">Agrega imágenes o videos demostrativos del ejercicio.</p>
+            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 3: Contenido Multimedia</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Agrega imágenes o videos demostrativos del ejercicio.</p>
           </div>
         </header>
 
-        <section aria-labelledby="multimedia-heading" className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+        <section aria-labelledby="multimedia-heading" className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <h2 id="multimedia-heading" className="sr-only">Subir archivos multimedia</h2>
           
           <div 
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-            className="border-2 border-dashed border-white/15 rounded-xl p-8 sm:p-12 hover:border-primary/50 transition-colors"
+            className="border-2 border-dashed border-gray-300 dark:border-white/15 rounded-xl p-8 sm:p-12 hover:border-primary/50 transition-colors"
           >
             <div className="flex flex-col items-center gap-4 text-center">
               <div className="bg-primary/15 p-4 rounded-full text-white" aria-hidden>
                 <Upload size={32} />
               </div>
               <div>
-                <p className="text-white text-base sm:text-lg font-bold">Arrastra y suelta tus archivos aquí</p>
-                <p className="text-gray-300 text-sm mt-1">Soporta JPG, PNG, MP4. Max 50MB por archivo.</p>
+                <p className="text-gray-900 dark:text-white text-base sm:text-lg font-bold">Arrastra y suelta tus archivos aquí</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">Soporta JPG, PNG, MP4. Max 50MB por archivo.</p>
               </div>
               <button 
                 type="button"
                 onClick={handleSelectMedia}
-                className="px-6 py-3 bg-primary text-background-dark rounded-lg font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
+                className="px-6 py-3 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
               >
                 Seleccionar Archivos
               </button>
@@ -745,7 +745,7 @@ const CreateExercise: React.FC = () => {
 
           {storedMedia.length > 0 && (
             <div className="mt-8">
-              <h3 className="text-white text-base md:text-lg font-bold mb-4">Multimedia existente ({storedMedia.length})</h3>
+              <h3 className="text-gray-900 dark:text-white text-base md:text-lg font-bold mb-4">Multimedia existente ({storedMedia.length})</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {storedMedia.map((file) => (
                   <div key={file.id} className="bg-white/5 rounded-lg border border-white/10 overflow-hidden">
@@ -758,8 +758,8 @@ const CreateExercise: React.FC = () => {
                     </div>
                     <div className="p-4 flex items-center justify-between">
                       <div className="overflow-hidden flex-1">
-                        <p className="text-white text-sm font-medium truncate">{file.name}</p>
-                        <p className="text-gray-300 text-xs">{((file.size || 0) / 1024 / 1024).toFixed(2)} MB</p>
+                        <p className="text-gray-900 dark:text-white text-sm font-medium truncate">{file.name}</p>
+                        <p className="text-gray-600 dark:text-gray-300 text-xs">{((file.size || 0) / 1024 / 1024).toFixed(2)} MB</p>
                       </div>
                       <button
                         type="button"
@@ -778,7 +778,7 @@ const CreateExercise: React.FC = () => {
 
           {mediaFiles.length > 0 && (
             <div className="mt-8">
-              <h3 className="text-white text-base md:text-lg font-bold mb-4">{mediaFiles.length} archivo(s) seleccionado(s)</h3>
+              <h3 className="text-gray-900 dark:text-white text-base md:text-lg font-bold mb-4">{mediaFiles.length} archivo(s) seleccionado(s)</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {mediaFiles.map((file, index) => (
                   <div key={index} className="bg-white/5 rounded-lg border border-white/10 overflow-hidden">
@@ -791,8 +791,8 @@ const CreateExercise: React.FC = () => {
                     </div>
                     <div className="p-4 flex items-center justify-between">
                       <div className="overflow-hidden flex-1">
-                        <p className="text-white text-sm font-medium truncate">{file.name}</p>
-                        <p className="text-gray-300 text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <p className="text-gray-900 dark:text-white text-sm font-medium truncate">{file.name}</p>
+                        <p className="text-gray-600 dark:text-gray-300 text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                       </div>
                       <button
                         type="button"
@@ -809,23 +809,23 @@ const CreateExercise: React.FC = () => {
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row justify-between gap-3 mt-8 pt-6 border-t border-white/10">
+          <div className="flex flex-col sm:flex-row justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
             <button 
               onClick={goPrev} 
-              className="flex items-center justify-center h-12 px-6 rounded-xl border border-white/10 text-white font-bold hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
+              className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
             >
               <ArrowLeft size={18} className="mr-2" /> Anterior
             </button>
             <div className="flex gap-3">
               <button 
                 onClick={goNext} 
-                className="flex items-center justify-center h-12 px-6 rounded-xl bg-white/10 text-white font-bold hover:bg-white/20 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
+                className="flex items-center justify-center h-12 px-6 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-200 dark:hover:bg-white/20 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
               >
                 Omitir
               </button>
               <button 
                 onClick={goNext} 
-                className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-background-dark font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
+                className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
               >
                 Continuar <ArrowRight size={18} className="ml-2" />
               </button>
@@ -843,23 +843,23 @@ const CreateExercise: React.FC = () => {
       <Layout>
         <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
         <header className="flex items-center gap-4">
-          <button onClick={goPrev} className="p-2 hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
-            <ArrowLeft size={24} className="text-white" />
+          <button onClick={goPrev} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-2">
-            <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 2: Grupos Musculares</h1>
-            <p className="text-gray-300 text-sm sm:text-base leading-relaxed">Selecciona el grupo muscular principal y secundario.</p>
+            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 2: Grupos Musculares</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Selecciona el grupo muscular principal y secundario.</p>
           </div>
         </header>
-        <section className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="exercise-muscle" className="text-white font-medium mb-2 block">Grupo Muscular Principal</label>
+              <label htmlFor="exercise-muscle" className="text-gray-900 dark:text-white font-medium mb-2 block">Grupo Muscular Principal</label>
               <select 
                 id="exercise-muscle"
                 value={muscle}
                 onChange={(e) => setMuscle(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl bg-background-dark border border-white/10 text-white focus:ring-2 focus:ring-primary focus:outline-none"
+                className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
               >
                 <option value="">Seleccionar músculo</option>
                 <option value="Pecho">Pecho</option>
@@ -870,12 +870,12 @@ const CreateExercise: React.FC = () => {
               </select>
             </div>
             <div>
-              <label htmlFor="exercise-secondary" className="text-white font-medium mb-2 block">Grupo Muscular Secundario</label>
+              <label htmlFor="exercise-secondary" className="text-gray-900 dark:text-white font-medium mb-2 block">Grupo Muscular Secundario</label>
               <select 
                 id="exercise-secondary"
                 value={secondaryMuscle}
                 onChange={(e) => setSecondaryMuscle(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl bg-background-dark border border-white/10 text-white focus:ring-2 focus:ring-primary focus:outline-none"
+                className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
               >
                 <option value="">Seleccionar grupo secundario</option>
                 <option value="Pecho">Pecho</option>
@@ -886,9 +886,9 @@ const CreateExercise: React.FC = () => {
               </select>
             </div>
           </div>
-          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-white/10">
-            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-white/10 text-white font-bold hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
-            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-background-dark font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
+          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
+            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
+            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
           </div>
         </section>
       </div>
@@ -901,33 +901,33 @@ const CreateExercise: React.FC = () => {
     <Layout>
       <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
       <header className="flex flex-col gap-2">
-        <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 1: {isEditing ? 'Editar Ejercicio' : 'Crear Nuevo Ejercicio'}</h1>
-        <p className="text-gray-300 text-sm sm:text-base leading-relaxed">{isEditing ? 'Actualiza la información del ejercicio.' : 'Introduce la información básica del ejercicio.'}</p>
+        <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 1: {isEditing ? 'Editar Ejercicio' : 'Crear Nuevo Ejercicio'}</h1>
+        <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">{isEditing ? 'Actualiza la información del ejercicio.' : 'Introduce la información básica del ejercicio.'}</p>
       </header>
 
       <section aria-labelledby="exercise-form-heading">
         <h2 id="exercise-form-heading" className="sr-only">Formulario de nuevo ejercicio</h2>
-        <div className="bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+        <div className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <form className="flex flex-col gap-6 md:gap-8" onSubmit={(e) => e.preventDefault()}>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="col-span-2 md:col-span-1">
-              <label htmlFor="exercise-name" className="text-white font-medium mb-2 block">Nombre del Ejercicio</label>
+              <label htmlFor="exercise-name" className="text-gray-900 dark:text-white font-medium mb-2 block">Nombre del Ejercicio</label>
               <input 
                 id="exercise-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl bg-background-dark border border-white/10 text-white focus:ring-2 focus:ring-primary focus:outline-none placeholder-gray-400"
+                className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none placeholder-gray-500 dark:placeholder-gray-400"
                 placeholder="Ej: Press de Banca"
               />
             </div>
              <div className="col-span-2 md:col-span-1">
-               <label htmlFor="exercise-equipment" className="text-white font-medium mb-2 block">Equipo Necesario</label>
+               <label htmlFor="exercise-equipment" className="text-gray-900 dark:text-white font-medium mb-2 block">Equipo Necesario</label>
                <select 
                  id="exercise-equipment"
                  value={equipment}
                  onChange={(e) => setEquipment(e.target.value)}
-                 className="w-full h-12 px-4 rounded-xl bg-background-dark border border-white/10 text-white focus:ring-2 focus:ring-primary focus:outline-none"
+                 className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
                >
                  <option value="">Seleccionar equipo</option>
                  <option value="Barra">Barra</option>
@@ -942,7 +942,7 @@ const CreateExercise: React.FC = () => {
 
           <div className="col-span-2">
              <div className="flex justify-between items-center mb-2">
-                <label className="text-white font-medium">Descripción</label>
+                <label className="text-gray-900 dark:text-white font-medium">Descripción</label>
                 <button 
                   type="button"
                   onClick={handleGenerateAI}
@@ -958,16 +958,16 @@ const CreateExercise: React.FC = () => {
                id="exercise-description"
                value={description}
                onChange={(e) => setDescription(e.target.value)}
-               className="w-full min-h-[150px] p-4 rounded-xl bg-background-dark border border-white/10 text-white focus:ring-2 focus:ring-primary focus:outline-none placeholder-gray-400 resize-y"
+               className="w-full min-h-[150px] p-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none placeholder-gray-500 dark:placeholder-gray-400 resize-y"
                placeholder="Describe el movimiento o usa el botón AI..."
              />
           </div>
 
-          <div className="flex justify-end gap-4 pt-6 border-t border-white/10">
-            <button onClick={handleCancel} type="button" className="flex items-center justify-center h-12 px-6 rounded-xl border border-white/10 text-white font-bold hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2">
+          <div className="flex justify-end gap-4 pt-6 border-t border-gray-200 dark:border-white/10">
+            <button onClick={handleCancel} type="button" className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2">
               <X size={18} className="mr-2" /> Cancelar
             </button>
-            <button onClick={handleSave} type="button" className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-background-dark font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2">
+            <button onClick={handleSave} type="button" className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2">
               Continuar <ArrowRight size={18} className="ml-2" />
             </button>
           </div>
