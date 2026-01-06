@@ -30,16 +30,16 @@ export class Split {
   @Column({ type: 'enum', enum: Days, array: true, default: '{}' })
   trainingDays: Days[];
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
     
-    @UpdateDateColumn()
-    updatedAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-    @Column()
-    official: boolean;
+  @Column()
+  official: boolean;
 
-    @ManyToMany(() => Routine, (routine) => routine.splits)
-    @JoinTable()
-    routines: Routine[];
+  @ManyToMany(() => Routine, (routine) => routine.splits)
+  @JoinTable()
+  routines: Routine[];
 }

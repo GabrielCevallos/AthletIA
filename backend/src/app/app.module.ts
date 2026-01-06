@@ -11,6 +11,7 @@ import { ProfilesModule } from 'src/users/profiles/profiles.module';
 import { ExercisesModule } from 'src/workout/exercises/exercises.module';
 import { RoutinesModule } from 'src/workout/routines/routines.module';
 import { SplitsModule } from 'src/workout/splits/splits.module';
+import { MeasurementsModule } from 'src/measurements/measurements.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SplitsModule } from 'src/workout/splits/splits.module';
     SplitsModule,
     RoutinesModule,
     ExercisesModule,
+    MeasurementsModule
   ],
   controllers: [AppController],
   providers: [AppService, BootstrapService],
