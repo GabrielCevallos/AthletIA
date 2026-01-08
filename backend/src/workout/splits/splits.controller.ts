@@ -45,8 +45,7 @@ export class SplitsController {
     @Body() createSplitDto: SplitRequest,
     @Req() req: Request & { user?: any },
   ): Promise<ResponseBody<Split>> {
-    const userId = req.user.id;
-    const data = await this.splitsService.create(createSplitDto, userId);
+    const data = await this.splitsService.create(createSplitDto);
     return new ResponseBody(true, 'Split created successfully', data);
   }
 

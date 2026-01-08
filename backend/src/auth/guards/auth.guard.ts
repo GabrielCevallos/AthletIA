@@ -53,7 +53,8 @@ export class AuthGuard implements CanActivate {
       ) {
         throw new UnauthorizedException();
       }
-      request.user = payload;
+      // Ensure JWT subject aligns with DB Account ID to avoid FK issues
+      (request as any).user = { ...payload, sub: account.id, id: account.id };
     } catch {
       throw new UnauthorizedException();
     }

@@ -13,25 +13,14 @@ export class MeasurementsService {
   ) {}
 
   async create(measurementDto: MeasurementRequest): Promise<Measurement> {
-      // Validaciones básicas para evitar errores de cálculo/BD
       const { weight, height } = measurementDto;
-      if (weight === undefined || height === undefined) {
-        throw new BadRequestException('Weight and height are required');
-      }
-      if (height <= 0) {
-        throw new BadRequestException('Height must be greater than 0');
-      }
-      if (weight < 0) {
-        throw new BadRequestException('Weight must be greater or equal to 0');
-      }
-
-      // Calcular IMC automáticamente
       const imc = this.calculateIMC(weight, height);
       const newMeasurement = this.measurementRepository.create({
         ...measurementDto,
-        // Asegurar el tipo correcto del enum para TypeORM/TS
         checkTime: measurementDto.checkTime as CheckTime,
         imc,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       return this.measurementRepository.save(newMeasurement);
   }
@@ -60,8 +49,55 @@ export class MeasurementsService {
       measurementDto['imc'] = this.calculateIMC(weight, height);
     }
     
-    Object.assign(measurement, measurementDto);
+    Object.assign(measurement, measurementDto, { updatedAt: new Date() });
     return await this.measurementRepository.save(measurement);
+  }
+
+  /**
+   * Upsert the measurement for a given account.
+   * If the account has no measurement yet, create it on first edit.
+   */
+  async editForAccount(
+    accountId: string,
+    dto: MeasurementUpdate,
+  ): Promise<Measurement> {
+    // Try to find existing measurement by account
+    const existing = await this.measurementRepository.findOne({
+      where: { account: { id: accountId } },
+      
+    });
+
+    if (existing) {
+      // Recalculate IMC when weight/height change
+      if (dto.weight || dto.height) {
+        const weight = dto.weight ?? existing.weight;
+        const height = dto.height ?? existing.height;
+        dto['imc'] = this.calculateIMC(weight, height);
+      }
+      Object.assign(existing, dto);
+      return this.measurementRepository.save(existing);
+    }
+
+    // No existing measurement: create on-demand (first edit).
+    const { weight, height } = dto as { weight: number; height: number };
+    const imc = this.calculateIMC(weight, height);
+    const payload: Partial<Measurement> = {
+      ...dto,
+      checkTime: dto.checkTime as CheckTime,
+      imc,
+      account: { id: accountId } as any,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const newMeasurement = this.measurementRepository.create(payload);
+    return this.measurementRepository.save(newMeasurement);
+  }
+
+  async findByAccountId(accountId: string): Promise<Measurement | null> {
+    return this.measurementRepository.findOne({
+      where: { account: { id: accountId } },
+      
+    });
   }
 
   async remove(id: string): Promise<void> {
@@ -71,7 +107,11 @@ export class MeasurementsService {
 
   private calculateIMC(weight: number, height: number): number {
     // IMC = peso (kg) / (altura (m))^2
-    const heightInMeters = height / 100; // Asumiendo altura en cm
+    // Soporta altura en cm (>= 10) o en metros (< 10)
+    const heightInMeters = height >= 10 ? height / 100 : height;
+    if (heightInMeters <= 0) {
+      return 0; // evitar divisiones inválidas; validación formal está en DTO
+    }
     const imc = weight / (heightInMeters * heightInMeters);
     return Math.round(imc * 100) / 100; // Redondear a 2 decimales
   }

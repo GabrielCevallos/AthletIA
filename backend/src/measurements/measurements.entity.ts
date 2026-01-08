@@ -4,8 +4,11 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { CheckTime } from './enum/check-time.enum';
+import { Account } from 'src/users/accounts/account.entity';
 
 @Entity()
 export class Measurement {
@@ -68,4 +71,10 @@ export class Measurement {
 
   @Column({ type: 'enum', enum: CheckTime })
   checkTime: CheckTime;
+
+  @OneToOne(() => Account, (account) => account.measurement, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  account: Account;
 }

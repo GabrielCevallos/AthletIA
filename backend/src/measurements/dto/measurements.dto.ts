@@ -217,3 +217,95 @@ export class MeasurementUpdate {
   })
   checkTime?: string;
 }
+
+export class MyMeasurementResponse {
+  @IsUUID()
+  id: string;
+
+  @IsNumber()
+  @Type(() => Number)
+  weight: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  height: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  imc: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  left_arm?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  right_arm?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  left_forearm?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  right_forearm?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  clavicular_width?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  neck_diameter?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  chest_size?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  back_width?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  hip_diameter?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  left_leg?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  right_leg?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  left_calve?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  right_calve?: number;
+
+  @Type(() => String)
+  @IsEnum(CheckTime)
+  checkTime: string;
+
+  @IsDate()
+  createdAt: Date;
+
+  @IsDate()
+  updatedAt: Date;
+}

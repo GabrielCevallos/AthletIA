@@ -17,9 +17,8 @@ export class SplitsService {
     private routinesRepository: Repository<Routine>,
   ) {}
 
-  async create(splitDto: SplitRequest, userId: string): Promise<Split> {
+  async create(splitDto: SplitRequest): Promise<Split> {
     const newSplit = this.splitsRepository.create(splitDto);
-    newSplit.userId = userId;
     newSplit.official = false;
 
     if (splitDto.routineIds && splitDto.routineIds.length) {

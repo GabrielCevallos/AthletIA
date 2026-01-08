@@ -8,6 +8,7 @@ import {
 import { AccountState } from './enum/account-states.enum';
 import { Role } from './enum/role.enum';
 import { Profile } from 'src/users/profiles/profile.entity';
+import { Measurement } from 'src/measurements/measurements.entity';
 
 @Entity()
 export class Account {
@@ -53,4 +54,7 @@ export class Account {
 
   @Column({ type: 'text', nullable: true })
   refreshTokenHash: string | null;
+
+  @OneToOne(() => Measurement, (measurement) => measurement.account)
+  measurement: Measurement;
 }
