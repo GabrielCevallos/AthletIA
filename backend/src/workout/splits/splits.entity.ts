@@ -34,18 +34,12 @@ export class Split {
 
   @CreateDateColumn()
   createdAt: Date;
-
+    
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ default: false })
-  official: boolean;
-
   @Column()
-  userId: string;
-
-  @ManyToOne(() => Account)
-  user: Account;
+  official: boolean;
 
   @ManyToMany(() => Routine, (routine) => routine.splits)
   @JoinTable()
