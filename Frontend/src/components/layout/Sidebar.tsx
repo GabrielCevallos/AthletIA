@@ -87,6 +87,24 @@ export default function Sidebar() {
               <p className="text-gray-900 dark:text-white text-sm font-medium">Rutinas</p>
             </NavLink>
             <NavLink 
+              to="/splits" 
+              className={linkCls} 
+              aria-label="Ir a splits"
+              onClick={closeSidebar}
+            >
+              <span className="material-symbols-outlined text-gray-900 dark:text-white">calendar_today</span>
+              <p className="text-gray-900 dark:text-white text-sm font-medium">Splits</p>
+            </NavLink>
+            <NavLink 
+              to="/measurements" 
+              className={linkCls} 
+              aria-label="Ir a medidas"
+              onClick={closeSidebar}
+            >
+              <span className="material-symbols-outlined text-gray-900 dark:text-white">scale</span>
+              <p className="text-gray-900 dark:text-white text-sm font-medium">Medidas</p>
+            </NavLink>
+            <NavLink 
               to="/users" 
               className={linkCls} 
               aria-label="Ir a usuarios"

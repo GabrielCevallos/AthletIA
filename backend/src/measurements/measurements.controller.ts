@@ -146,7 +146,7 @@ export class MeasurementsController {
         value: {
           weight: 75,
           height: 175,
-          checkTime: 'MORNING',
+          checkTime: 'WEEKLY',
           left_arm: 32.5,
         },
       },

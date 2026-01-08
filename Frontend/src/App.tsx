@@ -9,6 +9,9 @@ import CreateExercise from './pages/Exercises/CreateExercise'
 import Routines from './pages/Routines/Routines'
 import RoutineDetail from './pages/Routines/RoutineDetail'
 import RoutineCreator from './pages/Routines/RoutineCreator'
+import Splits from './pages/Splits/Splits'
+import SplitForm from './pages/Splits/SplitForm'
+import Measurements from './pages/Measurements/Measurements'
 import UserManagement from './pages/UserManagement'
 import { AccessibilityProvider } from './context/AccessibilityContext'
 import AccessibilityButton from './components/AccessibilityButton'
@@ -31,6 +34,10 @@ export default function App() {
             <Route path="/routines/new" element={<RoutineCreator />} />
             <Route path="/routines/:id" element={<RoutineDetail />} />
             <Route path="/routines/:id/edit" element={<RoutineCreator />} />
+            <Route path="/splits" element={<Splits />} />
+            <Route path="/splits/new" element={<SplitForm />} />
+            <Route path="/splits/:id/edit" element={<SplitForm />} />
+            <Route path="/measurements" element={<Measurements />} />
             <Route path="/users" element={<UserManagement />} />
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />
