@@ -27,7 +27,7 @@ export const UserTable = () => {
       setLoading(true)
       const { data } = await api.get('/users')
       console.log('✅ Usuarios cargados:', data)
-      setUsers(data.data || [])
+      setUsers(data.items || [])
       setError(null)
     } catch (err: any) {
       console.error('❌ Error cargando usuarios:', err)

@@ -4,14 +4,26 @@ import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
 import { deleteExercise, getAllExercises } from '../../lib/exerciseStore';
 import Swal from 'sweetalert2';
+import api from '../../lib/api';
 
 const Exercises: React.FC = () => {
   const [exercises, setExercises] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setExercises(getAllExercises());
+    fetchExercises();
   }, []);
+
+  const fetchExercises = async () => {
+    try {
+      const res = await api.get('/workout/exercises');
+      const items = res.data?.data?.items || [];
+      setExercises(items);
+    } catch (error) {
+      console.warn('Fallo al traer ejercicios del backend, usando localStorage:', error);
+      setExercises(getAllExercises());
+    }
+  };
 
   const handleDelete = async (id: string, isSeed?: boolean) => {
     if (isSeed) {
@@ -35,15 +47,29 @@ const Exercises: React.FC = () => {
     });
 
     if (result.isConfirmed) {
-      deleteExercise(id);
-      setExercises(getAllExercises());
-      await Swal.fire({
-        icon: 'success',
-        title: 'Ejercicio eliminado',
-        timer: 1500,
-        timerProgressBar: true,
-        showConfirmButton: false,
-      });
+      try {
+        await api.delete(`/workout/exercises/${id}`);
+        await Swal.fire({
+          icon: 'success',
+          title: 'Ejercicio eliminado',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+        fetchExercises();
+      } catch (error: any) {
+        console.error('Error eliminando en backend:', error);
+        // Fallback: intenta borrar local si era custom
+        const deletedLocal = deleteExercise(id);
+        if (deletedLocal) {
+          setExercises(getAllExercises());
+        }
+        await Swal.fire({
+          icon: 'error',
+          title: 'No se pudo eliminar',
+          text: error?.response?.data?.message || 'Requiere permisos de administrador.',
+        });
+      }
     }
   };
   return (

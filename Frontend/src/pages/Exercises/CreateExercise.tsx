@@ -173,6 +173,9 @@ const CreateExercise: React.FC = () => {
 
     const createdTimestamp = !createdAt || isSeedExercise ? new Date().toISOString() : createdAt;
 
+    // Usa la primera imagen disponible como portada
+    const coverCandidate = [...newMedia, ...storedMedia].find((file) => file.type?.startsWith('image/'));
+
     const payload: Exercise = {
       id: isEditing && id && !isSeedExercise ? id : crypto.randomUUID(),
       name: name.trim(),
@@ -181,6 +184,7 @@ const CreateExercise: React.FC = () => {
       equipment: equipment || 'No especificado',
       description: description || undefined,
       mediaFiles: [...storedMedia, ...newMedia],
+      coverUrl: coverCandidate?.data,
       instructions: instructions.map((i) => i.trim()).filter(Boolean),
       benefit:
         benefitTitle || benefitDescription || benefitCategories.length
@@ -192,7 +196,7 @@ const CreateExercise: React.FC = () => {
           : null,
       variants,
       isPublic,
-        createdAt: createdTimestamp,
+      createdAt: createdTimestamp,
     };
 
     const saved = upsertExercise(payload);

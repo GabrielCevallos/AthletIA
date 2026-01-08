@@ -12,6 +12,7 @@ import { ExercisesModule } from 'src/workout/exercises/exercises.module';
 import { RoutinesModule } from 'src/workout/routines/routines.module';
 import { SplitsModule } from 'src/workout/splits/splits.module';
 import { MeasurementsModule } from 'src/measurements/measurements.module';
+import { AiModule } from 'src/ai/ai.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { MeasurementsModule } from 'src/measurements/measurements.module';
     SplitsModule,
     RoutinesModule,
     ExercisesModule,
-    MeasurementsModule
+    MeasurementsModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService, BootstrapService],
