@@ -209,34 +209,34 @@ npm run start:dev
 ## 4. Capturas de aplicación funcional
 
 - **Login**
-  <img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/ed50b4bb-a411-4588-bb5c-578d57cd208f" />
+<img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/ed50b4bb-a411-4588-bb5c-578d57cd208f" />
 
 - **Autenticación con Google**
-  <img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/1b4e8268-85ea-4247-bc4d-d37205bf03d2" />
+<img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/1b4e8268-85ea-4247-bc4d-d37205bf03d2" />
 
 - **Pantalla de Ejercicios aplicando tema claro**
-  <img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/fa6ff91c-d489-47a1-80ac-6049ee96c380" />
+<img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/fa6ff91c-d489-47a1-80ac-6049ee96c380" />
 
 - **Creación de rutina para visualización de alerta**
-  <img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/62684e75-04d0-43f3-90af-e97dbe8a0102" />
+<img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/62684e75-04d0-43f3-90af-e97dbe8a0102" />
 
 - **Eliminación de rutina para visualización de alerta**
-  <img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/56aa2932-fb3b-4f62-b759-5e6c9906631e" />
-  <img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/ae5623e9-08d5-4def-be6a-a321e071f003" />
+<img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/56aa2932-fb3b-4f62-b759-5e6c9906631e" />
+<img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/ae5623e9-08d5-4def-be6a-a321e071f003" />
 
 
 ### Menú de Accesibilidad
-  <img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/4bbf4842-4a89-40a8-967d-628509d7c3de" />
+<img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/4bbf4842-4a89-40a8-967d-628509d7c3de" />
 
 - Escala de Grises
-  <img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/e97bed29-9009-4d11-985c-d50686f30a70" />
+<img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/e97bed29-9009-4d11-985c-d50686f30a70" />
 
 - Contraste negativo
-  <img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/41aee47a-1128-4c79-a8c2-f63345aaf51e" />
+<img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/41aee47a-1128-4c79-a8c2-f63345aaf51e" />
 
 - Fuente Legible
-  <img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/442a27b0-d2d4-4f77-a898-96790efe9e3f" />
+<img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/442a27b0-d2d4-4f77-a898-96790efe9e3f" />
 
 - Enlaces Subrayados
-  <img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/628e5044-8b2c-4dff-8ef6-a3512164ba11" />
+<img width="719" height="404" alt="image" src="https://github.com/user-attachments/assets/628e5044-8b2c-4dff-8ef6-a3512164ba11" />
 
