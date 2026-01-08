@@ -23,10 +23,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('🔐 Iniciando login con:', email)
       const { data } = await api.post('/auth/login', { email, password })
       console.log('✅ Respuesta del backend:', data)
-      localStorage.setItem('accessToken', data.accessToken)
-      localStorage.setItem('refreshToken', data.refreshToken)
-      if (data.accountId) localStorage.setItem('accountId', data.accountId)
-      setAccountId(data.accountId)
+      
+      const accessToken = data.data?.accessToken || data.accessToken
+      const refreshToken = data.data?.refreshToken || data.refreshToken
+      const accountId = data.data?.accountId || data.accountId
+
+      if (accessToken) localStorage.setItem('accessToken', accessToken)
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
+      if (accountId) localStorage.setItem('accountId', accountId)
+      
+      setAccountId(accountId)
       setIsAuthenticated(true)
       console.log('✅ Login exitoso')
     } catch (error: any) {
