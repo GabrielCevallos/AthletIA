@@ -54,8 +54,8 @@ const ExerciseDetail: React.FC = () => {
   if (!exercise) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <p className="text-white text-xl">Ejercicio no encontrado</p>
-        <Link to="/exercises" className="text-[#13ec5b] hover:underline">Volver a Ejercicios</Link>
+        <p className="text-gray-900 dark:text-white text-xl">Ejercicio no encontrado</p>
+        <Link to="/exercises" className="text-primary hover:underline">Volver a Ejercicios</Link>
       </div>
     );
   }
@@ -68,20 +68,20 @@ const ExerciseDetail: React.FC = () => {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/exercises')}
-            className="p-2 hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
             aria-label="Volver a ejercicios"
           >
-            <ArrowLeft size={24} className="text-white" />
+            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-2">
-            <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">{exercise.name}</h1>
+            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">{exercise.name}</h1>
             <div className="flex items-center gap-2">
               {exercise.isPublic !== false ? (
                 <span className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/20 text-primary">
                   <Eye size={14} /> Público
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/10 text-gray-300">
+                <span className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-200 text-gray-800 dark:bg-white/10 dark:text-gray-300">
                   <EyeOff size={14} /> Privado
                 </span>
               )}
@@ -89,10 +89,10 @@ const ExerciseDetail: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => navigate(`/exercises/${exercise.id}/edit`)} className="p-2 hover:bg-white/10 rounded-lg transition text-white" aria-label="Editar ejercicio">
+          <button onClick={() => navigate(`/exercises/${exercise.id}/edit`)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition text-gray-900 dark:text-white" aria-label="Editar ejercicio">
             <Edit size={20} />
           </button>
-          <button onClick={handleDelete} className="p-2 hover:bg-red-900/30 rounded-lg transition text-red-400" aria-label="Eliminar ejercicio">
+          <button onClick={handleDelete} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition text-red-600 dark:text-red-400" aria-label="Eliminar ejercicio">
             <Trash2 size={20} />
           </button>
         </div>
@@ -117,8 +117,8 @@ const ExerciseDetail: React.FC = () => {
                 <Target size={24} className="text-primary/80" />
               </div>
               <div>
-                <p className="text-gray-300 text-sm font-medium mb-1">Grupo Muscular Secundario</p>
-                <p className="text-white text-lg font-bold">{exercise.secondaryMuscle}</p>
+                <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-1">Grupo Muscular Secundario</p>
+                <p className="text-gray-900 dark:text-white text-lg font-bold">{exercise.secondaryMuscle}</p>
               </div>
             </div>
           )}
@@ -128,16 +128,16 @@ const ExerciseDetail: React.FC = () => {
               <Dumbbell size={24} className="text-primary" />
             </div>
             <div>
-              <p className="text-gray-300 text-sm font-medium mb-1">Equipo</p>
-              <p className="text-white text-lg font-bold">{exercise.equipment}</p>
+              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-1">Equipo</p>
+              <p className="text-gray-900 dark:text-white text-lg font-bold">{exercise.equipment}</p>
             </div>
           </div>
         </div>
 
         {exercise.description && (
           <div className="mt-6 pt-6 border-t border-[#326744]">
-            <p className="text-gray-300 text-sm font-medium mb-2">Descripción</p>
-            <p className="text-white text-base leading-relaxed">{exercise.description}</p>
+            <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Descripción</p>
+            <p className="text-gray-900 dark:text-white text-base leading-relaxed">{exercise.description}</p>
           </div>
         )}
       </section>
@@ -164,8 +164,8 @@ const ExerciseDetail: React.FC = () => {
                   </div>
                 )}
                 <div className="p-3">
-                  <p className="text-white text-xs font-medium truncate">{file.name}</p>
-                  <p className="text-[#a9d8b9] text-xs">{((file.size || 0) / 1024 / 1024).toFixed(2)} MB</p>
+                  <p className="text-gray-900 dark:text-white text-xs font-medium truncate">{file.name}</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-xs">{((file.size || 0) / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
               </div>
             ))}
@@ -182,7 +182,7 @@ const ExerciseDetail: React.FC = () => {
           </div>
           <ol className="space-y-3">
             {exercise.instructions.map((text: string, idx: number) => (
-              <li key={idx} className="flex gap-3 text-white text-sm leading-relaxed bg-white/5 p-4 rounded-lg">
+              <li key={idx} className="flex gap-3 text-gray-900 dark:text-white text-sm leading-relaxed bg-gray-50 dark:bg-white/5 p-4 rounded-lg">
                 <span className="text-primary font-bold shrink-0">{idx + 1}.</span>
                 <span>{text}</span>
               </li>
@@ -206,7 +206,7 @@ const ExerciseDetail: React.FC = () => {
             {exercise.benefit.categories && exercise.benefit.categories.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {exercise.benefit.categories.map((cat: string, idx: number) => (
-                  <span key={idx} className="px-2 py-1 text-xs rounded-full bg-white/10 text-white border border-white/10">{cat}</span>
+                  <span key={idx} className="px-2 py-1 text-xs rounded-full bg-gray-200 text-gray-900 border border-gray-300 dark:bg-white/10 dark:text-white dark:border-white/10">{cat}</span>
                 ))}
               </div>
             )}

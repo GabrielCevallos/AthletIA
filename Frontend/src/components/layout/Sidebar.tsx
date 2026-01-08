@@ -1,8 +1,11 @@
 import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false)
+  const { logout } = useAuth()
+  const navigate = useNavigate()
   
   const linkCls = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-3 px-3 py-2 rounded-lg ${
@@ -12,6 +15,11 @@ export default function Sidebar() {
     } transition-colors`
 
   const closeSidebar = () => setIsOpen(false)
+
+  const handleLogout = async () => {
+    await logout()
+    navigate('/login', { replace: true })
+  }
 
   return (
     <>
@@ -88,6 +96,17 @@ export default function Sidebar() {
               <p className="text-gray-900 dark:text-white text-sm font-medium">Usuarios</p>
             </NavLink>
           </nav>
+        </div>
+
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-white/10">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            aria-label="Cerrar sesión"
+          >
+            <span className="material-symbols-outlined">logout</span>
+            <span className="text-sm font-medium">Cerrar sesión</span>
+          </button>
         </div>
       </aside>
     </>

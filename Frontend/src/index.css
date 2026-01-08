@@ -49,6 +49,14 @@
   line-height: 1.6 !important;
 }
 
+/* Mantener la fuente de íconos cuando se activa "Fuente Legible" */
+.accessibility-readable-font .material-symbols-outlined {
+  font-family: 'Material Symbols Outlined' !important;
+  letter-spacing: normal !important;
+  line-height: 1 !important;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
 /* Enlaces subrayados */
 .accessibility-underline-links a {
   text-decoration: underline !important;
