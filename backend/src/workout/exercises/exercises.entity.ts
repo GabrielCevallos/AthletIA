@@ -2,14 +2,17 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToMany,
+  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { ExerciseType } from './enum/exercise-type.enum';
 import { MuscleTarget } from './enum/muscle-target.enum';
 import { Routine } from '../routines/routines.entity';
-import { SetType } from './enum/set-type.enum';
+import { Equipment } from './enum/equipment.enum';
 
 @Entity()
 export class Exercise {
@@ -24,6 +27,9 @@ export class Exercise {
 
   @Column()
   video: string;
+
+  @Column({ type: 'enum', enum: Equipment, default: Equipment.BODYWEIGHT })
+  equipment: Equipment;
 
   @Column({ default: 1 })
   minSets: number;
@@ -55,8 +61,25 @@ export class Exercise {
   @Column({ type: 'enum', enum: MuscleTarget, array: true })
   muscleTarget: MuscleTarget[];
 
-  @Column({ type: 'enum', enum: SetType, array: true })
-  setType: SetType[];
+  @Column({ type: 'text', array: true, default: '{}' })
+  instructions: string[];
+
+  @Column({ type: 'jsonb', nullable: true })
+  benefit: {
+    title: string;
+    description?: string;
+    categories?: string[];
+  } | null;
+
+  @ManyToOne(() => Exercise, (exercise) => exercise.variants, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'parentExerciseId' })
+  parentExercise: Exercise | null;
+
+  @OneToMany(() => Exercise, (exercise) => exercise.parentExercise)
+  variants: Exercise[];
 
   @ManyToMany(() => Routine, (routine) => routine.exercises)
   routines: Routine[];

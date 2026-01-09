@@ -19,7 +19,7 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { MuscleTarget } from '../enum/muscle-target.enum';
 import { ExerciseType } from '../enum/exercise-type.enum';
-import { SetType } from '../enum/set-type.enum';
+import { Equipment } from '../enum/equipment.enum';
 
 export class ExerciseRequest {
   @IsString()
@@ -45,6 +45,26 @@ export class ExerciseRequest {
     example: 'Barbell bench press on a flat bench.',
   })
   description: string;
+
+  @IsEnum(Equipment, {
+    message: `Equipment must be one of: ${Object.values(Equipment).join(', ')}`,
+  })
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Equipment required for the exercise',
+    enum: Equipment,
+    example: Equipment.BARBELL,
+  })
+  equipment: Equipment;
+
+  @IsUUID()
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Parent exercise ID if this is a variant',
+    format: 'uuid',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  parentExerciseId?: string;
 
   @IsUrl()
   @IsNotEmpty()
@@ -143,16 +163,29 @@ export class ExerciseRequest {
   exerciseType: ExerciseType[];
 
   @IsArray()
-  @IsEnum(SetType, {
-    each: true,
-    message: `Each setType must be one of: ${Object.values(SetType).join(
-      ', ',
-    )}`,
+  @IsString({ each: true })
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Exercise instructions (steps)',
+    type: [String],
+    example: ['Step 1: Position yourself', 'Step 2: Execute the movement'],
   })
-  @IsNotEmpty()
-  @ArrayMinSize(1)
-  @ApiProperty({ description: 'Set types', enum: SetType, isArray: true })
-  setType: SetType[];
+  instructions?: string[];
+
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Exercise benefit information',
+    example: {
+      title: 'Increases strength',
+      description: 'Builds chest and triceps strength',
+      categories: ['Cardio', 'Fuerza', 'Resistencia'],
+    },
+  })
+  benefit?: {
+    title: string;
+    description?: string;
+    categories?: string[];
+  };
 }
 
 export class Exercise extends ExerciseRequest {
@@ -205,6 +238,26 @@ export class ExerciseUpdate {
   })
   video?: string;
 
+  @IsEnum(Equipment, {
+    message: `Equipment must be one of: ${Object.values(Equipment).join(', ')}`,
+  })
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Equipment required for the exercise',
+    enum: Equipment,
+    example: Equipment.BARBELL,
+  })
+  equipment?: Equipment;
+
+  @IsUUID()
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Parent exercise ID if this is a variant',
+    format: 'uuid',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  parentExerciseId?: string;
+
   @IsArray()
   @IsEnum(MuscleTarget, {
     each: true,
@@ -240,19 +293,27 @@ export class ExerciseUpdate {
   exerciseType?: ExerciseType[];
 
   @IsArray()
-  @IsEnum(SetType, {
-    each: true,
-    message: `Each setType must be one of: ${Object.values(SetType).join(
-      ', ',
-    )}`,
-  })
-  @IsNotEmpty()
+  @IsString({ each: true })
   @IsOptional()
-  @ArrayMinSize(1)
   @ApiPropertyOptional({
-    description: 'Set types',
-    enum: SetType,
-    isArray: true,
+    description: 'Exercise instructions (steps)',
+    type: [String],
+    example: ['Step 1: Position yourself', 'Step 2: Execute the movement'],
   })
-  setType?: SetType[];
+  instructions?: string[];
+
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Exercise benefit information',
+    example: {
+      title: 'Increases strength',
+      description: 'Builds chest and triceps strength',
+      categories: ['Cardio', 'Fuerza', 'Resistencia'],
+    },
+  })
+  benefit?: {
+    title: string;
+    description?: string;
+    categories?: string[];
+  };
 }

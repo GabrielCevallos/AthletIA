@@ -14,7 +14,12 @@ export class ExercisesService {
   ) {}
 
   async create(exerciseDto: ExerciseRequest): Promise<Exercise> {
-    const newExercise = this.exercisesRepository.create(exerciseDto);
+    const newExercise = this.exercisesRepository.create({
+      ...exerciseDto,
+      parentExercise: exerciseDto.parentExerciseId
+        ? { id: exerciseDto.parentExerciseId } as Exercise
+        : null,
+    });
     return await this.exercisesRepository.save(newExercise);
   }
 
@@ -27,6 +32,7 @@ export class ExercisesService {
     const [items, total] = await this.exercisesRepository.findAndCount({
       take: limit,
       skip: offset,
+      relations: ['parentExercise', 'variants'],
     });
 
     return {
@@ -38,7 +44,10 @@ export class ExercisesService {
   }
 
   async findOne(id: string): Promise<Exercise> {
-    const exercise = await this.exercisesRepository.findOne({ where: { id } });
+    const exercise = await this.exercisesRepository.findOne({
+      where: { id },
+      relations: ['parentExercise', 'variants'],
+    });
     if (!exercise) {
       throw new NotFoundException(`Exercise with id ${id} not found`);
     }
@@ -47,7 +56,17 @@ export class ExercisesService {
 
   async update(id: string, exerciseDto: ExerciseUpdate): Promise<Exercise> {
     const exercise = await this.findOne(id);
-    this.exercisesRepository.merge(exercise, exerciseDto);
+    
+    const updateData: any = { ...exerciseDto };
+    
+    if (exerciseDto.parentExerciseId !== undefined) {
+      updateData.parentExercise = exerciseDto.parentExerciseId
+        ? { id: exerciseDto.parentExerciseId } as Exercise
+        : null;
+      delete updateData.parentExerciseId;
+    }
+    
+    this.exercisesRepository.merge(exercise, updateData);
     return await this.exercisesRepository.save(exercise);
   }
 

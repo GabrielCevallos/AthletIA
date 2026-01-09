@@ -36,7 +36,6 @@ export class ExercisesController {
   constructor(private readonly exercisesService: ExercisesService) {}
 
   @Post()
-  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateExercise()
   async create(
@@ -65,7 +64,6 @@ export class ExercisesController {
   }
 
   @Patch(':id')
-  @UseGuards(AdminGuard)
   @ApiUpdateExercise()
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -76,7 +74,6 @@ export class ExercisesController {
   }
 
   @Delete(':id')
-  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiDeleteExercise()
   async remove(
