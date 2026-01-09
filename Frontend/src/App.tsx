@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
+import Register from './pages/Register'
+import CompleteProfile from './pages/CompleteProfile'
 import Dashboard from './pages/Dashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import AuthCallback from './pages/AuthCallback'
@@ -14,6 +16,8 @@ import SplitForm from './pages/Splits/SplitForm'
 import SplitDetail from './pages/Splits/SplitDetail'
 import Measurements from './pages/Measurements/Measurements'
 import UserManagement from './pages/UserManagement'
+import UserProfile from './pages/UserProfile'
+import MobileAppRedirect from './pages/MobileAppRedirect'
 import { AccessibilityProvider } from './context/AccessibilityContext'
 import AccessibilityButton from './components/AccessibilityButton'
 
@@ -24,7 +28,10 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/mobile-app-redirect" element={<MobileAppRedirect />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/exercises" element={<Exercises />} />
@@ -41,6 +48,7 @@ export default function App() {
             <Route path="/splits/:id/edit" element={<SplitForm />} />
             <Route path="/measurements" element={<Measurements />} />
             <Route path="/users" element={<UserManagement />} />
+          <Route path="/users/:accountId" element={<UserProfile />} />
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

@@ -1,29 +1,49 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import api from '../lib/api'
+import { UserRole } from '../types'
 
 type AuthCtx = {
   accountId?: string
   isAuthenticated: boolean
-  role?: string
+  hasProfile: boolean | null // null = loading/unknown
+  role: UserRole | null
+  name: string | null
+  checkProfileStatus: () => Promise<boolean>
   login: (email: string, password: string) => Promise<void>
-  loginWithTokens: (accessToken: string, refreshToken: string, accountId?: string, role?: string) => void
+  register: (email: string, password: string) => Promise<void>
+  loginWithTokens: (accessToken: string, refreshToken: string, accountId?: string) => void
   logout: () => Promise<void>
 }
 const AuthContext = createContext<AuthCtx | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accountId, setAccountId] = useState<string | undefined>(() => localStorage.getItem('accountId') || undefined)
-  const [role, setRole] = useState<string | undefined>(() => {
-    const storedRole = localStorage.getItem('userRole') || undefined
-    console.log('🚀 AuthProvider inicializado - Rol desde localStorage:', storedRole)
-    return storedRole
-  })
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => !!localStorage.getItem('accessToken'))
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null)
+  const [role, setRole] = useState<UserRole | null>(null)
+  const [name, setName] = useState<string | null>(null)
+
+  const checkProfileStatus = useCallback(async () => {
+    try {
+      if (!localStorage.getItem('accessToken')) return false
+      let { data } = await api.get('auth/me')
+      data = data.data || data
+      setHasProfile(!!data.hasProfile)
+      if (data.role) setRole(data.role)
+      if (data.name) setName(data.name)
+      return !!data.hasProfile
+    } catch (e) {
+      console.error('Error checking profile status', e)
+      return false
+    }
+  }, [])
 
   useEffect(() => {
     setIsAuthenticated(!!localStorage.getItem('accessToken'))
-    console.log('📊 Estado de autenticación actualizado - Role actual:', role, 'isAuthenticated:', isAuthenticated)
-  }, [accountId, role, isAuthenticated])
+    if (!!localStorage.getItem('accessToken')) {
+      checkProfileStatus()
+    }
+  }, [accountId, checkProfileStatus])
 
   const login = useCallback(async (email: string, password: string) => {
     try {
@@ -35,31 +55,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const refreshToken = data.data?.refreshToken || data.refreshToken
       const accountId = data.data?.accountId || data.accountId
 
-      // Decodificar el token para obtener el rol
-      let userRole: string | undefined
-      if (accessToken) {
-        try {
-          const payload = JSON.parse(atob(accessToken.split('.')[1]))
-          console.log('📋 Token payload decodificado:', payload)
-          userRole = payload.role
-          console.log('👤 Rol extraído del token:', userRole)
-        } catch (e) {
-          console.warn('⚠️ No se pudo decodificar el token para obtener el rol:', e)
-        }
-      }
-
       if (accessToken) localStorage.setItem('accessToken', accessToken)
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
       if (accountId) localStorage.setItem('accountId', accountId)
-      if (userRole) {
-        localStorage.setItem('userRole', userRole)
-        console.log('💾 Rol guardado en localStorage:', userRole)
-      }
       
       setAccountId(accountId)
-      setRole(userRole)
       setIsAuthenticated(true)
-      console.log('✅ Login exitoso, rol asignado al contexto:', userRole)
+      await checkProfileStatus()
+      console.log('✅ Login exitoso')
     } catch (error: any) {
       console.error('❌ Error en login:', error)
       console.error('Status:', error.response?.status)
@@ -68,14 +71,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const loginWithTokens = useCallback((accessToken: string, refreshToken: string, accountId?: string, role?: string) => {
-    console.log('🎫 loginWithTokens llamado con:', { accessToken: accessToken?.substring(0, 20) + '...', accountId, role })
+  const register = useCallback(async (email: string, password: string) => {
+    try {
+      console.log('📝 Iniciando registro con:', email)
+      await api.post('/auth/register-account', { email, password })
+      console.log('✅ Registro exitoso')
+    } catch (error: any) {
+      console.error('❌ Error en registro:', error)
+      throw error
+    }
+  }, [])
+
+  const loginWithTokens = useCallback((accessToken: string, refreshToken: string, accountId?: string) => {
+    console.log('🎫 loginWithTokens llamado con:', { accessToken: accessToken?.substring(0, 20) + '...', accountId })
     localStorage.setItem('accessToken', accessToken)
     localStorage.setItem('refreshToken', refreshToken)
     if (accountId) localStorage.setItem('accountId', accountId)
-    if (role) localStorage.setItem('userRole', role)
     setAccountId(accountId)
-    setRole(role)
     setIsAuthenticated(true)
     console.log('✅ Tokens guardados, isAuthenticated:', true)
   }, [])
@@ -86,13 +98,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
     localStorage.removeItem('accountId')
-    localStorage.removeItem('userRole')
     setAccountId(undefined)
-    setRole(undefined)
     setIsAuthenticated(false)
   }, [])
 
-  const value = useMemo(() => ({ accountId, role, isAuthenticated, login, loginWithTokens, logout }), [accountId, role, isAuthenticated, login, loginWithTokens, logout])
+  const value = useMemo(() => ({ accountId, isAuthenticated, hasProfile, role, name, checkProfileStatus, login, register, loginWithTokens, logout }), [accountId, isAuthenticated, hasProfile, role, name, checkProfileStatus, login, register, loginWithTokens, logout])
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 

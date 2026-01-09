@@ -24,6 +24,9 @@ export class Profile {
   phoneNumber: string;
 
   @Column()
+  createdAt: Date;
+  
+  @Column()
   updatedAt: Date;
 
   @Column({ type: 'enum', enum: Gender })

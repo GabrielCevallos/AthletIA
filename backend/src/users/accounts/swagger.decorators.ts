@@ -56,3 +56,11 @@ export function ApiGiveRole() {
     ApiResponse({ status: 404, description: 'User not found' }),
   );
 }
+
+export function ApiRequestModeratorRole() { 
+    return applyDecorators(
+      ApiOperation({ summary: 'Request moderator role' }),
+      ApiResponse({ status: 200, description: 'Moderator role request submitted' }),
+      ApiResponse({ status: 404, description: 'User not found' }),
+    );
+}

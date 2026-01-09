@@ -131,12 +131,12 @@ export class AuthService {
     await this.accountsService.recordVerificationSend(account.id);
 
     return {
-      message: messages.accountSaved,
+      message: messages.verificationEmailSent,
       accountId: account.id,
     };
   }
 
-  async completeWithProfileSetup(
+  /* async completeWithProfileSetup(
     accountId: string,
     profileRequest: ProfileRequest,
   ): Promise<{ message: string }> {
@@ -153,7 +153,7 @@ export class AuthService {
 
     await this.accountsService.completeProfileSetup(account, profileRequest);
     return { message: messages.profileSetupCompleted };
-  }
+  } */
 
   async changePassword(
     accountId: string,
@@ -358,9 +358,10 @@ export class AuthService {
     return {
       email,
       id,
-      status,
+      state: status,
       role,
       name: profile?.name || '',
+      hasProfile: account.hasProfile,
       birthDate: profile?.birthDate || null,
     };
   }

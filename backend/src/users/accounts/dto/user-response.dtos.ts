@@ -1,3 +1,4 @@
+import { AccountState } from '../enum/account-states.enum';
 import { Role } from '../enum/role.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -18,11 +19,13 @@ export class User {
   @ApiProperty({ description: 'User ID', example: 'uuid-v4' })
   id: string;
   @ApiProperty({ description: 'Account status', example: 'ACTIVE' })
-  status: string;
+  state: AccountState;
   @ApiProperty({ description: 'Assigned role', enum: Role })
   role: Role;
+  @ApiProperty({ description: 'Indicates if profile exists', example: true })
+  hasProfile: boolean;
   @ApiProperty({ description: 'Full name', example: 'Jane Doe' })
-  name: string;
+  name?: string | null;
   @ApiProperty({ description: 'Birth date', type: Date, nullable: true })
-  birthDate: Date | null;
+  birthDate?: Date | null;
 }

@@ -40,6 +40,7 @@ import {
   ApiAuthMe,
 } from './swagger.decorators';
 import { User } from 'src/users/accounts/dto/user-response.dtos';
+import { log } from 'console';
 
 type accountIdOnly = { accountId: string };
 
@@ -104,7 +105,7 @@ export class AuthController {
     return ResponseBody.success(status, 'Status fetched');
   }
 
-  @Public()
+  /* @Public()
   @Post('complete-profile-setup')
   @ApiAuthCompleteProfileSetup()
   @HttpCode(HttpStatus.OK)
@@ -117,7 +118,7 @@ export class AuthController {
       profileRequest,
     );
     return ResponseBody.success(undefined, result.message);
-  }
+  } */
 
   @UseGuards(AuthGuard)
   @Patch('change-password')
@@ -185,6 +186,7 @@ export class AuthController {
   @ApiAuthMe()
   async me(@Req() req: Request): Promise<ResponseBody<User>> {
     const user = await this.authService.getCurrentUser(req.user);
+    log("Authenticated user: ", user);
     return ResponseBody.success(user, 'Authenticated user fetched');
   }
 }

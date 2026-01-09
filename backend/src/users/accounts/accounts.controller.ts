@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query,
   Req,
   UseGuards,
@@ -25,6 +26,7 @@ import {
   ApiFindUserById,
   ApiSuspendUser,
   ApiGiveRole,
+  ApiRequestModeratorRole,
 } from './swagger.decorators';
 
 @UseGuards(AuthGuard, RolesGuard)
@@ -37,7 +39,7 @@ export class AccountsController {
   @ApiFindAllUsers()
   async findAll(
     @Query() paginationRequest: PaginationRequest,
-  ): Promise<ResponseBody<void> & PaginationResponse<UserItem>> {
+  ): Promise<ResponseBody<void> & PaginationResponse<User>> {
     const pagination = await this.accountsService.findAll(paginationRequest);
     const success = true;
     const message = 'User list fetched successfully';
@@ -76,6 +78,17 @@ export class AccountsController {
       );
     }
     const result = await this.accountsService.giveRole(id, role);
+    return ResponseBody.success(undefined, result.message);
+  }
+
+  @Roles(Role.USER)
+  @Post('request-moderator')
+  @ApiRequestModeratorRole()
+  async requestModeratorRole(
+    @Req() request: Request & { user: UserPayload },
+  ): Promise<ResponseBody<void>> {
+    const userId = request.user.sub;
+    const result = await this.accountsService.requestModeratorRole(userId);
     return ResponseBody.success(undefined, result.message);
   }
 }
