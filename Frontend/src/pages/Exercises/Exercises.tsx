@@ -3,6 +3,7 @@ import { Search, Plus, Filter, MoreVertical, Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
 import { deleteExercise, getAllExercises } from '../../lib/exerciseStore';
+import { MuscleTargetLabels, EquipmentLabels } from '../../lib/enums';
 import Swal from 'sweetalert2';
 import api from '../../lib/api';
 
@@ -131,8 +132,23 @@ const Exercises: React.FC = () => {
               <div className="p-3 sm:p-4 flex flex-col gap-2">
                 <h3 className="text-gray-900 dark:text-white font-bold text-base sm:text-lg line-clamp-2">{ex.name}</h3>
                 <div className="flex flex-wrap gap-2">
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/20 text-primary">{ex.muscle}</span>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white/90">{ex.equipment}</span>
+                  {ex.muscleTarget && ex.muscleTarget.length > 0 ? (
+                    <>
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/20 text-primary">
+                        {MuscleTargetLabels[ex.muscleTarget[0] as keyof typeof MuscleTargetLabels]}
+                      </span>
+                      {ex.muscleTarget.length > 1 && (
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+                          +{ex.muscleTarget.length - 1}
+                        </span>
+                      )}
+                    </>
+                  ) : ex.muscle ? (
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/20 text-primary">{ex.muscle}</span>
+                  ) : null}
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white/90">
+                    {ex.equipment && EquipmentLabels[ex.equipment as keyof typeof EquipmentLabels] ? EquipmentLabels[ex.equipment as keyof typeof EquipmentLabels] : ex.equipment || 'No especificado'}
+                  </span>
                 </div>
                 <Link 
                   to={`/exercises/${ex.id}`}

@@ -11,6 +11,7 @@ import RoutineDetail from './pages/Routines/RoutineDetail'
 import RoutineCreator from './pages/Routines/RoutineCreator'
 import Splits from './pages/Splits/Splits'
 import SplitForm from './pages/Splits/SplitForm'
+import SplitDetail from './pages/Splits/SplitDetail'
 import Measurements from './pages/Measurements/Measurements'
 import UserManagement from './pages/UserManagement'
 import { AccessibilityProvider } from './context/AccessibilityContext'
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/routines/:id/edit" element={<RoutineCreator />} />
             <Route path="/splits" element={<Splits />} />
             <Route path="/splits/new" element={<SplitForm />} />
+            <Route path="/splits/:id" element={<SplitDetail />} />
             <Route path="/splits/:id/edit" element={<SplitForm />} />
             <Route path="/measurements" element={<Measurements />} />
             <Route path="/users" element={<UserManagement />} />

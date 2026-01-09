@@ -2,6 +2,7 @@ import axios from 'axios'
 
 const api = axios.create({
   baseURL: (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000',
+  timeout: 30000, // 30 segundos timeout global
 })
 
 function getAccessToken() {
@@ -16,7 +17,12 @@ let pending: Array<(token: string) => void> = []
 
 api.interceptors.request.use((config) => {
   const token = getAccessToken()
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+    console.log('🔑 Token añadido al request:', token.substring(0, 20) + '...')
+  } else {
+    console.warn('⚠️ No hay token disponible para el request')
+  }
   return config
 })
 
@@ -99,6 +105,115 @@ function generateFallbackDescription(name: string, muscle?: string, equipment?: 
   }
   
   return baseTemplate
+}
+
+// Exercise API functions
+import { Exercise } from './exerciseStore';
+
+export async function saveExercise(exercise: Exercise): Promise<Exercise> {
+  try {
+    console.log('📤 saveExercise llamado con exercise:', exercise);
+    
+    // Asegurar que muscleTarget y exerciseType sean arrays
+    const muscleTargetArray = Array.isArray(exercise.muscleTarget) 
+      ? exercise.muscleTarget 
+      : exercise.muscleTarget 
+        ? [exercise.muscleTarget] 
+        : [];
+    
+    const exerciseTypeArray = Array.isArray(exercise.exerciseType)
+      ? exercise.exerciseType
+      : exercise.exerciseType
+        ? [exercise.exerciseType]
+        : [];
+
+    if (muscleTargetArray.length === 0) {
+      throw new Error('El ejercicio debe tener al menos un músculo objetivo');
+    }
+
+    if (exerciseTypeArray.length === 0) {
+      throw new Error('El ejercicio debe tener al menos un tipo de ejercicio');
+    }
+    
+    // Preparar los datos para el backend - solo los campos que espera el DTO
+    const backendPayload = {
+      name: exercise.name?.trim() || 'Sin nombre',
+      description: (exercise.description?.trim() || 'Descripción del ejercicio sin especificar'),
+      equipment: exercise.equipment,
+      video: exercise.video || 'https://example.com/video',
+      minSets: Number(exercise.minSets) || 3,
+      maxSets: Number(exercise.maxSets) || 5,
+      minReps: Number(exercise.minReps) || 8,
+      maxReps: Number(exercise.maxReps) || 12,
+      minRestTime: Number(exercise.minRestTime) || 60,
+      maxRestTime: Number(exercise.maxRestTime) || 120,
+      muscleTarget: muscleTargetArray,
+      exerciseType: exerciseTypeArray,
+      instructions: exercise.instructions || [],
+      benefit: exercise.benefit || undefined,
+      parentExerciseId: exercise.parentExerciseId || undefined,
+    };
+
+    console.log('📦 Payload preparado:', JSON.stringify(backendPayload, null, 2));
+
+    if (!exercise.id || exercise.isSeed) {
+      console.log('📨 Haciendo POST a /workout/exercises');
+      console.log('🔑 Headers:', api.defaults.headers);
+      const response = await api.post('/workout/exercises', backendPayload, {
+        timeout: 30000, // 30 segundos timeout
+      });
+      // La respuesta es ResponseBody<Exercise> con estructura { success, message, data }
+      console.log('✅ Response del POST:', response.data);
+      return response.data?.data || response.data
+    } else {
+      // Si ya existe, hacer PATCH
+      console.log(`📨 Haciendo PATCH a /workout/exercises/${exercise.id}`);
+      const response = await api.patch(`/workout/exercises/${exercise.id}`, backendPayload, {
+        timeout: 30000, // 30 segundos timeout
+      })
+      console.log('✅ Response del PATCH:', response.data);
+      return response.data?.data || response.data
+    }
+  } catch (error: any) {
+    console.error('❌ Error en saveExercise:', error);
+    console.error('📋 Error completo:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers,
+    });
+    
+    // Si hay un error de validación, mostrar detalles específicos
+    if (error.response?.data?.message) {
+      const validationErrors = error.response.data.message;
+      if (Array.isArray(validationErrors)) {
+        console.error('🔍 Errores de validación:', validationErrors);
+      }
+    }
+    
+    throw error
+  }
+}
+
+export async function getExercise(id: string): Promise<Exercise> {
+  try {
+    const response = await api.get(`/workout/exercises/${id}`)
+    return response.data.data || response.data
+  } catch (error) {
+    console.error('Error fetching exercise:', error)
+    throw error
+  }
+}
+
+export async function getAllExercises(): Promise<Exercise[]> {
+  try {
+    const response = await api.get('/workout/exercises')
+    return response.data.data?.items || response.data.items || []
+  } catch (error) {
+    console.error('Error fetching exercises:', error)
+    throw error
+  }
 }
 
 export default api

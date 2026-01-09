@@ -3,21 +3,29 @@ import { Sparkles, Save, X, Upload, Image as ImageIcon, Video, Eye, EyeOff, Arro
 import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
 import { generateExerciseDescription } from '../../lib/api';
-import { upsertExercise, getExerciseById, Exercise, StoredMedia } from '../../lib/exerciseStore';
+import { upsertExercise, getExerciseById, getAllExercises, Exercise, StoredMedia, ValidationError, validateCompleteExercise } from '../../lib/exerciseStore';
+import { MuscleTarget, MuscleTargetLabels, Equipment, EquipmentLabels, ExerciseType, ExerciseTypeLabels } from '../../lib/enums';
 import Swal from 'sweetalert2';
 
 const CreateExercise: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
-  // 1 Info, 2 Muscles, 3 Multimedia, 4 Instructions, 5 Benefits, 6 Variants, 7 Visibility, 8 Preview
+  // 1 Info, 2 Muscles, 3 Exercise Type, 4 Video/Multimedia, 5 Benefits, 6 Visibility, 7 Preview
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
-  const [muscle, setMuscle] = useState('');
-  const [secondaryMuscle, setSecondaryMuscle] = useState('');
-  const [equipment, setEquipment] = useState('');
+  const [muscleTarget, setMuscleTarget] = useState<MuscleTarget[]>([]);
+  const [equipment, setEquipment] = useState<Equipment>(Equipment.BODYWEIGHT);
   const [description, setDescription] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [video, setVideo] = useState('');
+  const [minSets, setMinSets] = useState<number | undefined>(3);
+  const [maxSets, setMaxSets] = useState<number | undefined>(5);
+  const [minReps, setMinReps] = useState<number | undefined>(8);
+  const [maxReps, setMaxReps] = useState<number | undefined>(12);
+  const [minRestTime, setMinRestTime] = useState<number | undefined>(60);
+  const [maxRestTime, setMaxRestTime] = useState<number | undefined>(120);
+  const [exerciseType, setExerciseType] = useState<ExerciseType[]>([]);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviewUrls, setMediaPreviewUrls] = useState<string[]>([]);
   const [storedMedia, setStoredMedia] = useState<StoredMedia[]>([]);
@@ -29,8 +37,14 @@ const CreateExercise: React.FC = () => {
   const [variants, setVariants] = useState<Array<{ name: string; notes?: string }>>([]);
   const [createdAt, setCreatedAt] = useState<string | undefined>();
   const [isSeedExercise, setIsSeedExercise] = useState(false);
+  const [parentExerciseId, setParentExerciseId] = useState<string>('');
+  const [availableExercises, setAvailableExercises] = useState<Exercise[]>([]);
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
 
   useEffect(() => {
+    // Cargar todos los ejercicios disponibles para selección
+    setAvailableExercises(getAllExercises().filter(ex => ex.id !== id));
+    
     if (!isEditing || !id) return;
     const found = getExerciseById(id);
     if (!found) {
@@ -38,10 +52,17 @@ const CreateExercise: React.FC = () => {
       return;
     }
     setName(found.name);
-    setMuscle(found.muscle || '');
-    setSecondaryMuscle(found.secondaryMuscle || '');
-    setEquipment(found.equipment || '');
+    setMuscleTarget(found.muscleTarget || []);
+    setEquipment(found.equipment || Equipment.BODYWEIGHT);
     setDescription(found.description || '');
+    setVideo(found.video || '');
+    setMinSets(found.minSets);
+    setMaxSets(found.maxSets);
+    setMinReps(found.minReps);
+    setMaxReps(found.maxReps);
+    setMinRestTime(found.minRestTime);
+    setMaxRestTime(found.maxRestTime);
+    setExerciseType(found.exerciseType || []);
     setIsPublic(found.isPublic);
     setInstructions(found.instructions && found.instructions.length ? found.instructions : ['']);
     setBenefitTitle(found.benefit?.title || '');
@@ -51,6 +72,7 @@ const CreateExercise: React.FC = () => {
     setStoredMedia(found.mediaFiles || []);
     setCreatedAt(found.createdAt);
     setIsSeedExercise(Boolean(found.isSeed));
+    setParentExerciseId(found.parentExerciseId || '');
   }, [id, isEditing, navigate]);
 
   const handleGenerateAI = async () => {
@@ -64,7 +86,9 @@ const CreateExercise: React.FC = () => {
       return;
     }
     setIsGenerating(true);
-    const desc = await generateExerciseDescription(name, muscle, equipment || 'General Equipment');
+    const muscleLabel = muscleTarget.length > 0 ? MuscleTargetLabels[muscleTarget[0]] : 'General';
+    const equipmentLabel = EquipmentLabels[equipment];
+    const desc = await generateExerciseDescription(name, muscleLabel, equipmentLabel);
     setDescription(desc);
     setIsGenerating(false);
   };
@@ -127,126 +151,178 @@ const CreateExercise: React.FC = () => {
     setStep(2);
   };
 
-  const goNext = () => setStep((s) => Math.min(s + 1, 8));
+  const goNext = () => setStep((s) => Math.min(s + 1, 7));
   const goPrev = () => setStep((s) => Math.max(s - 1, 1));
 
   const handlePublish = async () => {
-    if (!name.trim()) {
-      await Swal.fire({
-        icon: 'info',
-        title: 'Nombre requerido',
-        text: 'Por favor completa el nombre del ejercicio.',
-        confirmButtonText: 'Entendido',
-      });
-      setStep(1);
-      return;
-    }
-    if (!muscle) {
-      await Swal.fire({
-        icon: 'info',
-        title: 'Grupo muscular requerido',
-        text: 'Por favor selecciona al menos un grupo muscular.',
-        confirmButtonText: 'Entendido',
-      });
-      setStep(2);
-      return;
-    }
-
-    const newMedia: StoredMedia[] = await Promise.all(
-      mediaFiles.map(
-        (file) =>
-          new Promise<StoredMedia>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              resolve({
-                id: crypto.randomUUID(),
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                data: reader.result as string,
-              });
-            };
-            reader.readAsDataURL(file);
-          })
-      )
-    );
-
-    const createdTimestamp = !createdAt || isSeedExercise ? new Date().toISOString() : createdAt;
-
-    // Usa la primera imagen disponible como portada
-    const coverCandidate = [...newMedia, ...storedMedia].find((file) => file.type?.startsWith('image/'));
-
-    const payload: Exercise = {
-      id: isEditing && id && !isSeedExercise ? id : crypto.randomUUID(),
-      name: name.trim(),
-      muscle,
-      secondaryMuscle: secondaryMuscle || undefined,
-      equipment: equipment || 'No especificado',
-      description: description || undefined,
-      mediaFiles: [...storedMedia, ...newMedia],
-      coverUrl: coverCandidate?.data,
-      instructions: instructions.map((i) => i.trim()).filter(Boolean),
-      benefit:
-        benefitTitle || benefitDescription || benefitCategories.length
-          ? {
-              title: benefitTitle || 'Beneficio',
-              description: benefitDescription || undefined,
-              categories: benefitCategories,
-            }
-          : null,
-      variants,
-      isPublic,
-      createdAt: createdTimestamp,
+    console.log('🚀 Iniciando handlePublish...');
+    
+    // Compilar el ejercicio con todos los campos
+    const exerciseData: Partial<Exercise> = {
+      name,
+      muscleTarget,
+      equipment,
+      description,
+      video,
+      minSets,
+      maxSets,
+      minReps,
+      maxReps,
+      minRestTime,
+      maxRestTime,
+      exerciseType,
     };
 
-    const saved = upsertExercise(payload);
+    // Validar todos los campos
+    const errors = validateCompleteExercise(exerciseData);
+    
+    if (errors.length > 0) {
+      const errorMessages = errors.map(e => `${e.field}: ${e.message}`).join('\n');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Errores de validación',
+        text: 'Por favor corrige los siguientes errores:',
+        footer: errorMessages,
+        confirmButtonText: 'Entendido',
+      });
+      setValidationErrors(errors);
+      return;
+    }
 
-    mediaPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
-    setMediaFiles([]);
-    setMediaPreviewUrls([]);
-    setStoredMedia(saved.mediaFiles || []);
-    setCreatedAt(saved.createdAt);
+    setValidationErrors([]);
 
-    const action = isEditing ? (isSeedExercise ? 'duplicado' : 'actualizado') : 'creado';
-    await Swal.fire({
-      icon: 'success',
-      title: 'Ejercicio guardado',
-      text: `✅ Ejercicio "${saved.name}" ${action}.`,
-      confirmButtonText: 'Ver ejercicio',
-    });
-    navigate(`/exercises/${saved.id}`);
+    try {
+      console.log('✅ Validación pasada');
+
+      // Mostrar cargando
+      await Swal.fire({
+        title: 'Guardando ejercicio...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      console.log('⏳ Esperando conversión de archivos a base64...');
+      const newMedia: StoredMedia[] = await Promise.all(
+        mediaFiles.map(
+          (file) =>
+            new Promise<StoredMedia>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                resolve({
+                  id: crypto.randomUUID(),
+                  name: file.name,
+                  size: file.size,
+                  type: file.type,
+                  data: reader.result as string,
+                });
+              };
+              reader.readAsDataURL(file);
+            })
+        )
+      );
+
+      console.log('✅ Archivos convertidos a base64');
+      const createdTimestamp = !createdAt || isSeedExercise ? new Date().toISOString() : createdAt;
+
+      // Usa la primera imagen disponible como portada
+      const coverCandidate = [...newMedia, ...storedMedia].find((file) => file.type?.startsWith('image/'));
+
+      console.log('📋 Compilando payload...');
+      const payload: Exercise = {
+        id: isEditing && id && !isSeedExercise ? id : crypto.randomUUID(),
+        name: name.trim(),
+        muscleTarget,
+        equipment,
+        description: description || undefined,
+        video: video || undefined,
+        minSets,
+        maxSets,
+        minReps,
+        maxReps,
+        minRestTime,
+        maxRestTime,
+        exerciseType,
+        mediaFiles: [...storedMedia, ...newMedia],
+        coverUrl: coverCandidate?.data,
+        instructions: instructions.map((i) => i.trim()).filter(Boolean),
+        benefit:
+          benefitTitle || benefitDescription || benefitCategories.length
+            ? {
+                title: benefitTitle || 'Beneficio',
+                description: benefitDescription || undefined,
+                categories: benefitCategories,
+              }
+            : null,
+        variants,
+        isPublic,
+        createdAt: createdTimestamp,
+        parentExerciseId: parentExerciseId || null,
+        isSeed: isSeedExercise,
+      };
+
+      console.log('📤 Enviando payload al servidor...');
+      // Guardar en backend
+      const { saveExercise } = await import('../../lib/api');
+      console.log('✅ saveExercise importado');
+      
+      const saved = await saveExercise(payload as any);
+      console.log('✅ Ejercicio guardado en backend:', saved);
+
+      // Guardar también en localStorage como backup
+      upsertExercise(saved as any);
+
+      mediaPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+      setMediaFiles([]);
+      setMediaPreviewUrls([]);
+      setStoredMedia(saved.mediaFiles || []);
+      setCreatedAt(saved.createdAt);
+
+      const action = isEditing ? (isSeedExercise ? 'duplicado' : 'actualizado') : 'creado';
+      await Swal.fire({
+        icon: 'success',
+        title: 'Ejercicio guardado',
+        text: `✅ Ejercicio "${saved.name}" ${action}.`,
+        confirmButtonText: 'Ver ejercicio',
+      });
+      navigate(`/exercises/${saved.id}`);
+    } catch (error: any) {
+      console.error('❌ Error saving exercise:', error);
+      console.error('Error stack:', error.stack);
+      console.error('Error response:', error.response);
+      
+      const errorMessage = error.response?.data?.message 
+        || error.response?.statusText 
+        || error.message 
+        || 'Error desconocido';
+      const errorDetails = error.response?.data?.data || error.response?.data || '';
+      const status = error.response?.status || 'N/A';
+      
+      console.error('Status:', status);
+      console.error('Message:', errorMessage);
+      console.error('Details:', errorDetails);
+      
+      Swal.hideLoading();
+      
+      await Swal.fire({
+        icon: 'error',
+        title: `Error al guardar (${status})`,
+        html: `<p><strong>${errorMessage}</strong></p>${errorDetails ? `<small>${typeof errorDetails === 'string' ? errorDetails : JSON.stringify(errorDetails, null, 2)}</small>` : ''}`,
+        confirmButtonText: 'Entendido',
+      });
+    }
   };
 
   const handleCancel = async () => {
-    if (step === 8) {
-      setStep(7);
+    // Si estamos en los últimos pasos, solo volver atrás
+    if (step > 1 && step <= 7) {
+      setStep(step - 1);
       return;
     }
-    if (step === 7) {
-      setStep(6);
-      return;
-    }
-    if (step === 6) {
-      setStep(5);
-      return;
-    }
-    if (step === 5) {
-      setStep(4);
-      return;
-    }
-    if (step === 4) {
-      setStep(3);
-      return;
-    }
-    if (step === 3) {
-      setStep(2);
-      return;
-    }
-    if (step === 2) {
-      setStep(1);
-      return;
-    }
-    if (name || muscle || equipment || description || mediaFiles.length > 0) {
+    
+    // Si estamos en el paso 1 y hay datos, pedir confirmación
+    if (name || muscleTarget.length > 0 || equipment !== Equipment.BODYWEIGHT || description || video || mediaFiles.length > 0) {
       const result = await Swal.fire({
         title: '¿Descartar los cambios?',
         text: 'Perderás la información no guardada.',
@@ -259,21 +335,10 @@ const CreateExercise: React.FC = () => {
 
       if (result.isConfirmed) {
         mediaPreviewUrls.forEach(url => URL.revokeObjectURL(url));
-        setStep(1);
-        setName('');
-        setMuscle('');
-        setSecondaryMuscle('');
-        setEquipment('');
-        setDescription('');
-        setMediaFiles([]);
-        setMediaPreviewUrls([]);
-        setIsPublic(true);
-        setInstructions(['']);
-        setBenefitTitle('');
-        setBenefitDescription('');
-        setBenefitCategories([]);
-        setVariants([]);
+        navigate('/exercises');
       }
+    } else {
+      navigate('/exercises');
     }
   };
 
@@ -296,178 +361,7 @@ const CreateExercise: React.FC = () => {
     })),
   ];
 
-  // Step 8: Preview/Confirm Screen
-  if (step === 8) {
-    return (
-      <Layout>
-        <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
-        <header className="flex items-center gap-4">
-          <button 
-            onClick={goPrev}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
-            aria-label="Volver"
-          >
-            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
-          </button>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 8: Vista Previa y Confirmación</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Revisa la información antes de publicar.</p>
-          </div>
-        </header>
-
-        <section aria-labelledby="preview-heading" className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
-          <h2 id="preview-heading" className="text-gray-900 dark:text-white text-xl md:text-2xl font-bold mb-6">Información del Ejercicio</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div>
-              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Nombre</p>
-              <p className="text-gray-900 dark:text-white text-lg font-bold">{name}</p>
-            </div>
-            <div>
-              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Grupo Muscular</p>
-              <p className="text-gray-900 dark:text-white text-lg font-bold">{muscle}{secondaryMuscle ? ' / ' + secondaryMuscle : ''}</p>
-            </div>
-            <div>
-              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Equipo</p>
-              <p className="text-gray-900 dark:text-white text-lg font-bold">{equipment || 'No especificado'}</p>
-            </div>
-            <div>
-              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Archivos Multimedia</p>
-              <p className="text-gray-900 dark:text-white text-lg font-bold">{previewMedia.length} archivo(s)</p>
-            </div>
-          </div>
-
-          {description && (
-            <div className="mb-8">
-              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Descripción</p>
-              <p className="text-gray-900 dark:text-white text-base leading-relaxed bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">{description}</p>
-            </div>
-          )}
-
-          {previewMedia.length > 0 && (
-            <div className="mb-8">
-              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-3">Archivos Multimedia</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {previewMedia.map((file) => (
-                  <div key={file.key} className="bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden">
-                    {file.type.startsWith('image/') ? (
-                      <img src={file.url} alt={file.name} className="w-full aspect-video object-cover" />
-                    ) : (
-                      <video src={file.url} controls className="w-full aspect-video bg-black" />
-                    )}
-                    <div className="p-3">
-                      <p className="text-gray-900 dark:text-white text-xs font-medium truncate">{file.name}</p>
-                      <p className="text-gray-600 dark:text-gray-300 text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {instructions.filter(i => i.trim()).length > 0 && (
-            <div className="mb-8">
-              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Pasos de Ejecución</p>
-              <ol className="space-y-2">
-                {instructions.filter(i => i.trim()).map((text, idx) => (
-                  <li key={idx} className="text-gray-900 dark:text-white text-sm leading-relaxed bg-gray-50 dark:bg-white/5 p-3 rounded-lg border border-gray-200 dark:border-white/10">
-                    <span className="text-primary font-bold mr-2">{idx + 1}.</span>{text}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
-
-          {(benefitTitle || benefitDescription) && (
-            <div className="mb-8">
-              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Beneficios</p>
-              <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">
-                {benefitTitle && <p className="text-gray-900 dark:text-white font-bold mb-1">{benefitTitle}</p>}
-                {benefitDescription && <p className="text-gray-800 dark:text-white/90 text-sm leading-relaxed">{benefitDescription}</p>}
-                {benefitCategories.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {benefitCategories.map((cat, idx) => (
-                      <span key={idx} className="px-2 py-1 text-xs rounded-full bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white border border-gray-300 dark:border-white/10">{cat}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {variants.length > 0 && (
-            <div className="mb-8">
-              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Variantes</p>
-              <ul className="space-y-2">
-                {variants.map((v, idx) => (
-                  <li key={idx} className="bg-gray-50 dark:bg-white/5 p-3 rounded-lg text-gray-900 dark:text-white border border-gray-200 dark:border-white/10">
-                    <span className="font-bold">{v.name}</span>{v.notes ? ` — ${v.notes}` : ''}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="border-t border-gray-200 dark:border-white/10 pt-6">
-            <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4">Visibilidad</h3>
-            <div className="flex flex-col gap-3">
-              <label className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-lg border-2 border-gray-200 dark:border-white/10 hover:border-primary/50 cursor-pointer transition">
-                <input
-                  type="radio"
-                  name="visibility"
-                  checked={isPublic}
-                  onChange={() => setIsPublic(true)}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Eye size={20} className="text-primary" />
-                    <p className="text-gray-900 dark:text-white font-bold">Público</p>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">Visible para todos los usuarios de la aplicación móvil</p>
-                </div>
-              </label>
-
-              <label className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-lg border-2 border-gray-200 dark:border-white/10 hover:border-primary/50 cursor-pointer transition">
-                <input
-                  type="radio"
-                  name="visibility"
-                  checked={!isPublic}
-                  onChange={() => setIsPublic(false)}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <EyeOff size={20} className="text-gray-400" />
-                    <p className="text-gray-900 dark:text-white font-bold">Privado</p>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">Solo visible para administradores, no aparecerá en la app de usuarios</p>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
-            <button 
-              onClick={handleCancel} 
-              className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
-            >
-              <ArrowLeft size={18} className="mr-2" /> Volver a Editar
-            </button>
-            <button 
-              onClick={handlePublish} 
-              className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
-            >
-              <Check size={18} className="mr-2" /> {isPublic ? 'Confirmar Publicación' : 'Confirmar Guardado Privado'}
-            </button>
-          </div>
-        </section>
-      </div>
-      </Layout>
-    );
-  }
-
-  // Step 7: Visibility Screen
+  // Step 12: Preview/Confirm Screen
   if (step === 7) {
     return (
       <Layout>
@@ -481,7 +375,211 @@ const CreateExercise: React.FC = () => {
             <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-2">
-            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 7: Visualización</h1>
+            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 7: Vista Previa y Confirmación</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Revisa la información antes de publicar.</p>
+          </div>
+        </header>
+
+        <section aria-labelledby="preview-heading" className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
+          <h2 id="preview-heading" className="text-gray-900 dark:text-white text-xl md:text-2xl font-bold mb-6">Información Completa del Ejercicio</h2>
+          
+          {/* Sección 1: Información Básica */}
+          <div className="mb-8 pb-8 border-b border-gray-200 dark:border-white/10">
+            <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm">1</div>
+              Información Básica
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Nombre</p>
+                <p className="text-gray-900 dark:text-white text-lg font-bold">{name || '(No definido)'}</p>
+              </div>
+              <div>
+                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Equipo</p>
+                <p className="text-gray-900 dark:text-white text-lg font-bold">{EquipmentLabels[equipment]}</p>
+              </div>
+              {parentExerciseId && (
+                <div className="col-span-1 md:col-span-2">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Variante de</p>
+                  <p className="text-gray-900 dark:text-white text-base">{availableExercises.find(e => e.id === parentExerciseId)?.name || parentExerciseId}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sección 2: Clasificación */}
+          <div className="mb-8 pb-8 border-b border-gray-200 dark:border-white/10">
+            <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm">2</div>
+              Clasificación
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Grupos Musculares ({muscleTarget.length})</p>
+                <div className="flex flex-wrap gap-2">
+                  {muscleTarget.length > 0 ? (
+                    muscleTarget.map(m => (
+                      <span key={m} className="px-3 py-1.5 bg-primary/20 text-primary rounded-full text-sm font-semibold">
+                        {MuscleTargetLabels[m]}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-900 dark:text-white italic">No especificado</span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Tipos de Ejercicio ({exerciseType.length})</p>
+                <div className="flex flex-wrap gap-2">
+                  {exerciseType.length > 0 ? (
+                    exerciseType.map(et => (
+                      <span key={et} className="px-3 py-1.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
+                        {et}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-900 dark:text-white italic">No especificado</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sección 3: Descripción */}
+          {description && (
+            <div className="mb-8 pb-8 border-b border-gray-200 dark:border-white/10">
+              <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4 flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm">3</div>
+                Descripción
+              </h3>
+              <p className="text-gray-900 dark:text-white text-base leading-relaxed bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">{description}</p>
+            </div>
+          )}
+
+          {/* Sección 4: Contenido Multimedia */}
+          <div className="mb-8 pb-8 border-b border-gray-200 dark:border-white/10">
+            <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm">4</div>
+              Contenido Multimedia
+            </h3>
+            <div className="space-y-4">
+              {video && (
+                <div>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">URL del Video</p>
+                  <p className="text-blue-600 dark:text-blue-400 text-sm break-all hover:underline cursor-pointer">{video}</p>
+                </div>
+              )}
+              {previewMedia.length > 0 && (
+                <div>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-3">Archivos Multimedia ({previewMedia.length})</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {previewMedia.map((file) => (
+                      <div key={file.key} className="bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden">
+                        {file.type.startsWith('image/') ? (
+                          <img src={file.url} alt={file.name} className="w-full aspect-video object-cover" />
+                        ) : (
+                          <video src={file.url} controls className="w-full aspect-video bg-black" />
+                        )}
+                        <div className="p-3">
+                          <p className="text-gray-900 dark:text-white text-xs font-medium truncate">{file.name}</p>
+                          <p className="text-gray-600 dark:text-gray-300 text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {!video && previewMedia.length === 0 && (
+                <p className="text-gray-600 dark:text-gray-300 italic text-sm">No se añadió contenido multimedia</p>
+              )}
+            </div>
+          </div>
+
+          {/* Sección 5: Beneficios */}
+          {(benefitTitle || benefitDescription || benefitCategories.length > 0) && (
+            <div className="mb-8 pb-8 border-b border-gray-200 dark:border-white/10">
+              <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4 flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm">5</div>
+                Beneficios
+              </h3>
+              <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">
+                {benefitTitle && <p className="text-gray-900 dark:text-white font-bold mb-1">{benefitTitle}</p>}
+                {benefitDescription && <p className="text-gray-800 dark:text-white/90 text-sm leading-relaxed mb-3">{benefitDescription}</p>}
+                {benefitCategories.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {benefitCategories.map((cat) => (
+                      <span key={cat} className="px-2 py-1 text-xs rounded-full bg-primary/20 text-primary border border-primary/30 font-semibold">
+                        {cat}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Sección 6: Visibilidad */}
+          <div className="mb-8 pb-8 border-b border-gray-200 dark:border-white/10">
+            <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm">6</div>
+              Visibilidad
+            </h3>
+            <div className="p-4 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+              {isPublic ? (
+                <div className="flex items-center gap-3">
+                  <Eye size={20} className="text-primary" />
+                  <div>
+                    <p className="text-gray-900 dark:text-white font-bold">Público</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">Visible para todos los usuarios</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <EyeOff size={20} className="text-gray-400" />
+                  <div>
+                    <p className="text-gray-900 dark:text-white font-bold">Privado</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">Solo visible para administradores</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6">
+            <button 
+              onClick={handleCancel} 
+              className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
+            >
+              <ArrowLeft size={18} className="mr-2" /> Volver a Editar
+            </button>
+            <button 
+              onClick={handlePublish} 
+              className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
+            >
+              <Check size={18} className="mr-2" /> {isPublic ? 'Publicar Ejercicio' : 'Guardar Ejercicio'}
+            </button>
+          </div>
+        </section>
+      </div>
+      </Layout>
+    );
+  }
+
+  // Step 11: Visibility Screen
+  if (step === 6) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
+        <header className="flex items-center gap-4">
+          <button 
+            onClick={goPrev}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
+            aria-label="Volver"
+          >
+            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
+          </button>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 6: Visibilidad</h1>
             <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Elige si será público o privado.</p>
           </div>
         </header>
@@ -542,63 +640,7 @@ const CreateExercise: React.FC = () => {
     );
   }
 
-  // Step 6: Variants Manager
-  if (step === 6) {
-    const addVariant = () => setVariants([...variants, { name: '' }]);
-    const updateVariant = (idx: number, field: 'name' | 'notes', value: string) => {
-      setVariants(variants.map((v, i) => i === idx ? { ...v, [field]: value } : v));
-    };
-    const removeVariant = (idx: number) => setVariants(variants.filter((_, i) => i !== idx));
-    return (
-      <Layout>
-        <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
-        <header className="flex items-center gap-4">
-          <button onClick={goPrev} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
-            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
-          </button>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 6: Variantes del Ejercicio</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Gestiona versiones alternativas del ejercicio.</p>
-          </div>
-        </header>
-        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
-          <div className="flex justify-end mb-4">
-            <button onClick={addVariant} className="px-4 py-2 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white rounded-lg font-bold hover:bg-gray-200 dark:hover:bg-white/20">Añadir Variante</button>
-          </div>
-          {variants.length === 0 ? (
-            <p className="text-gray-600 dark:text-gray-300">Aún no hay variantes.</p>
-          ) : (
-            <div className="space-y-4">
-              {variants.map((v, idx) => (
-                <div key={idx} className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-gray-900 dark:text-white font-medium mb-2 block">Nombre de la Variante</label>
-                      <input value={v.name} onChange={(e) => updateVariant(idx, 'name', e.target.value)} className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="Ej: Press de Banca con Mancuernas" />
-                    </div>
-                    <div>
-                      <label className="text-gray-900 dark:text-white font-medium mb-2 block">Notas</label>
-                      <input value={v.notes || ''} onChange={(e) => updateVariant(idx, 'notes', e.target.value)} className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="Ej: Enfatiza control del movimiento" />
-                    </div>
-                  </div>
-                  <div className="flex justify-end mt-3">
-                    <button onClick={() => removeVariant(idx)} className="p-2 hover:bg-red-900/30 rounded text-red-400" aria-label="Eliminar variante"><X size={18} /></button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
-            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
-            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
-          </div>
-        </section>
-      </div>
-      </Layout>
-    );
-  }
-
-  // Step 5: Benefits Editor
+  // Step 10: Benefits Editor
   if (step === 5) {
     const availableCategories = ['Cardio', 'Salud General', 'Fuerza', 'Resistencia', 'Flexibilidad', 'Pérdida de Peso', 'Aumento de Masa'];
     const toggleCategory = (cat: string) => {
@@ -617,7 +659,7 @@ const CreateExercise: React.FC = () => {
           </button>
           <div className="flex flex-col gap-2">
             <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 5: Beneficios del Ejercicio</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Define beneficios y categorías.</p>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Define beneficios y categorías (Opcional).</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
@@ -648,48 +690,18 @@ const CreateExercise: React.FC = () => {
                   </button>
                 ))}
               </div>
-            </div>
-          </div>
-          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
-            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
-            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
-          </div>
-        </section>
-      </div>
-      </Layout>
-    );
-  }
-
-  // Step 4: Instructions Editor
-  if (step === 4) {
-    const updateInstruction = (idx: number, value: string) => setInstructions(instructions.map((t, i) => i === idx ? value : t));
-    const addInstruction = () => setInstructions([...instructions, '']);
-    const removeInstruction = (idx: number) => setInstructions(instructions.filter((_, i) => i !== idx));
-    return (
-      <Layout>
-        <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
-        <header className="flex items-center gap-4">
-          <button onClick={goPrev} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
-            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
-          </button>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 4: Instrucciones</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Especifica pasos para ejecutar correctamente el ejercicio.</p>
-          </div>
-        </header>
-        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
-          <div className="space-y-4">
-            {instructions.map((text, idx) => (
-              <div key={idx} className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">
-                <label className="text-gray-900 dark:text-white font-medium mb-2 block">Paso {idx + 1}</label>
-                <textarea value={text} onChange={(e) => updateInstruction(idx, e.target.value)} className="w-full min-h-[80px] p-3 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="Describe el paso..." />
-                <div className="flex justify-end mt-2">
-                  <button onClick={() => removeInstruction(idx)} className="p-2 hover:bg-red-900/30 rounded text-red-400" aria-label="Eliminar paso"><X size={18} /></button>
+              {benefitCategories.length > 0 && (
+                <div className="mt-4 p-3 bg-primary/10 rounded-lg">
+                  <p className="text-gray-900 dark:text-white font-medium text-sm mb-2">Categorías seleccionadas ({benefitCategories.length}):</p>
+                  <div className="flex flex-wrap gap-2">
+                    {benefitCategories.map(cat => (
+                      <span key={cat} className="px-2 py-1 bg-primary text-white rounded-full text-xs font-semibold">
+                        {cat}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-            <div className="flex justify-end">
-              <button onClick={addInstruction} className="px-4 py-2 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white rounded-lg font-bold hover:bg-gray-200 dark:hover:bg-white/20">Añadir Paso</button>
+              )}
             </div>
           </div>
           <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
@@ -702,8 +714,9 @@ const CreateExercise: React.FC = () => {
     );
   }
 
-  // Step 3: Multimedia Upload Screen
-  if (step === 3) {
+  // Step 9: Instructions Editor
+  // [ELIMINADO - Step 3 Multimedia duplicado]
+  if (step === 999) {
     return (
       <Layout>
         <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
@@ -843,6 +856,14 @@ const CreateExercise: React.FC = () => {
 
   // Step 2: Muscles Screen
   if (step === 2) {
+    const toggleMuscle = (muscle: MuscleTarget) => {
+      setMuscleTarget(prev => 
+        prev.includes(muscle) 
+          ? prev.filter(m => m !== muscle)
+          : [...prev, muscle]
+      );
+    };
+
     return (
       <Layout>
         <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
@@ -852,44 +873,254 @@ const CreateExercise: React.FC = () => {
           </button>
           <div className="flex flex-col gap-2">
             <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 2: Grupos Musculares</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Selecciona el grupo muscular principal y secundario.</p>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Selecciona uno o más grupos musculares que trabaja el ejercicio.</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="exercise-muscle" className="text-gray-900 dark:text-white font-medium mb-2 block">Grupo Muscular Principal</label>
-              <select 
-                id="exercise-muscle"
-                value={muscle}
-                onChange={(e) => setMuscle(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
-              >
-                <option value="">Seleccionar músculo</option>
-                <option value="Pecho">Pecho</option>
-                <option value="Espalda">Espalda</option>
-                <option value="Piernas">Piernas</option>
-                <option value="Hombros">Hombros</option>
-                <option value="Brazos">Brazos</option>
-              </select>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {Object.entries(MuscleTargetLabels).map(([key, label]) => {
+              const isSelected = muscleTarget.includes(key as MuscleTarget);
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => toggleMuscle(key as MuscleTarget)}
+                  className={`p-4 rounded-xl border-2 transition-all font-semibold text-sm sm:text-base ${
+                    isSelected
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-gray-300 dark:border-white/10 text-gray-900 dark:text-white hover:border-primary/50'
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          
+          {muscleTarget.length === 0 && (
+            <div className="mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+              <p className="text-red-600 dark:text-red-400 font-semibold">⚠️ Debes seleccionar al menos un grupo muscular para continuar</p>
             </div>
+          )}
+
+          {muscleTarget.length > 0 && (
+            <div className="mt-6 p-4 bg-primary/10 rounded-xl">
+              <p className="text-gray-900 dark:text-white font-medium mb-2">Músculos seleccionados ({muscleTarget.length}):</p>
+              <div className="flex flex-wrap gap-2">
+                {muscleTarget.map(m => (
+                  <span key={m} className="px-3 py-1 bg-primary text-white rounded-full text-sm font-semibold">
+                    {MuscleTargetLabels[m]}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
+            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
+            <button 
+              onClick={() => {
+                if (muscleTarget.length === 0) {
+                  Swal.fire({
+                    icon: 'warning',
+                    title: 'Grupo muscular requerido',
+                    text: 'Por favor selecciona al menos un grupo muscular para continuar.',
+                    confirmButtonText: 'Entendido',
+                  });
+                  return;
+                }
+                goNext();
+              }} 
+              className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              disabled={muscleTarget.length === 0}
+            >
+              Continuar <ArrowRight size={18} className="ml-2" />
+            </button>
+          </div>
+        </section>
+      </div>
+      </Layout>
+    );
+  }
+
+  // Step 3: Exercise Types
+  if (step === 3) {
+    const toggleExerciseType = (type: ExerciseType) => {
+      setExerciseType(prev => 
+        prev.includes(type) 
+          ? prev.filter(t => t !== type)
+          : [...prev, type]
+      );
+    };
+
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
+        <header className="flex items-center gap-4">
+          <button onClick={goPrev} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
+          </button>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 3: Tipos de Ejercicio</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Selecciona uno o más tipos de ejercicio (ej: Fuerza, Cardio, etc).</p>
+          </div>
+        </header>
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {Object.entries(ExerciseTypeLabels).map(([key, label]) => {
+              const isSelected = exerciseType.includes(key as ExerciseType);
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => toggleExerciseType(key as ExerciseType)}
+                  className={`p-4 rounded-xl border-2 transition-all font-semibold text-sm ${
+                    isSelected
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-gray-300 dark:border-white/10 text-gray-900 dark:text-white hover:border-primary/50'
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          
+          {exerciseType.length === 0 && (
+            <div className="mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+              <p className="text-red-600 dark:text-red-400 font-semibold">⚠️ Debes seleccionar al menos un tipo de ejercicio para continuar</p>
+            </div>
+          )}
+
+          {exerciseType.length > 0 && (
+            <div className="mt-6 p-4 bg-primary/10 rounded-xl">
+              <p className="text-gray-900 dark:text-white font-medium mb-2">Tipos seleccionados ({exerciseType.length}):</p>
+              <div className="flex flex-wrap gap-2">
+                {exerciseType.map(t => (
+                  <span key={t} className="px-3 py-1 bg-primary text-white rounded-full text-sm font-semibold">
+                    {ExerciseTypeLabels[t]}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
+            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
+            <button 
+              onClick={() => {
+                if (exerciseType.length === 0) {
+                  Swal.fire({
+                    icon: 'warning',
+                    title: 'Tipo de ejercicio requerido',
+                    text: 'Por favor selecciona al menos un tipo de ejercicio para continuar.',
+                    confirmButtonText: 'Entendido',
+                  });
+                  return;
+                }
+                goNext();
+              }} 
+              className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              disabled={exerciseType.length === 0}
+            >
+              Continuar <ArrowRight size={18} className="ml-2" />
+            </button>
+          </div>
+        </section>
+      </div>
+      </Layout>
+    );
+  }
+
+  // Step 4: Description
+  // Step 4: Video/Multimedia (Contenido Multimedia)
+  if (step === 4) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
+        <header className="flex items-center gap-4">
+          <button onClick={goPrev} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
+          </button>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 4: Contenido Multimedia</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Añade un video (URL) o archivos multimedia (imágenes/videos). Puedes usar una o ambas opciones.</p>
+          </div>
+        </header>
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
+          <div className="space-y-8">
+            {/* Opción 1: Video URL */}
             <div>
-              <label htmlFor="exercise-secondary" className="text-gray-900 dark:text-white font-medium mb-2 block">Grupo Muscular Secundario</label>
-              <select 
-                id="exercise-secondary"
-                value={secondaryMuscle}
-                onChange={(e) => setSecondaryMuscle(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
+              <h3 className="text-gray-900 dark:text-white font-bold text-lg mb-4 flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center">1</div>
+                URL del Video
+              </h3>
+              <div>
+                <label htmlFor="video-url" className="text-gray-900 dark:text-white font-medium mb-2 block">Enlace del Video (YouTube, Vimeo, etc.)</label>
+                <input 
+                  id="video-url"
+                  type="url"
+                  value={video}
+                  onChange={(e) => setVideo(e.target.value)}
+                  className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none placeholder-gray-500 dark:placeholder-gray-400"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">Proporciona un enlace válido a un video que demuestre el ejercicio</p>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-200 dark:border-white/10 pt-8">
+              {/* Opción 2: Archivos Multimedia */}
+              <h3 className="text-gray-900 dark:text-white font-bold text-lg mb-4 flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center">2</div>
+                Archivos Multimedia
+              </h3>
+              <div
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                onClick={handleSelectMedia}
+                className="w-full border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition p-8 md:p-12"
               >
-                <option value="">Seleccionar grupo secundario</option>
-                <option value="Pecho">Pecho</option>
-                <option value="Espalda">Espalda</option>
-                <option value="Piernas">Piernas</option>
-                <option value="Hombros">Hombros</option>
-                <option value="Brazos">Brazos</option>
-              </select>
+                <Upload size={48} className="text-gray-400" />
+                <div className="text-center">
+                  <p className="text-gray-900 dark:text-white font-bold">Arrastra aquí o haz clic para seleccionar</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">PNG, JPG, MP4</p>
+                </div>
+              </div>
+
+              {previewMedia.length > 0 && (
+                <div className="mt-8">
+                  <p className="text-gray-900 dark:text-white font-medium mb-4">Multimedia cargada ({previewMedia.length})</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {previewMedia.map((file) => (
+                      <div key={file.key} className="relative rounded-lg overflow-hidden bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+                        {file.type.startsWith('image/') ? (
+                          <img src={file.url} alt={file.name} className="w-full aspect-video object-cover" />
+                        ) : (
+                          <video src={file.url} className="w-full aspect-video bg-black" />
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (file.isStored) {
+                              handleRemoveStoredMedia(file.key);
+                            } else {
+                              const idx = mediaFiles.findIndex(f => f.name === file.name);
+                              if (idx >= 0) handleRemoveMedia(idx);
+                            }
+                          }}
+                          className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
+
           <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
             <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
             <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
@@ -898,6 +1129,11 @@ const CreateExercise: React.FC = () => {
       </div>
       </Layout>
     );
+  }
+
+  // [ELIMINADO - Step 8 (Multimedia combinado con Step 5)]
+  if (step === 999) {
+    return null;
   }
 
   // Step 1: Basic Info Form Screen
@@ -930,16 +1166,36 @@ const CreateExercise: React.FC = () => {
                <select 
                  id="exercise-equipment"
                  value={equipment}
-                 onChange={(e) => setEquipment(e.target.value)}
+                 onChange={(e) => setEquipment(e.target.value as Equipment)}
                  className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
                >
-                 <option value="">Seleccionar equipo</option>
-                 <option value="Barra">Barra</option>
-                 <option value="Mancuernas">Mancuernas</option>
-                 <option value="Máquina">Máquina</option>
-                 <option value="Peso Corporal">Peso Corporal</option>
+                 {Object.entries(EquipmentLabels).map(([key, label]) => (
+                   <option key={key} value={key}>{label}</option>
+                 ))}
                </select>
              </div>
+          </div>
+
+          <div className="col-span-2">
+            <label htmlFor="parent-exercise" className="text-gray-900 dark:text-white font-medium mb-2 block">
+              ¿Es variante de otro ejercicio? (Opcional)
+            </label>
+            <select 
+              id="parent-exercise"
+              value={parentExerciseId}
+              onChange={(e) => setParentExerciseId(e.target.value)}
+              className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
+            >
+              <option value="">No es variante</option>
+              {availableExercises.map(ex => (
+                <option key={ex.id} value={ex.id}>
+                  {ex.name} ({EquipmentLabels[ex.equipment]})
+                </option>
+              ))}
+            </select>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+              Si este ejercicio es una variante de otro, selecciona el ejercicio base.
+            </p>
           </div>
 
           {/* Selección de músculos se mueve a Paso 2 */}

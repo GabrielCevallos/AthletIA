@@ -15,6 +15,8 @@ export type Split = {
   nTrainingDays: number;
   nRestDays: number;
   trainingDays: Days[];
+  // Mapeo día -> rutina seleccionada
+  routineSchedule?: Partial<Record<Days, string>>;
   official: boolean;
   createdAt: string;
   updatedAt: string;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Plus, Trash2, Edit } from 'lucide-react'
+import { Plus, Trash2, Edit, Eye } from 'lucide-react'
 import Layout from '../../components/layout/Layout'
 import { deleteSplit, getAllSplits, Split } from '../../lib/splitStore'
 import Swal from 'sweetalert2'
@@ -88,6 +88,14 @@ export default function Splits() {
                 <div className="flex flex-col gap-2 text-xs text-gray-600 dark:text-gray-400">
                   {s.description && <p className="line-clamp-2">{s.description}</p>}
                   <p>Días: {getDayNames(s.trainingDays.length > 0 ? s.trainingDays : ['Sin asignar'])}</p>
+                </div>
+                <div className="mt-auto pt-3 border-t border-gray-200 dark:border-white/10">
+                  <button
+                    onClick={() => navigate(`/splits/${s.id}`)}
+                    className="w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-white/10 rounded-lg py-2 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary text-sm font-medium"
+                  >
+                    <Eye size={16} /> Ver detalles
+                  </button>
                 </div>
               </div>
             ))}

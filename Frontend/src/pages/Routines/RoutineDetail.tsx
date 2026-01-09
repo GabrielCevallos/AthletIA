@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Trash2, Edit } from 'lucide-react'
+import { ArrowLeft, Trash2, Edit, ExternalLink } from 'lucide-react'
 import Layout from '../../components/layout/Layout'
 import { deleteRoutine, getRoutineById, Routine } from '../../lib/routineStore'
 import Swal from 'sweetalert2'
@@ -81,15 +81,28 @@ export default function RoutineDetail() {
         {routine.description && <p className="text-gray-700 dark:text-white/90 leading-relaxed">{routine.description}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {routine.exercises.map((ex) => (
-            <div key={ex.id} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3">
-              <p className="text-gray-900 dark:text-white font-bold">{ex.name}</p>
-              <p className="text-gray-600 dark:text-gray-300 text-xs">{ex.muscle}</p>
-              <div className="flex gap-3 text-xs text-gray-700 dark:text-white/90 mt-2">
+            <div key={ex.id} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 flex flex-col gap-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-gray-900 dark:text-white font-bold">{ex.name}</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-xs">{ex.muscle}</p>
+                </div>
+                {ex.uid && (
+                  <Link
+                    to={`/exercises/${ex.uid}`}
+                    className="flex-shrink-0 p-1.5 text-primary hover:bg-primary/10 rounded transition-colors"
+                    title="Ver ejercicio"
+                  >
+                    <ExternalLink size={16} />
+                  </Link>
+                )}
+              </div>
+              <div className="flex gap-3 text-xs text-gray-700 dark:text-white/90">
                 {ex.sets && <span>Series: {ex.sets}</span>}
                 {ex.reps && <span>Reps: {ex.reps}</span>}
                 {ex.rest && <span>Descanso: {ex.rest}</span>}
               </div>
-              {ex.notes && <p className="text-[#92c9a4] text-xs mt-1">{ex.notes}</p>}
+              {ex.notes && <p className="text-[#92c9a4] text-xs">{ex.notes}</p>}
             </div>
           ))}
         </div>

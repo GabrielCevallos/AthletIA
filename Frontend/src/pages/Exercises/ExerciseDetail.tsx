@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Eye, EyeOff, Dumbbell, Target, Video, ImageIcon, ListOrdered, Heart, GitBranch, Edit, Trash2 } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import { deleteExercise, getExerciseById, Exercise } from '../../lib/exerciseStore';
+import { MuscleTargetLabels, EquipmentLabels } from '../../lib/enums';
 import Swal from 'sweetalert2';
 
 const ExerciseDetail: React.FC = () => {
@@ -101,27 +102,25 @@ const ExerciseDetail: React.FC = () => {
       {/* Main Info */}
       <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 col-span-2">
             <div className="p-2 bg-primary/15 rounded-lg">
               <Target size={24} className="text-primary" />
             </div>
-            <div>
-              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-1">Grupo Muscular Principal</p>
-              <p className="text-gray-900 dark:text-white text-lg font-bold">{exercise.muscle}</p>
+            <div className="flex-1">
+              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-2">Grupos Musculares</p>
+              <div className="flex flex-wrap gap-2">
+                {exercise.muscleTarget && exercise.muscleTarget.length > 0 ? (
+                  exercise.muscleTarget.map(muscle => (
+                    <span key={muscle} className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm font-semibold">
+                      {MuscleTargetLabels[muscle]}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-gray-900 dark:text-white text-lg font-bold">No especificado</span>
+                )}
+              </div>
             </div>
           </div>
-          
-          {exercise.secondaryMuscle && (
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-primary/15 rounded-lg">
-                <Target size={24} className="text-primary/80" />
-              </div>
-              <div>
-                <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-1">Grupo Muscular Secundario</p>
-                <p className="text-gray-900 dark:text-white text-lg font-bold">{exercise.secondaryMuscle}</p>
-              </div>
-            </div>
-          )}
 
           <div className="flex items-start gap-3">
             <div className="p-2 bg-primary/15 rounded-lg">
@@ -129,9 +128,26 @@ const ExerciseDetail: React.FC = () => {
             </div>
             <div>
               <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-1">Equipo</p>
-              <p className="text-gray-900 dark:text-white text-lg font-bold">{exercise.equipment}</p>
+              <p className="text-gray-900 dark:text-white text-lg font-bold">{EquipmentLabels[exercise.equipment]}</p>
             </div>
           </div>
+
+          {exercise.parentExerciseId && exercise.parentExercise && (
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-primary/15 rounded-lg">
+                <GitBranch size={24} className="text-primary" />
+              </div>
+              <div>
+                <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-1">Variante de</p>
+                <button 
+                  onClick={() => navigate(`/exercises/${exercise.parentExerciseId}`)}
+                  className="text-primary hover:underline text-lg font-bold text-left"
+                >
+                  {exercise.parentExercise.name} ({EquipmentLabels[exercise.parentExercise.equipment]})
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {exercise.description && (

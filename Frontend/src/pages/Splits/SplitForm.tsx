@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Save } from 'lucide-react'
 import Layout from '../../components/layout/Layout'
 import { getSplitById, upsertSplit, Days, Split } from '../../lib/splitStore'
+import { getAllRoutines, Routine } from '../../lib/routineStore'
+import { useAuth } from '../../context/AuthContext'
 import Swal from 'sweetalert2'
 
 const DAY_OPTIONS = [
@@ -18,23 +20,36 @@ const DAY_OPTIONS = [
 export default function SplitForm() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { role } = useAuth()
+  const isAdmin = role === 'ADMIN'
+  
+  console.log('🔑 SplitForm - Role:', role, 'isAdmin:', isAdmin)
+  
+  const [routines, setRoutines] = useState<Routine[]>([])
   const [form, setForm] = useState<Partial<Split>>({
     name: '',
     description: '',
     nTrainingDays: 0,
     nRestDays: 0,
     trainingDays: [],
-    official: false,
+    routineSchedule: {},
+    official: isAdmin, // Marcar como oficial si es admin
   })
 
   useEffect(() => {
+    // Cargar rutinas existentes
+    setRoutines(getAllRoutines())
+
     if (id && id !== 'new') {
       const existing = getSplitById(id)
       if (existing) {
-        setForm(existing)
+        setForm({
+          ...existing,
+          official: isAdmin ? true : existing.official, // Forzar oficial si es admin
+        })
       }
     }
-  }, [id])
+  }, [id, isAdmin])
 
   const handleChange = (field: string, value: any) => {
     setForm((prev) => ({
@@ -48,13 +63,30 @@ export default function SplitForm() {
       const days = prev.trainingDays || []
       const exists = days.includes(day)
       const newTrainingDays = exists ? (prev.nTrainingDays || 1) - 1 : (prev.nTrainingDays || 0) + 1
+      const nextTrainingDays = exists ? days.filter((d) => d !== day) : [...days, day]
+      const nextSchedule = { ...(prev.routineSchedule || {}) }
+      if (exists) {
+        // Al quitar el día, también eliminar la asignación de rutina
+        delete nextSchedule[day]
+      }
       return {
         ...prev,
-        trainingDays: exists ? days.filter((d) => d !== day) : [...days, day],
+        trainingDays: nextTrainingDays,
         nTrainingDays: newTrainingDays,
         nRestDays: 7 - newTrainingDays,
+        routineSchedule: nextSchedule,
       }
     })
+  }
+
+  const assignRoutineToDay = (day: Days, routineId: string) => {
+    setForm((prev) => ({
+      ...prev,
+      routineSchedule: {
+        ...(prev.routineSchedule || {}),
+        [day]: routineId || undefined,
+      },
+    }))
   }
 
   const handleSave = async () => {
@@ -83,7 +115,8 @@ export default function SplitForm() {
       nTrainingDays: form.nTrainingDays || 0,
       nRestDays: 7 - (form.nTrainingDays || 0),
       trainingDays: form.trainingDays || [],
-      official: form.official || false,
+      routineSchedule: form.routineSchedule || {},
+      official: isAdmin ? true : (form.official || false), // Forzar oficial si es admin
       createdAt: form.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
@@ -160,6 +193,30 @@ export default function SplitForm() {
               ))}
             </div>
           </div>
+
+          {/* Relacionar rutinas con días seleccionados */}
+          {(form.trainingDays || []).length > 0 && (
+            <div className="flex flex-col gap-3">
+              <label className="font-semibold text-gray-900 dark:text-white text-sm">Asignar rutina por día</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {(form.trainingDays || []).map((day) => (
+                  <div key={day} className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{DAY_OPTIONS.find(d => d.value === day)?.label}</span>
+                    <select
+                      value={(form.routineSchedule || {})[day] || ''}
+                      onChange={(e) => assignRoutineToDay(day, e.target.value)}
+                      className="px-3 py-2.5 border border-gray-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-gray-900 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      <option value="">Sin rutina</option>
+                      {routines.map((r) => (
+                        <option key={r.id} value={r.id}>{r.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Resumen */}
           <div className="flex flex-col gap-2 pt-4 border-t border-gray-200 dark:border-white/10">
