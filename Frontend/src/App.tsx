@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
+import Register from './pages/Register'
+import CompleteProfile from './pages/CompleteProfile'
 import Dashboard from './pages/Dashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import AuthCallback from './pages/AuthCallback'
@@ -10,6 +12,8 @@ import Routines from './pages/Routines/Routines'
 import RoutineDetail from './pages/Routines/RoutineDetail'
 import RoutineCreator from './pages/Routines/RoutineCreator'
 import UserManagement from './pages/UserManagement'
+import UserProfile from './pages/UserProfile'
+import MobileAppRedirect from './pages/MobileAppRedirect'
 import { AccessibilityProvider } from './context/AccessibilityContext'
 import AccessibilityButton from './components/AccessibilityButton'
 
@@ -20,7 +24,10 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/mobile-app-redirect" element={<MobileAppRedirect />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/exercises" element={<Exercises />} />
@@ -32,6 +39,7 @@ export default function App() {
             <Route path="/routines/:id" element={<RoutineDetail />} />
             <Route path="/routines/:id/edit" element={<RoutineCreator />} />
             <Route path="/users" element={<UserManagement />} />
+          <Route path="/users/:accountId" element={<UserProfile />} />
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

@@ -37,7 +37,6 @@ export class Account {
   @OneToOne(() => Profile, (profile) => profile.account, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
   profile: Profile;
 
   @Column({ default: false })
@@ -48,6 +47,9 @@ export class Account {
 
   @Column({ type: 'int', default: 0 })
   verificationResendCount: number;
+
+  @Column({ default: false })
+  moderatorRequested: boolean;
 
   @Column({ type: 'timestamp', nullable: true })
   lastVerificationSentAt: Date | null;

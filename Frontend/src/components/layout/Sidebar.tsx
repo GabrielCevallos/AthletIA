@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false)
-  const { logout } = useAuth()
+  const { logout, name, role, accountId } = useAuth()
   const navigate = useNavigate()
   
   const linkCls = ({ isActive }: { isActive: boolean }) =>
@@ -99,6 +99,24 @@ export default function Sidebar() {
         </div>
 
         <div className="mt-6 pt-4 border-t border-gray-200 dark:border-white/10">
+          <Link 
+            to={accountId ? `/users/${accountId}` : '#'}
+            className="mb-4 px-3 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-[#233c48]/60 p-2 rounded-lg transition-colors group"
+            title="Ver mi perfil"
+          >
+            <div className="w-10 h-10 rounded-full bg-primary/20 dark:bg-primary/30 flex items-center justify-center text-primary dark:text-sky-200 shrink-0 group-hover:scale-105 transition-transform">
+               <span className="font-bold">{(name || 'S').charAt(0).toUpperCase()}</span>
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">
+                {name || 'Sin nombre'}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 capitalize truncate">
+                {role || 'Usuario'}
+              </p>
+            </div>
+          </Link>
+
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"

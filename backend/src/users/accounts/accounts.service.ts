@@ -13,13 +13,14 @@ import {
   RegisterAccountRequest,
 } from 'src/auth/dto/auth.dto';
 import { AccountState } from './enum/account-states.enum';
-import { User, UserItem } from './dto/user-response.dtos';
+import { User } from './dto/user-response.dtos';
 import { Role } from './enum/role.enum';
 import { PaginationRequest } from '../../common/request/pagination.request.dto';
 import { PaginationResponse } from 'src/common/interfaces/pagination-response.interface';
 import { ResponseBody } from 'src/common/response/api.response';
 import { ProfilesService } from 'src/users/profiles/profiles.service';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
+import { MailService } from 'src/common/mail/mail.service';
 
 @Injectable()
 export class AccountsService {
@@ -27,6 +28,7 @@ export class AccountsService {
     @InjectRepository(Account)
     private readonly accountsRepository: Repository<Account>,
     private readonly profilesService: ProfilesService,
+    private readonly mailService: MailService,
   ) {}
 
   async createAdmin(
@@ -55,6 +57,7 @@ export class AccountsService {
     const account = this.accountsRepository.create({
       ...registerRequest,
       password: await argon2.hash(registerRequest.password),
+      hasProfile: false,
       status: AccountState.ACTIVE,
       isEmailVerified: true, // Temporary: set to true, email verification to be implemented
     });
@@ -81,27 +84,44 @@ export class AccountsService {
 
   async findAll(
     paginationRequest: PaginationRequest,
-  ): Promise<PaginationResponse<UserItem>> {
+  ): Promise<PaginationResponse<User>> {
     const { limit = 10, offset = 0 } = paginationRequest;
     const [list, total] = await this.accountsRepository.findAndCount({
-      where: { role: Role.USER },
+      where: { role: Role.USER, hasProfile: true },
+      relations: ['profile'],
       take: limit,
       skip: offset,
       order: { email: 'DESC' },
-      relations: ['profile'],
     });
     return {
       total,
       items: list.map((account) => {
-        const { email, id, status, profile } = account;
-        return { email, id, status, name: profile?.name };
+        const { email, id, role, hasProfile, status, profile } = account;
+        return {
+          email,
+          id,
+          role,
+          state: status,
+          hasProfile,
+          name: profile?.name,
+          birthDate: profile?.birthDate,
+        };
       }),
       limit,
       offset,
     };
   }
 
-  async completeProfileSetup(
+  async markProfileAsComplete(accountId: string): Promise<void> {
+    const account = await this.accountsRepository.findOneBy({ id: accountId });
+    if (!account) {
+      throw new NotFoundException('Account not found');
+    }
+    account.hasProfile = true;
+    await this.accountsRepository.save(account);
+  }
+
+  /* async completeProfileSetup(
     account: Account,
     profileRequest: ProfileRequest,
   ): Promise<void> {
@@ -110,7 +130,7 @@ export class AccountsService {
     account.hasProfile = true;
     account.profile = profile;
     await this.accountsRepository.save(account);
-  }
+  } */
 
   async findByEmail(email: string): Promise<Account | null> {
     const account = await this.accountsRepository.findOneBy({ email });
@@ -129,7 +149,8 @@ export class AccountsService {
     return {
       email,
       id: account.id,
-      status,
+      state: status,
+      hasProfile: account.hasProfile,
       role,
       name: profile?.name || '',
       birthDate: profile?.birthDate || null,
@@ -246,5 +267,40 @@ export class AccountsService {
       (account.verificationResendCount || 0) + 1;
     account.lastVerificationSentAt = new Date();
     await this.accountsRepository.save(account);
+  }
+
+  async requestModeratorRole(userId: string): Promise<{ message: string }> {
+    const account = await this.accountsRepository.findOne({
+      where: { id: userId },
+      relations: ['profile'],
+    });
+    if (!account) {
+      throw new NotFoundException('Account not found');
+    }
+    
+    if (account.role === Role.MODERATOR || account.role === Role.ADMIN) {
+      return { message: 'User is already a moderator or admin' };
+    }
+
+    if (account.moderatorRequested) {
+      throw new BadRequestException('Moderator role request already submitted');
+    }
+
+    const admins = await this.accountsRepository.find({
+      where: { role: Role.ADMIN },
+    });
+
+    for (const admin of admins) {
+      await this.mailService.sendModeratorRequestEmail(
+        admin.email,
+        account.email,
+        account.id,
+      );
+    }
+
+    account.moderatorRequested = true;
+    await this.accountsRepository.save(account);
+
+    return { message: 'Moderator role request submitted successfully' };
   }
 }

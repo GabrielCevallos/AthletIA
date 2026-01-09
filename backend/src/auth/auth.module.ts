@@ -5,7 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AccountsModule } from 'src/users/accounts/accounts.module';
 import { PassportModule } from '@nestjs/passport';
 import { GoogleStrategy } from './strategies/google.strategy';
-import { MailService } from 'src/common/mail/mail.service';
+import { MailModule } from 'src/common/mail/mail.module';
 import { AdminGuard } from './guards/admin.guard';
 import { OwnershipGuard } from './guards/ownership.guard';
 
@@ -17,8 +17,9 @@ import { OwnershipGuard } from './guards/ownership.guard';
       secret: process.env.JWT_SECRET_KEY_ACCESS || 'defaultSecretKey',
     }),
     AccountsModule,
+    MailModule,
   ],
-  providers: [AuthService, GoogleStrategy, MailService, AdminGuard, OwnershipGuard],
+  providers: [AuthService, GoogleStrategy, AdminGuard, OwnershipGuard],
   controllers: [AuthController],
   exports: [AuthService, AdminGuard, OwnershipGuard],
 })

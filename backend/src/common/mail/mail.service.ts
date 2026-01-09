@@ -56,4 +56,39 @@ export class MailService {
       throw e;
     }
   }
+
+  async sendModeratorRequestEmail(
+    adminEmail: string,
+    requesterEmail: string,
+    requesterId: string,
+  ): Promise<void> {
+    const subject = 'Nueva solicitud de moderador';
+    const html = `<p>Hola Admin,</p>
+      <p>El usuario <strong>${requesterEmail}</strong> (ID: ${requesterId}) ha solicitado ser moderador.</p>
+      <p>Por favor revisa su perfil y gestiona los permisos en la plataforma.</p>`;
+
+    if (!this.transporter) {
+      this.logger.log(
+        `Simulated moderator request email to ${adminEmail} for user ${requesterEmail}`,
+      );
+      return;
+    }
+
+    try {
+      await this.transporter.sendMail({
+        from: process.env.SMTP_FROM || 'no-reply@example.com',
+        to: adminEmail,
+        subject,
+        html,
+      });
+      this.logger.log(`Moderator request email sent to ${adminEmail}`);
+    } catch (e) {
+      this.logger.error(
+        `Failed to send moderator request email to ${adminEmail}`,
+        e,
+      );
+      // We don't throw here to avoid failing the user request if email fails?
+      // Or maybe we should log and continue.
+    }
+  }
 }

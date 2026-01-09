@@ -4,10 +4,14 @@ import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { Gender } from 'src/users/profiles/enum/gender.enum';
 import { AccountsService } from 'src/users/accounts/accounts.service';
 import { RoutineGoal } from 'src/workout/routines/enum/routine-goal.enum';
+import { ProfilesService } from 'src/users/profiles/profiles.service';
 
 @Injectable()
 export class BootstrapService implements OnApplicationBootstrap {
-  constructor(private readonly accountService: AccountsService) {}
+  constructor(
+    private readonly accountService: AccountsService,
+    private readonly profilesService: ProfilesService
+  ) {}
 
   async onApplicationBootstrap(): Promise<void> {
     const user = {
@@ -28,6 +32,7 @@ export class BootstrapService implements OnApplicationBootstrap {
       throw new Error('Admin account not found after creation');
     }
 
-    await this.accountService.completeProfileSetup(account, profile);
+    await this.profilesService.create(account.id, profile);
+    await this.accountService.markProfileAsComplete(account.id);
   }
 }

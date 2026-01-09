@@ -2,38 +2,47 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ThemeToggle from '../components/ThemeToggle'
 import { useAuth } from '../context/AuthContext'
+import api from '../lib/api'
 
 export default function AuthCallback() {
   const navigate = useNavigate()
   const { loginWithTokens } = useAuth()
 
   useEffect(() => {
-    console.log('🔗 AuthCallback: parseando URL hash')
-    console.log('🔗 Full hash:', window.location.hash)
-    const hash = new URLSearchParams(window.location.hash.substring(1))
-    const accessToken = hash.get('accessToken')
-    const refreshToken = hash.get('refreshToken')
-    const accountId = hash.get('accountId')
+    const processLogin = async () => {
+      console.log('🔗 AuthCallback: parseando URL hash')
+      const hash = new URLSearchParams(window.location.hash.substring(1))
+      const accessToken = hash.get('accessToken')
+      const refreshToken = hash.get('refreshToken')
+      const accountId = hash.get('accountId')
 
-    console.log('🔗 Tokens extraídos:', {
-      hasAccessToken: !!accessToken,
-      hasRefreshToken: !!refreshToken,
-      accountId,
-    })
-
-    if (accessToken && refreshToken) {
-      console.log('✅ Tokens válidos, llamando loginWithTokens')
-      loginWithTokens(accessToken, refreshToken, accountId || undefined)
-      console.log('✅ Esperando actualización de estado...')
-      // Esperar un tick para que React actualice el estado antes de navegar
-      setTimeout(() => {
-        console.log('✅ Redirigiendo a dashboard')
-        navigate('/dashboard', { replace: true })
-      }, 100)
-    } else {
-      console.log('❌ Tokens inválidos, redirigiendo a login')
-      navigate('/login', { replace: true })
+      if (accessToken && refreshToken) {
+        console.log('✅ Tokens válidos, llamando loginWithTokens')
+        loginWithTokens(accessToken, refreshToken, accountId || undefined)
+        
+        try {
+          console.log('🔍 Verificando estado del perfil...')
+          const { data: user } = await api.get('auth/me')
+          
+          console.log('👤 Estado del usuario:', user)
+          if (user.data.hasProfile) {
+            console.log('✅ Perfil completo, redirigiendo a dashboard')
+            navigate('/dashboard', { replace: true })
+          } else {
+            console.log('⚠️ Perfil incompleto, redirigiendo a completar perfil')
+            navigate('/complete-profile', { replace: true })
+          }
+        } catch (error) {
+          console.error('❌ Error verificando perfil:', error)
+          navigate('/login', { replace: true })
+        }
+      } else {
+        console.log('❌ Tokens inválidos, redirigiendo a login')
+        navigate('/login', { replace: true })
+      }
     }
+
+    processLogin()
   }, [navigate, loginWithTokens])
 
   return (

@@ -5,36 +5,36 @@ export const MOCK_USERS: User[] = [
     id: '1',
     name: 'Sarah Jenkins',
     email: 'sarah.j@example.com',
-    role: 'Trainer',
+    role: 'user',
     age: 29,
-    status: 'Active',
+    state: 'ACTIVE',
     lastAccess: 'Today, 10:23 AM'
   },
   {
     id: '2',
     name: 'Mike Ross',
     email: 'mike.ross@example.com',
-    role: 'Member',
+    role: 'user',
     age: 34,
-    status: 'Inactive',
+    state: 'ACTIVE',
     lastAccess: 'Oct 24, 2023'
   },
   {
     id: '3',
     name: 'Elena Fisher',
     email: 'elena.fish@example.com',
-    role: 'Member',
+    role: 'user',
     age: 24,
-    status: 'Suspended',
+    state: 'SUSPENDED',
     lastAccess: 'Never'
   },
   {
     id: '4',
     name: 'David Kim',
     email: 'david.kim@example.com',
-    role: 'Trainer',
+    role: 'user',
     age: 31,
-    status: 'Active',
+    state: 'ACTIVE',
     lastAccess: 'Yesterday, 4:15 PM'
   }
 ];

@@ -17,7 +17,7 @@ export const messages = {
   accountAlreadySetUp: 'This account has already been set up',
   passwordChanged: 'Password changed successfully',
   emailNotVerified: 'Email is not verified',
-  verificationEmailSent: 'Verification email sent',
+  verificationEmailSent: 'We have sent a verification email to your inbox',
   emailAlreadyVerified: 'Email is already verified',
   tooManyVerificationRequests:
     'Too many verification email requests. Try again later.',
