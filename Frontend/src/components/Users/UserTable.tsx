@@ -199,7 +199,7 @@ export const UserTable = () => {
       </div>
 
       {/* Data Table */}
-      <div className="w-full overflow-hidden rounded-xl border border-gray-200 dark:border-[#325567] bg-white dark:bg-[#1a2831] shadow-sm overflow-x-auto">
+      <div className="w-full overflow-hidden rounded-xl border border-gray-200 dark:border-[#325567] bg-white dark:bg-[#1a2831] shadow-card-md overflow-x-auto">
         <table className="w-full text-left text-sm text-gray-600 dark:text-[#92b7c9]">
           <thead className="bg-gray-50 dark:bg-[#0d1419] text-xs uppercase font-semibold text-gray-700 dark:text-white border-b border-gray-200 dark:border-[#325567]">
             <tr>

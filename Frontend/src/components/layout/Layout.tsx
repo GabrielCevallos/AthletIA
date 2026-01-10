@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       </main>
       
       {/* Botón flotante de cambio de tema */}
-      <div className="fixed bottom-6 left-6 z-40 lg:left-6">
+      <div className="fixed top-6 right-6 z-40">
         <ThemeToggle />
       </div>
     </div>

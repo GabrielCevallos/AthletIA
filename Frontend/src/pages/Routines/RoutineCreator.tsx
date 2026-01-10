@@ -128,7 +128,7 @@ const RoutineCreator: React.FC = () => {
 
          <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 flex-1 min-h-0" aria-label="Constructor de rutina">
           {/* Library */}
-          <aside className="bg-white dark:bg-background-dark rounded-xl border border-gray-200 dark:border-white/10 flex flex-col overflow-hidden" aria-labelledby="library-heading">
+          <aside className="bg-white dark:bg-background-dark rounded-xl border border-gray-200 dark:border-white/10 flex flex-col overflow-hidden shadow-card-md" aria-labelledby="library-heading">
            <div className="p-3 md:p-4 border-b border-gray-200 dark:border-white/10">
             <h2 id="library-heading" className="text-gray-900 dark:text-white text-base md:text-lg font-bold mb-3">Biblioteca</h2>
                 <div className="relative">

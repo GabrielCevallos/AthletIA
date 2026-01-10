@@ -18,6 +18,10 @@ export default {
         xl: '0.75rem',
         full: '9999px',
       },
+      boxShadow: {
+        'card-light': '0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        'card-dark': '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2)',
+      },
     },
   },
   plugins: [require('@tailwindcss/forms'), require('@tailwindcss/container-queries')],

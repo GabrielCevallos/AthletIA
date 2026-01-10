@@ -149,7 +149,7 @@ export default function SplitForm() {
           </p>
         </header>
 
-        <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-4">
+        <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-4 shadow-card-md">
           {/* Nombre */}
           <div className="flex flex-col gap-2">
             <label className="font-semibold text-gray-900 dark:text-white text-sm">Nombre *</label>

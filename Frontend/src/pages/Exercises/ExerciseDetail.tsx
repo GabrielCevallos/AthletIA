@@ -100,7 +100,7 @@ const ExerciseDetail: React.FC = () => {
       </header>
 
       {/* Main Info */}
-      <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
+      <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex items-start gap-3 col-span-2">
             <div className="p-2 bg-primary/15 rounded-lg">
@@ -160,7 +160,7 @@ const ExerciseDetail: React.FC = () => {
 
       {/* Multimedia */}
       {exercise.mediaFiles && exercise.mediaFiles.length > 0 && (
-        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
           <div className="flex items-center gap-2 mb-4">
             <Video size={20} className="text-primary" />
             <h2 className="text-gray-900 dark:text-white text-xl font-bold">Contenido Multimedia</h2>
@@ -191,7 +191,7 @@ const ExerciseDetail: React.FC = () => {
 
       {/* Instructions */}
       {exercise.instructions && exercise.instructions.length > 0 && (
-        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
           <div className="flex items-center gap-2 mb-4">
             <ListOrdered size={20} className="text-primary" />
             <h2 className="text-gray-900 dark:text-white text-xl font-bold">Pasos de Ejecución</h2>
@@ -232,7 +232,7 @@ const ExerciseDetail: React.FC = () => {
 
       {/* Variants */}
       {exercise.variants && exercise.variants.length > 0 && (
-        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
           <div className="flex items-center gap-2 mb-4">
             <GitBranch size={20} className="text-primary" />
             <h2 className="text-gray-900 dark:text-white text-xl font-bold">Variantes del Ejercicio</h2>

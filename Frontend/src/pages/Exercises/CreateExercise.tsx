@@ -380,7 +380,7 @@ const CreateExercise: React.FC = () => {
           </div>
         </header>
 
-        <section aria-labelledby="preview-heading" className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
+        <section aria-labelledby="preview-heading" className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
           <h2 id="preview-heading" className="text-gray-900 dark:text-white text-xl md:text-2xl font-bold mb-6">Información Completa del Ejercicio</h2>
           
           {/* Sección 1: Información Básica */}
@@ -662,7 +662,7 @@ const CreateExercise: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Define beneficios y categorías (Opcional).</p>
           </div>
         </header>
-        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
           <div className="flex flex-col gap-6">
             <div>
               <label className="text-gray-900 dark:text-white font-medium mb-2 block">Título del Beneficio</label>

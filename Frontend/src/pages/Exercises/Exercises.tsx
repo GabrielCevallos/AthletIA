@@ -117,7 +117,7 @@ const Exercises: React.FC = () => {
         <h2 id="exercises-grid-heading" className="sr-only">Lista de ejercicios</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
           {exercises.map((ex) => (
-            <div key={ex.id} className="bg-white dark:bg-background-dark rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 hover:border-primary dark:hover:border-primary group transition-all shadow-sm hover:shadow-md">
+            <div key={ex.id} className="bg-white dark:bg-background-dark rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 hover:border-primary dark:hover:border-primary group transition-all shadow-card-md hover:shadow-lg">
               <div className="relative aspect-video">
                 <img src={ex.coverUrl || 'https://via.placeholder.com/400x250?text=Ejercicio'} alt={ex.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -230,7 +230,7 @@ export default function Measurements() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Formulario */}
           <div className="lg:col-span-1 flex flex-col gap-4">
-            <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-4">
+            <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-4 shadow-card-md">
               <h2 className="font-bold text-gray-900 dark:text-white">Medidas Básicas</h2>
 
               {/* Peso */}
@@ -334,7 +334,7 @@ export default function Measurements() {
 
           {/* Gráfica */}
           <div className="lg:col-span-2 flex flex-col gap-4">
-            <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6">
+            <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 shadow-card-md">
               <div className="flex items-center gap-2 mb-4">
                 <TrendingUp size={20} className="text-primary" />
                 <h2 className="font-bold text-gray-900 dark:text-white">Progreso</h2>
@@ -415,7 +415,7 @@ export default function Measurements() {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-3 sm:p-4 text-center"
+                  className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-3 sm:p-4 text-center shadow-card-md"
                 >
                   <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">
                     {item.label}
