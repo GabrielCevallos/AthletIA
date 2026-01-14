@@ -110,9 +110,10 @@ function generateFallbackDescription(name: string, muscle?: string, equipment?: 
 // Exercise API functions
 import { Exercise } from './exerciseStore';
 
-export async function saveExercise(exercise: Exercise): Promise<Exercise> {
+export async function saveExercise(exercise: Exercise, isEditing: boolean = false): Promise<Exercise> {
   try {
     console.log('📤 saveExercise llamado con exercise:', exercise);
+    console.log('📤 isEditing flag:', isEditing);
     
     // Asegurar que muscleTarget y exerciseType sean arrays
     const muscleTargetArray = Array.isArray(exercise.muscleTarget) 
@@ -136,17 +137,32 @@ export async function saveExercise(exercise: Exercise): Promise<Exercise> {
     }
     
     // Preparar los datos para el backend - solo los campos que espera el DTO
+    const minSetsValue = Number(exercise.minSets) || 3;
+    const maxSetsValue = Number(exercise.maxSets) || 5;
+    const minRepsValue = Number(exercise.minReps) || 8;
+    const maxRepsValue = Number(exercise.maxReps) || 12;
+    const minRestTimeValue = Number(exercise.minRestTime) || 60;
+    const maxRestTimeValue = Number(exercise.maxRestTime) || 120;
+
+    // Validar que los números sean válidos
+    if (isNaN(minSetsValue) || minSetsValue < 1) throw new Error('minSets debe ser un número >= 1');
+    if (isNaN(maxSetsValue) || maxSetsValue < 1) throw new Error('maxSets debe ser un número >= 1');
+    if (isNaN(minRepsValue) || minRepsValue < 1) throw new Error('minReps debe ser un número >= 1');
+    if (isNaN(maxRepsValue) || maxRepsValue < 1) throw new Error('maxReps debe ser un número >= 1');
+    if (isNaN(minRestTimeValue) || minRestTimeValue < 10) throw new Error('minRestTime debe ser un número >= 10');
+    if (isNaN(maxRestTimeValue) || maxRestTimeValue < 1) throw new Error('maxRestTime debe ser un número >= 1');
+
     const backendPayload = {
       name: exercise.name?.trim() || 'Sin nombre',
-      description: (exercise.description?.trim() || 'Descripción del ejercicio sin especificar'),
+      description: (exercise.description?.trim() || 'Descripción del ejercicio sin especificar') || 'Descripción del ejercicio sin especificar',
       equipment: exercise.equipment,
-      video: exercise.video || 'https://example.com/video',
-      minSets: Number(exercise.minSets) || 3,
-      maxSets: Number(exercise.maxSets) || 5,
-      minReps: Number(exercise.minReps) || 8,
-      maxReps: Number(exercise.maxReps) || 12,
-      minRestTime: Number(exercise.minRestTime) || 60,
-      maxRestTime: Number(exercise.maxRestTime) || 120,
+      video: exercise.video?.trim() || 'https://example.com/video',
+      minSets: minSetsValue,
+      maxSets: maxSetsValue,
+      minReps: minRepsValue,
+      maxReps: maxRepsValue,
+      minRestTime: minRestTimeValue,
+      maxRestTime: maxRestTimeValue,
       muscleTarget: muscleTargetArray,
       exerciseType: exerciseTypeArray,
       instructions: exercise.instructions || [],
@@ -154,25 +170,71 @@ export async function saveExercise(exercise: Exercise): Promise<Exercise> {
       parentExerciseId: exercise.parentExerciseId || undefined,
     };
 
-    console.log('📦 Payload preparado:', JSON.stringify(backendPayload, null, 2));
+    // Validar que la descripción tenga al menos 10 caracteres
+    if (backendPayload.description.length < 10) {
+      throw new Error('La descripción debe tener al menos 10 caracteres');
+    }
 
-    if (!exercise.id || exercise.isSeed) {
-      console.log('📨 Haciendo POST a /workout/exercises');
+    // Validar que el video sea una URL válida
+    try {
+      new URL(backendPayload.video);
+    } catch {
+      throw new Error('El video debe ser una URL válida');
+    }
+
+    console.log('📦 Payload preparado:', JSON.stringify(backendPayload, null, 2));
+    
+    // IMPORTANTE: Validar que NO hay campos undefined en el payload
+    const undefinedFields = Object.entries(backendPayload)
+      .filter(([_, value]) => value === undefined)
+      .map(([key]) => key);
+    
+    if (undefinedFields.length > 0) {
+      console.warn('⚠️ Campos undefined encontrados:', undefinedFields);
+      console.warn('⚠️ Estos campos serán eliminados del payload');
+      undefinedFields.forEach(field => {
+        delete (backendPayload as any)[field];
+      });
+    }
+
+    console.log('📦 Payload final:', JSON.stringify(backendPayload, null, 2));
+
+    // IMPORTANTE: Para nuevos ejercicios, siempre hacer POST
+    // Para ediciones existentes, hacer PATCH
+    // Usar el flag isEditing que viene desde CreateExercise para determinar si es edición
+    // Un ejercicio es "nuevo" si:
+    // 1. isEditing es false (no estamos editando)
+    // 2. Es un duplicado de seed exercise (isSeed = true)
+    
+    const isCreatingNewExercise = !isEditing || exercise.isSeed;
+    console.log('🔍 isCreatingNewExercise:', isCreatingNewExercise, '(isEditing:', isEditing, ', isSeed:', exercise.isSeed, ')');
+    
+    if (isCreatingNewExercise) {
+      console.log('📨 Haciendo POST a /workout/exercises (nuevo ejercicio)');
       console.log('🔑 Headers:', api.defaults.headers);
       const response = await api.post('/workout/exercises', backendPayload, {
         timeout: 30000, // 30 segundos timeout
       });
       // La respuesta es ResponseBody<Exercise> con estructura { success, message, data }
+      // axios envuelve la respuesta en response.data
       console.log('✅ Response del POST:', response.data);
-      return response.data?.data || response.data
+      const result = response.data?.data || response.data;
+      if (!result) {
+        throw new Error('No se recibió respuesta válida del servidor');
+      }
+      return result;
     } else {
-      // Si ya existe, hacer PATCH
-      console.log(`📨 Haciendo PATCH a /workout/exercises/${exercise.id}`);
+      // Si ya existe y viene de una edición (ID fue cargado desde el servidor)
+      console.log(`📨 Haciendo PATCH a /workout/exercises/${exercise.id} (actualizar ejercicio existente)`);
       const response = await api.patch(`/workout/exercises/${exercise.id}`, backendPayload, {
         timeout: 30000, // 30 segundos timeout
       })
       console.log('✅ Response del PATCH:', response.data);
-      return response.data?.data || response.data
+      const result = response.data?.data || response.data;
+      if (!result) {
+        throw new Error('No se recibió respuesta válida del servidor');
+      }
+      return result;
     }
   } catch (error: any) {
     console.error('❌ Error en saveExercise:', error);
@@ -182,6 +244,7 @@ export async function saveExercise(exercise: Exercise): Promise<Exercise> {
       statusText: error.response?.statusText,
       data: error.response?.data,
       headers: error.response?.headers,
+      config: error.config,
     });
     
     // Si hay un error de validación, mostrar detalles específicos
@@ -190,6 +253,11 @@ export async function saveExercise(exercise: Exercise): Promise<Exercise> {
       if (Array.isArray(validationErrors)) {
         console.error('🔍 Errores de validación:', validationErrors);
       }
+    }
+    
+    // Mejorar el mensaje de error para timeouts
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      error.message = 'Timeout: El servidor tardó demasiado en responder. Verifica que el backend está en ejecución.';
     }
     
     throw error

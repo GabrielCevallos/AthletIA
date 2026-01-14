@@ -34,14 +34,14 @@ export default function AccessibilityButton() {
 
   return (
     <>
-      {/* Botón flotante principal */}
+      {/* Botón flotante principal - responsivo */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-primary/50 transition-all flex items-center justify-center"
+        className="fixed bottom-6 right-4 sm:right-6 z-50 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-primary/50 transition-all flex items-center justify-center"
         aria-label="Abrir menú de accesibilidad"
         aria-expanded={isOpen}
       >
-        <span className="material-symbols-outlined text-2xl">accessibility</span>
+        <span className="material-symbols-outlined text-xl sm:text-2xl">accessibility</span>
       </button>
 
       {/* Panel de accesibilidad */}
@@ -54,8 +54,8 @@ export default function AccessibilityButton() {
             aria-hidden="true"
           />
 
-          {/* Panel */}
-          <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 max-h-[70vh] sm:max-h-[80vh] bg-white dark:bg-[#1a2831] rounded-xl shadow-2xl border border-gray-200 dark:border-[#325567] flex flex-col overflow-hidden">
+          {/* Panel - responsivo */}
+          <div className="fixed bottom-20 sm:bottom-24 right-2 sm:right-6 z-50 w-[calc(100vw-1rem)] sm:w-80 md:w-96 max-h-[70vh] sm:max-h-[75vh] md:max-h-[80vh] bg-white dark:bg-[#1a2831] rounded-xl shadow-2xl border border-gray-200 dark:border-[#325567] flex flex-col overflow-hidden">
             <div className="sticky top-0 bg-white dark:bg-[#1a2831] border-b border-gray-200 dark:border-[#325567] p-4 flex justify-between items-center">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                 Accesibilidad

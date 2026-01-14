@@ -249,6 +249,62 @@ export class ExerciseUpdate {
   })
   equipment?: Equipment;
 
+  @IsNumber()
+  @IsInt()
+  @IsOptional()
+  @IsPositive()
+  @Min(1)
+  @ApiPropertyOptional({ description: 'Minimum sets', minimum: 1, example: 3 })
+  minSets?: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsOptional()
+  @IsPositive()
+  @Max(10)
+  @ApiPropertyOptional({ description: 'Maximum sets', maximum: 10, example: 5 })
+  maxSets?: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsOptional()
+  @IsPositive()
+  @Min(1)
+  @ApiPropertyOptional({ description: 'Minimum reps', minimum: 1, example: 8 })
+  minReps?: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsOptional()
+  @IsPositive()
+  @Max(60)
+  @ApiPropertyOptional({ description: 'Maximum reps', maximum: 60, example: 15 })
+  maxReps?: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsOptional()
+  @IsPositive()
+  @Min(10)
+  @ApiPropertyOptional({
+    description: 'Minimum rest time in seconds',
+    minimum: 10,
+    example: 60,
+  })
+  minRestTime?: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsOptional()
+  @IsPositive()
+  @Max(600)
+  @ApiPropertyOptional({
+    description: 'Maximum rest time in seconds',
+    maximum: 600,
+    example: 120,
+  })
+  maxRestTime?: number;
+
   @IsUUID()
   @IsOptional()
   @ApiPropertyOptional({

@@ -194,8 +194,8 @@ const CreateExercise: React.FC = () => {
     try {
       console.log('✅ Validación pasada');
 
-      // Mostrar cargando
-      await Swal.fire({
+      // Mostrar cargando (no usar await aquí para no bloquear)
+      Swal.fire({
         title: 'Guardando ejercicio...',
         allowOutsideClick: false,
         didOpen: () => {
@@ -231,7 +231,9 @@ const CreateExercise: React.FC = () => {
 
       console.log('📋 Compilando payload...');
       const payload: Exercise = {
-        id: isEditing && id && !isSeedExercise ? id : crypto.randomUUID(),
+        // IMPORTANTE: Para nuevos ejercicios, NO generar ID (dejar undefined)
+        // El backend lo generará. Solo para ediciones usar ID existente.
+        id: (isEditing && id && !isSeedExercise) ? id : crypto.randomUUID(),
         name: name.trim(),
         muscleTarget,
         equipment,
@@ -263,11 +265,12 @@ const CreateExercise: React.FC = () => {
       };
 
       console.log('📤 Enviando payload al servidor...');
+      console.log('📤 isEditing:', isEditing);
       // Guardar en backend
       const { saveExercise } = await import('../../lib/api');
       console.log('✅ saveExercise importado');
       
-      const saved = await saveExercise(payload as any);
+      const saved = await saveExercise(payload as any, isEditing);
       console.log('✅ Ejercicio guardado en backend:', saved);
 
       // Guardar también en localStorage como backup
@@ -278,6 +281,9 @@ const CreateExercise: React.FC = () => {
       setMediaPreviewUrls([]);
       setStoredMedia(saved.mediaFiles || []);
       setCreatedAt(saved.createdAt);
+
+      // Cerrar el modal de carga antes de mostrar el de éxito
+      Swal.close();
 
       const action = isEditing ? (isSeedExercise ? 'duplicado' : 'actualizado') : 'creado';
       await Swal.fire({
@@ -303,7 +309,8 @@ const CreateExercise: React.FC = () => {
       console.error('Message:', errorMessage);
       console.error('Details:', errorDetails);
       
-      Swal.hideLoading();
+      // Cerrar el modal de carga
+      Swal.close();
       
       await Swal.fire({
         icon: 'error',
