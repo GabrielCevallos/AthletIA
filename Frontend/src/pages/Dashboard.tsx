@@ -13,7 +13,7 @@ export default function Dashboard() {
 
         {/* Gráfica de Usuarios Registrados */}
         <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[#325567] bg-white dark:bg-[#1a2831] p-4 sm:p-6">
+          <div className="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-[#325567] bg-white dark:bg-[#1a2831] p-4 sm:p-6 shadow-card-md">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
                 <p className="text-gray-900 dark:text-white font-medium text-sm sm:text-base">Usuarios Registrados</p>
@@ -49,7 +49,7 @@ export default function Dashboard() {
           <h2 className="text-gray-900 dark:text-white text-lg sm:text-[22px] font-bold pb-3 pt-3 sm:pt-5">Accesos Rápidos</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             <a href="/exercises"
-              className="flex flex-col items-center justify-center gap-2 p-5 sm:p-6 rounded-xl bg-white dark:bg-[#1a2831] border border-gray-200 dark:border-[#325567] hover:border-primary dark:hover:border-primary transition-colors focus-visible:ring-2 ring-primary">
+              className="flex flex-col items-center justify-center gap-2 p-5 sm:p-6 rounded-xl bg-white dark:bg-[#1a2831] border border-gray-200 dark:border-[#325567] hover:border-primary dark:hover:border-primary transition-colors focus-visible:ring-2 ring-primary shadow-card-md">
               <span className="material-symbols-outlined text-primary text-3xl sm:text-4xl" aria-hidden>search</span>
               <p className="text-gray-900 dark:text-white font-semibold text-sm sm:text-base text-center">Explorar Ejercicios</p>
             </a>

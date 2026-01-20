@@ -51,13 +51,13 @@ export default function Routines() {
       </header>
 
       {routines.length === 0 ? (
-        <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-6 text-gray-500 dark:text-gray-300 text-center">
+        <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-6 text-gray-500 dark:text-gray-300 text-center shadow-card-md">
           Aún no tienes rutinas. Crea la primera.
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
           {routines.map((r) => (
-            <div key={r.id} className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-5 flex flex-col gap-3 hover:border-primary dark:hover:border-primary transition-colors shadow-sm hover:shadow-md">
+            <div key={r.id} className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-5 flex flex-col gap-3 hover:border-primary dark:hover:border-primary transition-colors shadow-card-md hover:shadow-lg">
               <div className="flex justify-between items-start gap-2">
                 <div className="flex-1 min-w-0">
                   <p className="text-gray-900 dark:text-white font-bold text-base sm:text-lg truncate">{r.name}</p>

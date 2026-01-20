@@ -26,7 +26,7 @@ export default function Sidebar() {
       {/* Botón hamburguesa para móviles */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-50 lg:hidden p-2 rounded-lg bg-white dark:bg-[#111c22] text-gray-900 dark:text-white shadow-lg hover:bg-gray-100 dark:hover:bg-[#233c48] focus:outline-none focus:ring-2 focus:ring-primary border border-gray-200 dark:border-transparent"
+        className="fixed top-4 left-4 z-50 lg:hidden p-2 rounded-lg bg-white dark:bg-[#111c22] text-gray-900 dark:text-white shadow-card-md hover:bg-gray-100 dark:hover:bg-[#233c48] focus:outline-none focus:ring-2 focus:ring-primary border border-gray-200 dark:border-transparent"
         aria-label="Abrir menú de navegación"
         aria-expanded={isOpen}
       >
@@ -46,11 +46,11 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static top-0 left-0 h-full w-64 bg-white dark:bg-[#111c22] border-r border-gray-200 dark:border-transparent p-4 flex flex-col justify-between z-40 transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed lg:static top-0 left-0 h-screen w-64 bg-white dark:bg-[#111c22] border-r border-gray-200 dark:border-transparent p-4 flex flex-col justify-between z-40 transition-transform duration-300 lg:translate-x-0 shadow-card-md ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8 flex-1">
           {/* Logo */}
           <div className="flex items-center gap-3 pt-12 lg:pt-0">
             <span className="material-symbols-outlined text-primary text-3xl">fitness_center</span>

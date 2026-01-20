@@ -194,8 +194,8 @@ const CreateExercise: React.FC = () => {
     try {
       console.log('✅ Validación pasada');
 
-      // Mostrar cargando
-      await Swal.fire({
+      // Mostrar cargando (no usar await aquí para no bloquear)
+      Swal.fire({
         title: 'Guardando ejercicio...',
         allowOutsideClick: false,
         didOpen: () => {
@@ -231,7 +231,9 @@ const CreateExercise: React.FC = () => {
 
       console.log('📋 Compilando payload...');
       const payload: Exercise = {
-        id: isEditing && id && !isSeedExercise ? id : crypto.randomUUID(),
+        // IMPORTANTE: Para nuevos ejercicios, NO generar ID (dejar undefined)
+        // El backend lo generará. Solo para ediciones usar ID existente.
+        id: (isEditing && id && !isSeedExercise) ? id : crypto.randomUUID(),
         name: name.trim(),
         muscleTarget,
         equipment,
@@ -263,11 +265,12 @@ const CreateExercise: React.FC = () => {
       };
 
       console.log('📤 Enviando payload al servidor...');
+      console.log('📤 isEditing:', isEditing);
       // Guardar en backend
       const { saveExercise } = await import('../../lib/api');
       console.log('✅ saveExercise importado');
       
-      const saved = await saveExercise(payload as any);
+      const saved = await saveExercise(payload as any, isEditing);
       console.log('✅ Ejercicio guardado en backend:', saved);
 
       // Guardar también en localStorage como backup
@@ -278,6 +281,9 @@ const CreateExercise: React.FC = () => {
       setMediaPreviewUrls([]);
       setStoredMedia(saved.mediaFiles || []);
       setCreatedAt(saved.createdAt);
+
+      // Cerrar el modal de carga antes de mostrar el de éxito
+      Swal.close();
 
       const action = isEditing ? (isSeedExercise ? 'duplicado' : 'actualizado') : 'creado';
       await Swal.fire({
@@ -303,7 +309,8 @@ const CreateExercise: React.FC = () => {
       console.error('Message:', errorMessage);
       console.error('Details:', errorDetails);
       
-      Swal.hideLoading();
+      // Cerrar el modal de carga
+      Swal.close();
       
       await Swal.fire({
         icon: 'error',
@@ -365,22 +372,22 @@ const CreateExercise: React.FC = () => {
   if (step === 7) {
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
-        <header className="flex items-center gap-4">
+        <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 md:gap-8">
+        <header className="flex items-center gap-3 sm:gap-4 pt-12 sm:pt-0">
           <button 
             onClick={goPrev}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
+            className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
             aria-label="Volver"
           >
-            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
+            <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
           </button>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 7: Vista Previa y Confirmación</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Revisa la información antes de publicar.</p>
+          <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
+            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 7: Vista Previa y Confirmación</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Revisa la información antes de publicar.</p>
           </div>
         </header>
 
-        <section aria-labelledby="preview-heading" className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
+        <section aria-labelledby="preview-heading" className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
           <h2 id="preview-heading" className="text-gray-900 dark:text-white text-xl md:text-2xl font-bold mb-6">Información Completa del Ejercicio</h2>
           
           {/* Sección 1: Información Básica */}
@@ -569,18 +576,18 @@ const CreateExercise: React.FC = () => {
   if (step === 6) {
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
-        <header className="flex items-center gap-4">
+        <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 md:gap-8">
+        <header className="flex items-center gap-3 sm:gap-4 pt-12 sm:pt-0">
           <button 
             onClick={goPrev}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
+            className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
             aria-label="Volver"
           >
-            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
+            <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
           </button>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 6: Visibilidad</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Elige si será público o privado.</p>
+          <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
+            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 6: Visibilidad</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Elige si será público o privado.</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
@@ -652,17 +659,17 @@ const CreateExercise: React.FC = () => {
     };
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
-        <header className="flex items-center gap-4">
-          <button onClick={goPrev} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
-            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
+        <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 md:gap-8">
+        <header className="flex items-center gap-3 sm:gap-4 pt-12 sm:pt-0">
+          <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+            <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
           </button>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 5: Beneficios del Ejercicio</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Define beneficios y categorías (Opcional).</p>
+          <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
+            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 5: Beneficios del Ejercicio</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Define beneficios y categorías (Opcional).</p>
           </div>
         </header>
-        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
           <div className="flex flex-col gap-6">
             <div>
               <label className="text-gray-900 dark:text-white font-medium mb-2 block">Título del Beneficio</label>
@@ -866,14 +873,14 @@ const CreateExercise: React.FC = () => {
 
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
-        <header className="flex items-center gap-4">
-          <button onClick={goPrev} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
-            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
+        <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 md:gap-8">
+        <header className="flex items-center gap-3 sm:gap-4 pt-12 sm:pt-0">
+          <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+            <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
           </button>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 2: Grupos Musculares</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Selecciona uno o más grupos musculares que trabaja el ejercicio.</p>
+          <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
+            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 2: Grupos Musculares</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Selecciona uno o más grupos musculares que trabaja el ejercicio.</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
@@ -955,14 +962,14 @@ const CreateExercise: React.FC = () => {
 
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
-        <header className="flex items-center gap-4">
-          <button onClick={goPrev} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
-            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
+        <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 md:gap-8">
+        <header className="flex items-center gap-3 sm:gap-4 pt-12 sm:pt-0">
+          <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+            <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
           </button>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 3: Tipos de Ejercicio</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Selecciona uno o más tipos de ejercicio (ej: Fuerza, Cardio, etc).</p>
+          <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
+            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 3: Tipos de Ejercicio</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Selecciona uno o más tipos de ejercicio (ej: Fuerza, Cardio, etc).</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
@@ -1037,14 +1044,14 @@ const CreateExercise: React.FC = () => {
   if (step === 4) {
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
-        <header className="flex items-center gap-4">
-          <button onClick={goPrev} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
-            <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
+        <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 md:gap-8">
+        <header className="flex items-center gap-3 sm:gap-4 pt-12 sm:pt-0">
+          <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+            <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
           </button>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 4: Contenido Multimedia</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Añade un video (URL) o archivos multimedia (imágenes/videos). Puedes usar una o ambas opciones.</p>
+          <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
+            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 4: Contenido Multimedia</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Añade un video (URL) o archivos multimedia (imágenes/videos). Puedes usar una o ambas opciones.</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
@@ -1139,10 +1146,15 @@ const CreateExercise: React.FC = () => {
   // Step 1: Basic Info Form Screen
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto flex flex-col gap-6 md:gap-8">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Paso 1: {isEditing ? 'Editar Ejercicio' : 'Crear Nuevo Ejercicio'}</h1>
-        <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">{isEditing ? 'Actualiza la información del ejercicio.' : 'Introduce la información básica del ejercicio.'}</p>
+      <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 md:gap-8">
+      <header className="flex items-center gap-3 sm:gap-4 pt-12 sm:pt-0">
+        <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+          <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
+        </button>
+        <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
+          <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 1: {isEditing ? 'Editar Ejercicio' : 'Crear Nuevo Ejercicio'}</h1>
+          <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">{isEditing ? 'Actualiza la información del ejercicio.' : 'Introduce la información básica del ejercicio.'}</p>
+        </div>
       </header>
 
       <section aria-labelledby="exercise-form-heading">

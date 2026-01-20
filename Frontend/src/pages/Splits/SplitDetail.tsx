@@ -106,7 +106,7 @@ export default function SplitDetail() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Resumen */}
-          <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-3">
+          <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-3 shadow-card-md">
             <h2 className="font-bold text-gray-900 dark:text-white text-lg">Resumen</h2>
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-sm">
@@ -127,7 +127,7 @@ export default function SplitDetail() {
           </div>
 
           {/* Días seleccionados */}
-          <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-3">
+          <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-3 shadow-card-md">
             <h2 className="font-bold text-gray-900 dark:text-white text-lg">Días de entrenamiento</h2>
             <div className="flex flex-wrap gap-2">
               {split.trainingDays.length > 0 ? (
@@ -148,7 +148,7 @@ export default function SplitDetail() {
 
         {/* Rutinas asignadas por día */}
         {split.routineSchedule && Object.keys(split.routineSchedule).length > 0 && (
-          <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-4">
+          <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-4 shadow-card-md">
             <h2 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
               <Calendar size={20} /> Rutinas asignadas por día
             </h2>

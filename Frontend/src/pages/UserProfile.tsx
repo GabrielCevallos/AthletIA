@@ -121,7 +121,7 @@ export default function UserProfile() {
         </div>
 
         {/* Profile Header Card */}
-        <div className="bg-white dark:bg-[#1a2831] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-[#325567] mb-6 relative overflow-hidden">
+        <div className="bg-white dark:bg-[#1a2831] rounded-2xl p-6 sm:p-8 shadow-card-md border border-gray-100 dark:border-[#325567] mb-6 relative overflow-hidden">
           {/* Decorative background accent */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl pointer-events-none"></div>
 
@@ -179,7 +179,7 @@ export default function UserProfile() {
         {/* Detailed Info Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* General Information */}
-          <div className="bg-white dark:bg-[#1a2831] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-[#325567]">
+          <div className="bg-white dark:bg-[#1a2831] rounded-2xl p-6 shadow-card-md border border-gray-100 dark:border-[#325567]">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <UserIcon size={20} className="text-primary" />
               Información Personal
@@ -225,7 +225,7 @@ export default function UserProfile() {
           </div>
 
           {/* Fitness Goals */}
-          <div className="bg-white dark:bg-[#1a2831] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-[#325567]">
+          <div className="bg-white dark:bg-[#1a2831] rounded-2xl p-6 shadow-card-md border border-gray-100 dark:border-[#325567]">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <FileText size={20} className="text-primary" />
               Objetivos Fitness

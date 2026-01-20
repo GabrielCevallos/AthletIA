@@ -77,7 +77,7 @@ export default function RoutineDetail() {
         </div>
       </header>
 
-      <section className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-4">
+      <section className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-4 shadow-card-md">
         {routine.description && <p className="text-gray-700 dark:text-white/90 leading-relaxed">{routine.description}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {routine.exercises.map((ex) => (
