@@ -31,7 +31,7 @@ import {
   ApiAuthVerifyEmail,
   ApiAuthResendVerification,
   ApiAuthResendVerificationStatus,
-  ApiAuthCompleteProfileSetup,
+  //ApiAuthCompleteProfileSetup,
   ApiAuthChangePassword,
   ApiAuthRefreshToken,
   ApiAuthLogout,
@@ -40,7 +40,7 @@ import {
   ApiAuthMe,
 } from './swagger.decorators';
 import { User } from 'src/users/accounts/dto/user-response.dtos';
-import { log } from 'console';
+//import { log } from 'console';
 
 type accountIdOnly = { accountId: string };
 
@@ -186,7 +186,7 @@ export class AuthController {
   @ApiAuthMe()
   async me(@Req() req: Request): Promise<ResponseBody<User>> {
     const user = await this.authService.getCurrentUser(req.user);
-    log("Authenticated user: ", user);
+    //log("Authenticated user: ", user);
     return ResponseBody.success(user, 'Authenticated user fetched');
   }
 }
