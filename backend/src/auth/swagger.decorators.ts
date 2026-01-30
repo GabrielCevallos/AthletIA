@@ -284,6 +284,7 @@ export function ApiAuthMe() {
             email: 'user@example.com',
             status: 'ACTIVE',
             role: 'USER',
+            hasProfile: true,
             name: 'Jane Doe',
             birthDate: null,
           },
@@ -300,6 +301,34 @@ export function ApiAuthMe() {
           message: 'Unauthorized',
         },
       },
+    }),
+  );
+}
+
+export function ApiAuthGoogleMobileLogin() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Google Mobile Login',
+      description:
+        'Authenticate user using a Google Access Token obtained from a mobile device.',
+    }),
+    ApiBody({
+      schema: {
+        type: 'object',
+        properties: {
+          token: { type: 'string', example: 'ya29.a0AfH6SM...' },
+        },
+      },
+      description: 'Google Access Token',
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Authentication successful',
+      type: TokenResponse,
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'Invalid Google Token',
     }),
   );
 }

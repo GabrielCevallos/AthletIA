@@ -17,12 +17,20 @@ import { AccountsService } from 'src/users/accounts/accounts.service';
 import { Request } from 'express';
 import { UserPayload } from 'src/auth/interfaces/user-payload.interface';
 import { ResponseBody } from 'src/common/response/api.response';
-import { ApiUpdateProfile } from './swagger.decorators';
+import {
+  ApiCompleteProfileSetup,
+  ApiFindMyProfile,
+  ApiGetProfileByAccountId,
+  ApiUpdateProfile,
+} from './swagger.decorators';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/guards/decorators/roles.decorator';
 import { Role } from '../accounts/enum/role.enum';
+import { ApiExtraModels, ApiTags } from '@nestjs/swagger';
 
 @UseGuards(AuthGuard, RolesGuard)
+@ApiTags('profiles')
+@ApiExtraModels(Profile)
 @Controller('profiles')
 export class ProfilesController {
   constructor(
@@ -50,6 +58,7 @@ export class ProfilesController {
 
   @Roles(Role.USER, Role.ADMIN, Role.MODERATOR)
   @Post('complete-setup')
+  @ApiCompleteProfileSetup()
   async completeProfileSetup(
     @Req() req: Request & { user: UserPayload },
     @Body() profileData: ProfileRequest,
@@ -63,6 +72,7 @@ export class ProfilesController {
 
   @Roles(Role.ADMIN, Role.MODERATOR)
   @Get('by-account/:accountId')
+  @ApiGetProfileByAccountId()
   async getProfileByAccountId(
     @Param('accountId') accountId: string,
   ): Promise<ResponseBody<Profile>> {
@@ -72,6 +82,7 @@ export class ProfilesController {
   }
 
   @Get('me')
+  @ApiFindMyProfile()
   @Roles(Role.USER, Role.ADMIN, Role.MODERATOR)
   async findMyProfile(
     @Req() req: Request & { user: UserPayload },

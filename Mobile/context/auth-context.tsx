@@ -1,3 +1,4 @@
+import { Config } from '@/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {
   createContext,
@@ -21,7 +22,8 @@ type AuthUser = {
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
-  signIn: (token: string, hasCompletedProfile: boolean) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: (token: string) => Promise<void>;
   signOut: () => Promise<void>;
   setProfileCompleted: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -61,18 +63,76 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     void loadSession();
   }, [loadSession]);
 
-  const signIn = useCallback(async (token: string, hasCompletedProfile: boolean) => {
-    try {
+  const handleAuthSuccess = useCallback(async (accessToken: string) => {
+     // Obtener información del usuario para verificar si completó el perfil
+      const userResponse = await fetch(`${Config.apiUrl}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+      const userResult = await userResponse.json();
+      
+      let hasCompletedProfile = false;
+      
+      if (userResult.success && userResult.data) {
+        hasCompletedProfile = !!userResult.data.hasProfile;
+      }
+
       await AsyncStorage.multiSet([
-        [STORAGE_KEYS.token, token],
+        [STORAGE_KEYS.token, accessToken],
         [STORAGE_KEYS.profile, hasCompletedProfile ? 'true' : 'false'],
       ]);
-      setUser({ token, hasCompletedProfile });
+      setUser({ token: accessToken, hasCompletedProfile });
+  }, []);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    try {
+      const response = await fetch(`${Config.apiUrl}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success || !result.data) {
+        throw new Error(result.message || 'Error al iniciar sesión');
+      }
+
+      const { accessToken } = result.data;
+      await handleAuthSuccess(accessToken);
     } catch (error) {
       console.error('Failed to sign in', error);
       throw error;
     }
-  }, []);
+  }, [handleAuthSuccess]);
+
+  const signInWithGoogle = useCallback(async (token: string) => {
+    try {
+      // Necesitarás crear este endpoint en tu backend
+      const response = await fetch(`${Config.apiUrl}/auth/google/mobile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success || !result.data) {
+        throw new Error(result.message || 'Error en Google Login');
+      }
+
+      const { accessToken } = result.data;
+      await handleAuthSuccess(accessToken);
+    } catch (error) {
+      console.error('Failed to sign in with Google', error);
+      throw error;
+    }
+  }, [handleAuthSuccess]);
 
   const signOut = useCallback(async () => {
     try {
@@ -99,11 +159,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       loading,
       signIn,
+      signInWithGoogle,
       signOut,
       setProfileCompleted,
       refresh: loadSession,
     }),
-    [user, loading, signIn, signOut, setProfileCompleted, loadSession],
+    [user, loading, signIn, signInWithGoogle, signOut, setProfileCompleted, loadSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

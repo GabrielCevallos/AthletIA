@@ -25,7 +25,6 @@ function RootNavigation() {
     const isLoginRoute = rootSegment === 'login';
     const isCompleteProfileRoute = rootSegment === 'complete-profile';
     const isAuthRoute = isLoginRoute || isCompleteProfileRoute;
-    const isRootPath = segments.length === 0;
 
     if (!user) {
       if (!isLoginRoute) {
@@ -41,7 +40,7 @@ function RootNavigation() {
       return;
     }
 
-    if (isAuthRoute || isRootPath) {
+    if (isAuthRoute) {
       router.replace('/(tabs)/dashboard');
     }
   }, [loading, router, segments, user]);

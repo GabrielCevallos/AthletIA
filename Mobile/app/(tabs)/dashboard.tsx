@@ -31,8 +31,8 @@ export default function DashboardScreen() {
           <View style={styles.chartArea}>
             <View style={styles.chartLine} />
             <View style={styles.chartDays}>
-              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d) => (
-                <Text key={d} style={styles.dayLabel}>
+              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, index) => (
+                <Text key={`${d}-${index}`} style={styles.dayLabel}>
                   {d}
                 </Text>
               ))}

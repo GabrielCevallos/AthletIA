@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+import { useEffect, useState } from 'react';
 import {
+  Image,
   ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
@@ -15,20 +18,42 @@ import { FormInput } from '@/components/ui/form-input';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { useAuth } from '@/context/auth-context';
 
+WebBrowser.maybeCompleteAuthSession();
+
 export default function LoginScreen() {
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    // Debes obtener estos IDs en Google Cloud Console
+    androidClientId: 'TU_ANDROID_CLIENT_ID',
+    iosClientId: 'TU_IOS_CLIENT_ID',
+    webClientId: 'TU_WEB_CLIENT_ID',
+  });
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { authentication } = response;
+      if (authentication?.accessToken) {
+        setLoading(true);
+        signInWithGoogle(authentication.accessToken)
+          .catch((error) => console.error(error))
+          .finally(() => setLoading(false));
+      }
+    }
+  }, [response, signInWithGoogle]);
+
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) return;
     setLoading(true);
     try {
-      await signIn('fake-dev-token', false);
+      await signIn(email, password);
     } catch (error) {
-      console.error('Login simulation failed', error);
+      console.error('Login failed', error);
+      // Aquí podrías mostrar una alerta con el error
     } finally {
       setLoading(false);
     }
@@ -100,9 +125,17 @@ export default function LoginScreen() {
                     <View style={styles.divider} />
                   </View>
 
-                  <Pressable style={styles.googleButton}>
+                  <Pressable 
+                    style={styles.googleButton}
+                    onPress={() => promptAsync()}
+                    disabled={!request}
+                  >
                     <View style={styles.googleIconWrapper}>
-                      <Text style={styles.googleIcon}>G</Text>
+                      <Image 
+                        source={require('@/assets/images/g-logo.png')} 
+                        style={{ width: 18, height: 18 }}
+                        resizeMode="contain"
+                      />
                     </View>
                     <Text style={styles.googleLabel}>Google</Text>
                   </Pressable>

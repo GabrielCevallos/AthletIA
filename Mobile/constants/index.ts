@@ -12,3 +12,7 @@ export {
 
 // Re-exportar tipos útiles si se necesitan
 export type { TextStyle } from 'react-native';
+
+// Exportar configuración de la app
+export { Config } from './config';
+

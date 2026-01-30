@@ -9,6 +9,7 @@ import {
   Req,
   Res,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags, ApiExtraModels } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -38,6 +39,7 @@ import {
   ApiAuthGoogleStart,
   ApiAuthGoogleCallback,
   ApiAuthMe,
+  ApiAuthGoogleMobileLogin,
 } from './swagger.decorators';
 import { User } from 'src/users/accounts/dto/user-response.dtos';
 //import { log } from 'console';
@@ -154,6 +156,45 @@ export class AuthController {
   ): Promise<ResponseBody<void>> {
     const result = await this.authService.logout(accountId);
     return ResponseBody.success(undefined, result.message);
+  }
+
+  @Public()
+  @Post('google/mobile')
+  @HttpCode(HttpStatus.OK)
+  @ApiAuthGoogleMobileLogin()
+  async googleMobileLogin(
+    @Body('token') googleAccessToken: string,
+  ): Promise<ResponseBody<TokenResponse>> {
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/oauth2/v3/userinfo`,
+        {
+          headers: { Authorization: `Bearer ${googleAccessToken}` },
+        },
+      );
+
+      if (!response.ok) {
+        throw new UnauthorizedException('Token inválido de Google');
+      }
+
+      const googleUserResponse = await response.json();
+
+      const googleUser: GoogleUser = {
+        provider: 'google',
+        sub: googleUserResponse.sub,
+        email: googleUserResponse.email,
+        name: googleUserResponse.name,
+        picture: googleUserResponse.picture,
+      };
+
+      const tokenResponse = await this.authService.signInWithGoogle(googleUser);
+      return ResponseBody.success(tokenResponse, 'Login successful');
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Error autenticando con Google');
+    }
   }
 
   // Google OAuth
