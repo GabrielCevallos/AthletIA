@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import CheckEmail from './pages/CheckEmail'
+import VerifyEmail from './pages/VerifyEmail'
 import CompleteProfile from './pages/CompleteProfile'
 import Dashboard from './pages/Dashboard'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -26,6 +28,8 @@ export default function App() {
     <AccessibilityProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/check-email" element={<CheckEmail />} />
+          <Route path="/auth/verify-email" element={<VerifyEmail />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
