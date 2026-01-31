@@ -80,7 +80,60 @@ Documentación completa de todas las pantallas implementadas basadas en los dise
 
 ## 🔧 Pantallas Adicionales (Fuera de Tabs)
 
-### 5. Complete Profile (`app/complete-profile.tsx`)
+### 5. Login (`app/login.tsx`)
+**Estado:** ✅ Implementada
+
+**Características:**
+- Formulario de inicio de sesión
+- Email y contraseña
+- Opción "Recuérdame"
+- Enlace "Olvidé mi contraseña"
+- Google Login (deshabilitado por ahora)
+- Enlace a pantalla de registro
+
+**Flujo de autenticación:**
+1. Usuario ingresa email y contraseña
+2. Se valida con el backend
+3. Se obtienen tokens (accessToken, refreshToken)
+4. Se verifica si tiene perfil completado
+5. Si no tiene perfil → redirige a Complete Profile
+6. Si tiene perfil → acceso normal a la app
+
+---
+
+### 6. Signup (`app/signup.tsx`)
+**Estado:** ✅ Implementada completamente
+
+**Características:**
+- Registro de nueva cuenta
+- Email y contraseña (con confirmación)
+- Indicador de fortaleza de contraseña:
+  - Débil (rojo) - menos de 8 caracteres
+  - Media (naranja) - 8-11 caracteres o sin mayúsculas/números
+  - Fuerte (verde) - 12+ caracteres con mayúsculas y números
+- Validación de coincidencia de contraseñas
+- Aceptación de términos y condiciones (checkbox)
+- Google Signup (deshabilitado por ahora)
+- Enlace a login
+
+**Flujo de registro sin OAuth2:**
+1. Usuario ingresa email, contraseña y confirmación
+2. Acepta términos y condiciones
+3. POST /auth/register-account al backend
+4. Backend envía email de verificación
+5. Se muestra alerta indicando verificar email
+6. Redirige a login para iniciar sesión después de verificar
+
+**Nota:** El flujo de verificación de email se completa:
+- Usuario recibe email con token
+- Hace click en enlace (redirige al frontend web)
+- Frontend web captura token y hace POST /auth/verify-email
+- Backend habilita la cuenta
+- Usuario regresa al login en la app móvil
+
+---
+
+### 7. Complete Profile (`app/complete-profile.tsx`)
 **Estado:** ✅ Actualizada con sistema de diseño
 
 **Características:**
@@ -95,7 +148,7 @@ Documentación completa de todas las pantallas implementadas basadas en los dise
 
 ---
 
-### 6. Create Split (`app/create-split.tsx`)
+### 8. Create Split (`app/create-split.tsx`)
 **Estado:** ✅ Implementada completamente
 
 **Características:**
@@ -110,7 +163,7 @@ Documentación completa de todas las pantallas implementadas basadas en los dise
 
 ---
 
-### 7. Routine Builder (`app/routine-builder.tsx`)
+### 9. Routine Builder (`app/routine-builder.tsx`)
 **Estado:** ✅ Implementada completamente
 
 **Características:**
@@ -128,7 +181,7 @@ Documentación completa de todas las pantallas implementadas basadas en los dise
 
 ---
 
-### 8. Measurements (`app/measurements.tsx`)
+### 10. Measurements (`app/measurements.tsx`)
 **Estado:** ✅ Implementada completamente
 
 **Características:**
@@ -148,7 +201,7 @@ Documentación completa de todas las pantallas implementadas basadas en los dise
 
 ---
 
-### 9. Splits Dashboard (`app/splits-dashboard.tsx`)
+### 11. Splits Dashboard (`app/splits-dashboard.tsx`)
 **Estado:** ✅ Implementada completamente
 
 **Características:**
@@ -190,14 +243,17 @@ import { GlobalStyles } from '@/styles/global';
 
 | Pantalla | Estado | Base HTML | Componentes |
 |----------|--------|-----------|-------------|
-| Dashboard | ✅ | - | Gráfico, Cards |
-| Exercises | ✅ | athletia_excersises | Search, Filters, List |
-| Routines | ✅ | routines | Cards, Badges |
-| Profile | ✅ | athletia_view_profile | Avatar, Stats, Menu |
+| Login | ✅ | - | Forms, Google Button |
+| Signup | ✅ | Mockup proporcionado | Forms, Password Strength |
 | Complete Profile | ✅ | - | Forms, Modal |
 | Create Split | ✅ | athletia_create_split_mobile | Day Selector |
 | Routine Builder | ✅ | athletia_routine_builder_mobile | Exercise Cards |
 | Measurements | ✅ | athletia_mobile_measurements | Chart, Metrics |
+| Splits Dashboard | ✅ | athletia_splits_dashboard_mobile | Cards, Badges |
+| Dashboard | ✅ | - | Gráfico, Cards |
+| Exercises | ✅ | athletia_excersises | Search, Filters, List |
+| Routines | ✅ | routines | Cards, Badges |
+| Profile | ✅ | athletia_view_profile | Avatar, Stats, Menu |
 | Splits Dashboard | ✅ | athletia_splits_dashboard_mobile | Progress Bars |
 
 **Total:** 9 pantallas implementadas ✅

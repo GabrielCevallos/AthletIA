@@ -1,4 +1,5 @@
 import * as Google from 'expo-auth-session/providers/google';
+import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
 import {
@@ -16,6 +17,7 @@ import {
 
 import { FormInput } from '@/components/ui/form-input';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { Config } from '@/constants';
 import { useAuth } from '@/context/auth-context';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -29,9 +31,9 @@ export default function LoginScreen() {
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     // Debes obtener estos IDs en Google Cloud Console
-    androidClientId: 'TU_ANDROID_CLIENT_ID',
-    iosClientId: 'TU_IOS_CLIENT_ID',
-    webClientId: 'TU_WEB_CLIENT_ID',
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+    //iosClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
   });
 
   useEffect(() => {
@@ -127,8 +129,8 @@ export default function LoginScreen() {
 
                   <Pressable 
                     style={styles.googleButton}
-                    onPress={() => promptAsync()}
-                    disabled={!request}
+                    onPress={() => WebBrowser.openBrowserAsync(`${Config.apiUrl}/auth/google`)}
+                    disabled={loading}
                   >
                     <View style={styles.googleIconWrapper}>
                       <Image 
@@ -144,7 +146,7 @@ export default function LoginScreen() {
 
               <View style={styles.footer}>
                 <Text style={styles.footerText}>¿No tienes cuenta?</Text>
-                <Pressable>
+                <Pressable onPress={() => router.push('/signup' as any)} disabled={loading}>
                   <Text style={styles.footerLink}>Regístrate aquí</Text>
                 </Pressable>
               </View>
@@ -167,7 +169,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingTop: 32,
-    paddingBottom: 24,
+    paddingBottom: 64,
     justifyContent: 'space-between',
   },
   header: {

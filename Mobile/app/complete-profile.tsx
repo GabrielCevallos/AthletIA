@@ -1,23 +1,26 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
-  Keyboard,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
+    Alert,
+    Keyboard,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
 import { z } from 'zod';
 
 import { FormInput } from '@/components/ui/form-input';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SelectField } from '@/components/ui/select-field';
+import { Config } from '@/constants';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { GlobalStyles } from '@/styles/global';
@@ -55,7 +58,7 @@ const goalOptions = [
 ];
 
 export default function CompleteProfileScreen() {
-  const { setProfileCompleted } = useAuth();
+  const { setProfileCompleted, user } = useAuth();
   const [genderSheetOpen, setGenderSheetOpen] = useState(false);
 
   const {
@@ -86,12 +89,50 @@ export default function CompleteProfileScreen() {
     setValue('goals', next, { shouldValidate: true });
   };
 
+  const normalizeBirthDate = (value: string) => {
+    const trimmed = value.trim();
+    const match = trimmed.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (match) {
+      const [, mm, dd, yyyy] = match;
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    return trimmed;
+  };
+
   const onSubmit = async (data: FormValues) => {
+    if (!user?.token) {
+      Alert.alert('Error', 'Tu sesión expiró. Inicia sesión nuevamente.');
+      router.replace('/login');
+      return;
+    }
+
     try {
-      // TODO: POST a backend /profiles endpoint con data mapeada a DTO.
+      const response = await fetch(`${Config.apiUrl}/profiles/complete-setup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({
+          name: data.fullName.trim(),
+          birthDate: normalizeBirthDate(data.birthDate),
+          phoneNumber: data.phone.trim(),
+          gender: data.gender,
+          fitGoals: data.goals,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!result?.success) {
+        Alert.alert('Error', result?.message || 'No se pudo completar el perfil');
+        return;
+      }
+
       await setProfileCompleted();
     } catch (error) {
       console.error('Complete profile failed', error);
+      Alert.alert('Error', 'No se pudo completar el perfil. Intenta más tarde.');
     }
   };
 

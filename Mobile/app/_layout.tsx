@@ -23,11 +23,14 @@ function RootNavigation() {
 
     const [rootSegment] = segments;
     const isLoginRoute = rootSegment === 'login';
+    const isSignupRoute = rootSegment === 'signup';
+    const isVerificationEmailSentRoute = rootSegment === 'verification-email-sent';
     const isCompleteProfileRoute = rootSegment === 'complete-profile';
-    const isAuthRoute = isLoginRoute || isCompleteProfileRoute;
+    const isAuthRoute =
+      isLoginRoute || isSignupRoute || isVerificationEmailSentRoute || isCompleteProfileRoute;
 
     if (!user) {
-      if (!isLoginRoute) {
+      if (!isAuthRoute || isCompleteProfileRoute) {
         router.replace('/login');
       }
       return;
@@ -63,6 +66,8 @@ function RootNavigation() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="signup" options={{ headerShown: false }} />
+        <Stack.Screen name="verification-email-sent" options={{ headerShown: false }} />
         <Stack.Screen
           name="complete-profile"
           options={{ headerShown: false, title: 'Completar perfil' }}
