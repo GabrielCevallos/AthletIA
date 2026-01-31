@@ -59,7 +59,7 @@ export class AccountsService {
       password: await argon2.hash(registerRequest.password),
       hasProfile: false,
       status: AccountState.ACTIVE,
-      isEmailVerified: true, // Temporary: set to true, email verification to be implemented
+      isEmailVerified: false,
     });
     await this.accountsRepository.save(account);
     return account;

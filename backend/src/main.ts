@@ -3,6 +3,11 @@ import { AppModule } from './app/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as dotenv from 'dotenv';
+import * as dotenvExpand from 'dotenv-expand';
+
+const myEnv = dotenv.config();
+dotenvExpand.default(myEnv);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -30,9 +35,9 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3001',
-      'http://localhost:5173',
       'http://localhost:5174',
       'http://localhost:5175',
+      process.env.FRONTEND_BASE_URL || 'http://localhost:5173',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
@@ -52,7 +57,7 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  const port = parseInt(process.env.SERVER_PORT!);
+  const port = parseInt(process.env.SERVER_PORT || '3000', 10);
   await app.listen(port, '0.0.0.0');
 }
 void bootstrap();

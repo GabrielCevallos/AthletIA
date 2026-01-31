@@ -60,7 +60,11 @@ export class SplitRequest {
     message: `Each day must be one of: ${Object.values(Days).join(', ')}`,
   })
   @ArrayMinSize(1)
-  @ApiProperty({ description: 'Training days', enum: Days, isArray: true })
+  @ApiProperty({ 
+    description: 'Training days - Valid values: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday', 
+    enum: Days, 
+    isArray: true 
+  })
   trainingDays: Days[];
 
   @IsBoolean()
@@ -68,10 +72,59 @@ export class SplitRequest {
   official: boolean;
 }
 
-export class Split extends SplitRequest {
+export class Split {
   @IsUUID()
   @ApiProperty({ description: 'Split ID', format: 'uuid' })
   id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(50)
+  @ApiProperty({
+    description: 'Split name',
+    minLength: 3,
+    maxLength: 50,
+    example: 'Upper/Lower',
+  })
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(10)
+  @MaxLength(500)
+  @ApiProperty({
+    description: 'Split description',
+    minLength: 10,
+    maxLength: 500,
+    example: '4-day weekly program split into upper and lower.',
+  })
+  description: string;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMinSize(1)
+  @IsUUID('4', { each: true })
+  @ApiProperty({
+    description: 'Included routine IDs',
+    type: [String],
+    example: ['123e4567-e89b-12d3-a456-426614174001'],
+  })
+  routineIds: string[];
+
+  @IsArray()
+  @IsEnum(Days, { each: true })
+  @ApiProperty({
+    description: 'Training days',
+    enum: Days,
+    isArray: true,
+    example: ['Monday', 'Tuesday', 'Thursday', 'Friday'],
+  })
+  trainingDays: Days[];
+
+  @IsBoolean()
+  @ApiProperty({ description: 'Official flag', example: false })
+  official: boolean;
 
   @IsDate()
   @ApiProperty({ description: 'Creation date', type: Date })
@@ -81,8 +134,8 @@ export class Split extends SplitRequest {
   @ApiProperty({ description: 'Last update date', type: Date })
   updatedAt: Date;
 
-  @ApiPropertyOptional({ description: 'Included routines' })
-  routines?: Routine[];
+  @ApiPropertyOptional({ description: 'Included routines', type: Array })
+  routines?: any[];
 }
 
 export class SplitUpdate {

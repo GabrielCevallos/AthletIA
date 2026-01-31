@@ -30,9 +30,10 @@ import { Request } from 'express';
 import { Role } from 'src/users/accounts/enum/role.enum';
 import { PaginationRequest } from '../../common/request/pagination.request.dto';
 import { PaginationResponse } from '../../common/interfaces/pagination-response.interface';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiExtraModels } from '@nestjs/swagger';
 
 @ApiTags('Splits')
+@ApiExtraModels(Split, SplitRequest, SplitUpdate)
 @Controller('workout/splits')
 @UseGuards(AuthGuard)
 export class SplitsController {

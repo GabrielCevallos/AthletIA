@@ -77,7 +77,7 @@ export class AuthService {
 
   async registerAccount(
     registerRequest: RegisterAccountRequest,
-  ): Promise<{ message: string; accountId: string }> {
+  ): Promise<{ message: string }> {
     const savedAccount = await this.accountsService.findByEmail(
       registerRequest.email,
     );
@@ -132,28 +132,8 @@ export class AuthService {
 
     return {
       message: messages.verificationEmailSent,
-      accountId: account.id,
     };
   }
-
-  /* async completeWithProfileSetup(
-    accountId: string,
-    profileRequest: ProfileRequest,
-  ): Promise<{ message: string }> {
-    const account = await this.accountsService.findById(accountId);
-    if (!account) {
-      throw new BadRequestException(messages.invalidAccountId);
-    }
-    if (!account.isEmailVerified) {
-      throw new BadRequestException(messages.emailNotVerified);
-    }
-    if (account.hasProfile) {
-      throw new BadRequestException(messages.profileAlreadySetUp);
-    }
-
-    await this.accountsService.completeProfileSetup(account, profileRequest);
-    return { message: messages.profileSetupCompleted };
-  } */
 
   async changePassword(
     accountId: string,
@@ -284,7 +264,10 @@ export class AuthService {
         sub: string;
         email: string;
       }>(token, {
-        secret: process.env.JWT_SECRET_KEY_ACCESS || 'defaultSecretKey',
+        secret:
+          process.env.JWT_SECRET_KEY_EMAIL ||
+          process.env.JWT_SECRET_KEY_ACCESS ||
+          'defaultEmailSecret',
       });
       const accountId = payload.sub;
       if (!accountId) throw new BadRequestException('Invalid token payload');

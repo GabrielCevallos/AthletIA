@@ -75,8 +75,7 @@ export function ApiAuthRegisterAccount() {
       schema: {
         example: {
           success: true,
-          data: { accountId: 'uuid' },
-          message: 'Account was registered, continue with profile setup',
+          message: messages.verificationEmailSent,
         },
       },
     }),
@@ -91,7 +90,27 @@ export function ApiAuthVerifyEmail() {
         properties: { token: { type: 'string', example: 'jwt-token' } },
       },
     }),
-    ApiResponse({ status: 200, description: 'Verification done' }),
+    ApiResponse({
+      status: 200,
+      description: 'Email verified successfully',
+      schema: {
+        example: {
+          success: true,
+          data: undefined,
+          message: 'Email verified successfully',
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Invalid or expired token',
+      schema: {
+        example: {
+          success: false,
+          message: 'Invalid or expired token',
+        },
+      },
+    }),
   );
 }
 
@@ -109,7 +128,27 @@ export function ApiAuthResendVerification() {
         },
       },
     }),
-    ApiResponse({ status: 200, description: 'Verification sent' }),
+    ApiResponse({
+      status: 200,
+      description: 'Verification email sent',
+      schema: {
+        example: {
+          success: true,
+          data: undefined,
+          message: 'Verification email sent',
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Too many requests',
+      schema: {
+        example: {
+          success: false,
+          message: 'Too many verification requests',
+        },
+      },
+    }),
   );
 }
 
@@ -151,7 +190,7 @@ export function ApiAuthCompleteProfileSetup() {
         type: 'object',
         properties: {
           accountId: { type: 'string', example: 'uuid' },
-          profileRequest: { $ref: getSchemaRef(ProfileRequest) as string },
+          profileRequest: { $ref: getSchemaPath(ProfileRequest) },
         },
         required: ['accountId', 'profileRequest'],
       },
@@ -169,7 +208,7 @@ export function ApiAuthChangePassword() {
         properties: {
           accountId: { type: 'string', example: 'uuid' },
           changePasswordRequest: {
-            $ref: getSchemaRef(ChangePasswordRequest) as string,
+            $ref: getSchemaPath(ChangePasswordRequest),
           },
         },
         required: ['accountId', 'changePasswordRequest'],
@@ -244,7 +283,27 @@ export function ApiAuthLogout() {
         properties: { accountId: { type: 'string', example: 'uuid' } },
       },
     }),
-    ApiResponse({ status: 200, description: 'Logged out' }),
+    ApiResponse({
+      status: 200,
+      description: 'Logged out successfully',
+      schema: {
+        example: {
+          success: true,
+          data: undefined,
+          message: 'Logged out successfully',
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Invalid Account ID',
+      schema: {
+        example: {
+          success: false,
+          message: 'Invalid account ID',
+        },
+      },
+    }),
   );
 }
 
@@ -274,7 +333,7 @@ export function ApiAuthMe() {
       schema: {
         properties: {
           success: { type: 'boolean' },
-          data: getSchemaRef(User),
+          data: { $ref: getSchemaPath(User) },
           message: { type: 'string' },
         },
         example: {
@@ -335,6 +394,7 @@ export function ApiAuthGoogleMobileLogin() {
 
 // Utility to reference DTOs in schema without circular issues
 import { getSchemaPath } from '@nestjs/swagger';
+import { messages } from './constants';
 function getSchemaRef(cls: any) {
   return { $ref: getSchemaPath(cls) } as any;
 }

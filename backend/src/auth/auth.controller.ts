@@ -32,7 +32,6 @@ import {
   ApiAuthVerifyEmail,
   ApiAuthResendVerification,
   ApiAuthResendVerificationStatus,
-  //ApiAuthCompleteProfileSetup,
   ApiAuthChangePassword,
   ApiAuthRefreshToken,
   ApiAuthLogout,
@@ -48,7 +47,7 @@ type accountIdOnly = { accountId: string };
 
 @Controller('auth')
 @ApiTags('auth')
-@ApiExtraModels(ProfileRequest, ChangePasswordRequest)
+@ApiExtraModels(ProfileRequest, ChangePasswordRequest, User)
 export class AuthController {
   constructor(private authService: AuthService) {}
 
@@ -71,10 +70,10 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   async registerAccount(
     @Body() registerRequest: RegisterAccountRequest,
-  ): Promise<ResponseBody<accountIdOnly>> {
+  ): Promise<ResponseBody<undefined>> {
     const result = await this.authService.registerAccount(registerRequest);
     return ResponseBody.success(
-      { accountId: result.accountId },
+      undefined,
       result.message,
     );
   }
@@ -106,21 +105,6 @@ export class AuthController {
     const status = await this.authService.getResendVerificationStatus(email);
     return ResponseBody.success(status, 'Status fetched');
   }
-
-  /* @Public()
-  @Post('complete-profile-setup')
-  @ApiAuthCompleteProfileSetup()
-  @HttpCode(HttpStatus.OK)
-  async completeWithProfileSetup(
-    @Body('accountId') accountId: string,
-    @Body('profileRequest') profileRequest: ProfileRequest,
-  ): Promise<ResponseBody<void>> {
-    const result = await this.authService.completeWithProfileSetup(
-      accountId,
-      profileRequest,
-    );
-    return ResponseBody.success(undefined, result.message);
-  } */
 
   @UseGuards(AuthGuard)
   @Patch('change-password')

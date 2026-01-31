@@ -9,6 +9,7 @@ import {
   HttpStatus,
   UseGuards,
   Req,
+  Post,
 } from '@nestjs/common';
 import { MeasurementsService } from './measurements.service';
 import { MeasurementRequest, MeasurementUpdate, MyMeasurementResponse } from './dto/measurements.dto';
@@ -25,9 +26,15 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
-  getSchemaPath,
 } from '@nestjs/swagger';
 import { Measurement as MeasurementEntity } from './measurements.entity';
+import {
+  ApiListMeasurements,
+  ApiGetMyMeasurement,
+  ApiCreateMeasurement,
+  ApiUpdateMeasurement,
+  ApiDeleteMeasurement,
+} from './swagger.decorators';
 
 @UseGuards(AuthGuard)
 @ApiTags('Measurements')
@@ -52,21 +59,7 @@ export class MeasurementsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List all measurements (admin use)' })
-  @ApiOkResponse({
-    description: 'Measurements retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        message: { type: 'string', example: 'Measurements retrieved successfully' },
-        data: {
-          type: 'array',
-          items: { $ref: getSchemaPath(MyMeasurementResponse) },
-        },
-      },
-    },
-  })
+  @ApiListMeasurements()
   async findAll() {
     const measurements = await this.measurementsService.findAll();
     return ResponseBody.success(
@@ -76,20 +69,7 @@ export class MeasurementsController {
   }
 
   @Get('me')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get my measurement' })
-  @ApiOkResponse({
-    description: 'Measurement retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        message: { type: 'string', example: 'Measurement retrieved successfully' },
-        data: { $ref: getSchemaPath(MyMeasurementResponse) },
-      },
-    },
-  })
-  @ApiNotFoundResponse({ description: 'Measurement not found' })
+  @ApiGetMyMeasurement()
   async getMyMeasurement(@Req() req: Request & { user?: any }) {
     const accountId = req.user.sub;
     const measurement = await this.measurementsService.findByAccountId(accountId);
@@ -110,11 +90,31 @@ export class MeasurementsController {
   @ApiOkResponse({
     description: 'Measurement retrieved successfully',
     schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        message: { type: 'string', example: 'Measurement retrieved successfully' },
-        data: { $ref: getSchemaPath(MyMeasurementResponse) },
+      example: {
+        success: true,
+        message: 'Measurement retrieved successfully',
+        data: {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          weight: 75.5,
+          height: 180,
+          imc: 23.3,
+          left_arm: 35,
+          right_arm: 35,
+          left_forearm: 28,
+          right_forearm: 28,
+          clavicular_width: 38,
+          neck_diameter: 38,
+          chest_size: 98,
+          back_width: 42,
+          hip_diameter: 98,
+          left_leg: 60,
+          right_leg: 60,
+          left_calve: 38,
+          right_calve: 38,
+          checkTime: 'morning',
+          createdAt: '2024-01-01T10:00:00Z',
+          updatedAt: '2024-01-01T10:00:00Z',
+        },
       },
     },
   })
@@ -130,46 +130,7 @@ export class MeasurementsController {
   // Authenticated upsert edit for the current user's account
   @Patch('me')
   @UseGuards(AuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create or update my measurement (upsert)' })
-  @ApiBody({
-    description: 'When creating for the first time, send required fields. For updates, all fields are optional.',
-    schema: {
-      oneOf: [
-        { $ref: getSchemaPath(MeasurementRequest) },
-        { $ref: getSchemaPath(MeasurementUpdate) },
-      ],
-    },
-    examples: {
-      create: {
-        summary: 'First time (create)',
-        value: {
-          weight: 75,
-          height: 175,
-          checkTime: 'WEEKLY',
-          left_arm: 32.5,
-        },
-      },
-      update: {
-        summary: 'Subsequent edit (update)',
-        value: {
-          weight: 76.2,
-          left_arm: 33.0,
-        },
-      },
-    },
-  })
-  @ApiOkResponse({
-    description: 'Measurement edited successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        message: { type: 'string', example: 'Measurement edited successfully' },
-        data: { $ref: getSchemaPath(MyMeasurementResponse) },
-      },
-    },
-  })
+  @ApiUpdateMeasurement()
   async editMyMeasurement(
     @Req() req: Request & { user?: any },
     @Body() body: any,
@@ -200,8 +161,7 @@ export class MeasurementsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a measurement by id (admin use)' })
-  @ApiNoContentResponse({ description: 'Measurement deleted successfully' })
+  @ApiDeleteMeasurement()
   async remove(@Param('id') id: string) {
     await this.measurementsService.remove(id);
     return ResponseBody.success(

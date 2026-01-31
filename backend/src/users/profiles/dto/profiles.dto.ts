@@ -34,16 +34,21 @@ export class ProfileRequest {
   @IsEnum(Gender, {
     message: 'Gender must be one of: "male", "female"',
   })
-  @ApiProperty({ description: 'Gender', enum: Gender })
+  @ApiProperty({ 
+    description: 'Gender - Valid values: male, female', 
+    enum: Gender,
+    example: Gender.MALE,
+  })
   gender: Gender;
 
   @IsArray()
   @ArrayNotEmpty()
   @IsEnum(RoutineGoal, { each: true })
   @ApiProperty({
-    description: 'Fitness goals',
+    description: 'Fitness goals - Valid values: weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement',
     isArray: true,
-    example: ['lose_weight', 'build_muscle'],
+    enum: RoutineGoal,
+    example: ['weight_loss', 'muscle_gain'],
   })
   fitGoals: RoutineGoal[];
 }
@@ -74,12 +79,50 @@ export class ProfileUpdate {
   phoneNumber: string;
 }
 
-export class Profile extends ProfileRequest {
+export class Profile {
+  @IsString()
+  @ApiProperty({ description: 'Full name', example: 'Jane Doe' })
+  name: string;
+
+  @IsNotEmpty()
+  @IsDateString()
+  @ApiProperty({
+    description: 'Birth date in ISO format',
+    example: '1990-01-01',
+  })
+  birthDate: Date;
+
+  @IsNumberString()
+  @Length(10)
+  @ApiProperty({ description: '10-digit phone number', example: '5512345678' })
+  phoneNumber: string;
+
+  @IsEnum(Gender, {
+    message: 'Gender must be one of: "male", "female"',
+  })
+  @ApiProperty({ 
+    description: 'Gender - Valid values: male, female', 
+    enum: Gender,
+    example: Gender.MALE,
+  })
+  gender: Gender;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsEnum(RoutineGoal, { each: true })
+  @ApiProperty({
+    description: 'Fitness goals - Valid values: weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement',
+    isArray: true,
+    enum: RoutineGoal,
+    example: ['weight_loss', 'muscle_gain'],
+  })
+  fitGoals: RoutineGoal[];
+
   @ApiProperty({ description: 'Associated email', example: 'user@example.com' })
   email: string;
-  @ApiProperty({ description: 'Creation date', type: Date })
+  @ApiProperty({ description: 'Creation date', type: Date, example: '2024-01-01T12:00:00Z' })
   createdAt: Date;
-  @ApiProperty({ description: 'Last update date', type: Date })
+  @ApiProperty({ description: 'Last update date', type: Date, example: '2024-01-02T12:00:00Z' })
   updatedAt: Date;
   @ApiProperty({ description: 'Calculated age', example: 30 })
   age: number;
