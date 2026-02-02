@@ -3,20 +3,21 @@ import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
 import {
-  Alert,
-  Image,
-  ImageBackground,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
+    Alert,
+    Image,
+    ImageBackground,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
 
+import { DumbbellIcon } from '@/components/ui/dumbbell-icon';
 import { FormInput } from '@/components/ui/form-input';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Config } from '@/constants';
@@ -181,7 +182,10 @@ export default function SignupScreen() {
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
               <View style={styles.container}>
                 <View style={styles.header}>
-                  <Text style={styles.logo}>ATHLET<Text style={styles.logoAccent}>IA</Text></Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <DumbbellIcon size={32} />
+                    <Text style={styles.logo}>ATHLET<Text style={styles.logoAccent}>IA</Text></Text>
+                  </View>
                   <Text style={styles.subtitle}>¡Comienza tu transformación hoy!</Text>
                 </View>
 

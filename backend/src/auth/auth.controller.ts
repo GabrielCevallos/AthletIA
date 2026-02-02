@@ -26,6 +26,7 @@ import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GoogleUser } from './strategies/google.strategy';
 import type { Request, Response } from 'express';
+import { UserPayload } from './interfaces/user-payload.interface';
 import {
   ApiAuthSignIn,
   ApiAuthRegisterAccount,
@@ -41,6 +42,7 @@ import {
   ApiAuthGoogleMobileLogin,
 } from './swagger.decorators';
 import { User } from 'src/users/accounts/dto/user-response.dtos';
+import { RateLimit } from 'src/common/guards/rate-limit.decorator';
 //import { log } from 'console';
 
 type accountIdOnly = { accountId: string };
@@ -59,6 +61,12 @@ export class AuthController {
   @Post('login')
   @ApiAuthSignIn()
   @HttpCode(HttpStatus.OK)
+  @RateLimit({
+    maxAttempts: 5,
+    windowMs: 15 * 60 * 1000,
+    blockDurationMs: 30 * 60 * 1000,
+    keyGenerator: (req) => req.body?.email || req.ip,
+  })
   async signIn(@Body() loginRequest: LoginRequest): Promise<ResponseBody<TokenResponse>> {
     const tokenResponse = await this.authService.signIn(loginRequest);
     return ResponseBody.success(tokenResponse, 'Login successful');
@@ -89,6 +97,12 @@ export class AuthController {
   @Public()
   @Post('resend-verification')
   @ApiAuthResendVerification()
+  @RateLimit({
+    maxAttempts: 5,
+    windowMs: 60 * 60 * 1000,
+    blockDurationMs: 60 * 60 * 1000,
+    keyGenerator: (req) => req.body?.email || req.ip,
+  })
   async resendVerification(
     @Body('email') email: string,
   ): Promise<ResponseBody<void>> {
@@ -209,7 +223,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('me')
   @ApiAuthMe()
-  async me(@Req() req: Request): Promise<ResponseBody<User>> {
+  async me(@Req() req: Request & { user: UserPayload }): Promise<ResponseBody<User>> {
     const user = await this.authService.getCurrentUser(req.user);
     //log("Authenticated user: ", user);
     return ResponseBody.success(user, 'Authenticated user fetched');

@@ -34,12 +34,24 @@ export function ApiCreateSplit() {
       },
     }),
     ApiResponse({
-      status: 401,
-      description: 'Unauthorized - No valid authentication token',
+      status: 400,
+      description: 'Bad Request - Validation error. Invalid or missing required fields',
+      schema: {
+        example: {
+          message: [
+            'name must be longer than or equal to 3 characters',
+            'description must be longer than or equal to 10 characters',
+            'trainingDays must contain at least 1 elements',
+            'routineIds must contain at least 1 elements',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
     }),
     ApiResponse({
-      status: 400,
-      description: 'Bad Request - Validation error',
+      status: 401,
+      description: 'Unauthorized - No valid authentication token',
     }),
   );
 }
@@ -154,6 +166,20 @@ export function ApiUpdateSplit() {
             createdAt: '2024-01-01T12:00:00Z',
             updatedAt: '2024-01-01T12:00:00Z',
           },
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Bad Request - Validation error. Invalid field values',
+      schema: {
+        example: {
+          message: [
+            'name must be longer than or equal to 3 characters',
+            'trainingDays must contain at least 1 elements',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
         },
       },
     }),

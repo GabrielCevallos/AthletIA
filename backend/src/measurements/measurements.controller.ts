@@ -16,8 +16,6 @@ import { MeasurementRequest, MeasurementUpdate, MyMeasurementResponse } from './
 import { ResponseBody } from 'src/common/response/api.response';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
-import { plainToInstance } from 'class-transformer';
-import { validateOrReject } from 'class-validator';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -85,6 +83,22 @@ export class MeasurementsController {
     );
   }
 
+  @Post('me')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreateMeasurement()
+  async createMyMeasurement(
+    @Req() req: Request & { user?: any },
+    @Body() body: MeasurementRequest,
+  ) {
+    const accountId = req.user.sub;
+    const measurement = await this.measurementsService.editForAccount(accountId, body);
+    const response = this.toMyResponse(measurement);
+    return ResponseBody.success(
+      response,
+      'Measurement created successfully'
+    );
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a measurement by id (admin use)' })
   @ApiOkResponse({
@@ -133,25 +147,10 @@ export class MeasurementsController {
   @ApiUpdateMeasurement()
   async editMyMeasurement(
     @Req() req: Request & { user?: any },
-    @Body() body: any,
+    @Body() body: MeasurementUpdate,
   ) {
     const accountId = req.user.sub;
-    const existing = await this.measurementsService.findByAccountId(accountId);
-
-    if (existing) {
-      const dto = plainToInstance(MeasurementUpdate, body);
-      await validateOrReject(dto as any);
-      const measurement = await this.measurementsService.editForAccount(accountId, dto);
-      const response = this.toMyResponse(measurement);
-      return ResponseBody.success(
-        response,
-        'Measurement edited successfully'
-      );
-    }
-
-    const createDto = plainToInstance(MeasurementRequest, body);
-    await validateOrReject(createDto as any);
-    const measurement = await this.measurementsService.editForAccount(accountId, createDto as any);
+    const measurement = await this.measurementsService.editForAccount(accountId, body);
     const response = this.toMyResponse(measurement);
     return ResponseBody.success(
       response,

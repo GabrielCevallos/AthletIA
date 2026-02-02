@@ -136,11 +136,15 @@ export function ApiGiveRole() {
     }),
     ApiResponse({
       status: 400,
-      description: 'Invalid operation (e.g. changing own role)',
+      description: 'Bad Request - Invalid role or operation',
       schema: {
         example: {
-          success: false,
-          message: 'You cannot change your own role',
+          message: [
+            'role must be one of: user, moderator, admin',
+            'You cannot change your own role',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
         },
       },
     }),

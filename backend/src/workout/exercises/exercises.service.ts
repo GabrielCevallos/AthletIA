@@ -2,8 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Exercise } from './exercises.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ExerciseRequest, ExerciseUpdate } from './dto/exercises.dto';
-import { PaginationRequest } from '../../common/request/pagination.request.dto';
+import { ExerciseRequest, ExerciseUpdate, ExerciseFilterRequest } from './dto/exercises.dto';
 import { PaginationResponse } from '../../common/interfaces/pagination-response.interface';
 
 @Injectable()
@@ -24,16 +23,25 @@ export class ExercisesService {
   }
 
   async findAll(
-    pagination: PaginationRequest,
+    query: ExerciseFilterRequest,
   ): Promise<PaginationResponse<Exercise>> {
-    const limit = pagination.limit || 10;
-    const offset = pagination.offset || 0;
+    const limit = query.limit || 10;
+    const offset = query.offset || 0;
 
-    const [items, total] = await this.exercisesRepository.findAndCount({
-      take: limit,
-      skip: offset,
-      relations: ['parentExercise', 'variants'],
-    });
+    const queryBuilder = this.exercisesRepository
+      .createQueryBuilder('exercise')
+      .leftJoinAndSelect('exercise.parentExercise', 'parentExercise')
+      .leftJoinAndSelect('exercise.variants', 'variants')
+      .take(limit)
+      .skip(offset);
+
+    if (query.muscleTarget && query.muscleTarget.length > 0) {
+      queryBuilder.andWhere('exercise.muscleTarget && ARRAY[:...muscleTarget]::exercise_muscletarget_enum[]', {
+        muscleTarget: query.muscleTarget,
+      });
+    }
+
+    const [items, total] = await queryBuilder.getManyAndCount();
 
     return {
       items,

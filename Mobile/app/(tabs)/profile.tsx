@@ -1,8 +1,10 @@
+import { DumbbellIcon } from '@/components/ui/dumbbell-icon';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Config } from '@/constants';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { GlobalStyles } from '@/styles/global';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -44,6 +46,7 @@ const GENDER_MAPPING: Record<string, string> = {
 };
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { signOut, user } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [authData, setAuthData] = useState<AuthData | null>(null);
@@ -111,7 +114,7 @@ export default function ProfileScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.headerIcon}>💪</Text>
+          <DumbbellIcon size={20} />
           <Text style={styles.headerTitle}>AthletIA</Text>
         </View>
         <Pressable style={styles.notificationButton}>
@@ -209,7 +212,7 @@ export default function ProfileScreen() {
             <Text style={styles.chevron}>›</Text>
           </Pressable>
 
-          <Pressable style={styles.menuItem}>
+          <Pressable style={styles.menuItem} onPress={() => router.push('/measurements')}>
             <View style={styles.menuItemLeft}>
               <Text style={styles.menuIcon}>📊</Text>
               <Text style={styles.menuText}>Medidas y Progreso</Text>

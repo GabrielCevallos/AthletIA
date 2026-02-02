@@ -46,6 +46,23 @@ export function ApiCreateExercise() {
       },
     }),
     ApiResponse({
+      status: 400,
+      description: 'Bad Request - Validation error. Invalid or missing required fields',
+      schema: {
+        example: {
+          message: [
+            'name must be longer than or equal to 3 characters',
+            'description must be longer than or equal to 10 characters',
+            'equipment must be one of: barbell, dumbbell, machine, bodyweight, kettlebell, resistance_band, cable, other',
+            'muscleTarget must contain at least 1 elements',
+            'exerciseType must contain at least 1 elements',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    }),
+    ApiResponse({
       status: 401,
       description: 'Unauthorized - No valid authentication token',
     }),
@@ -61,7 +78,7 @@ export function ApiListExercises() {
     ApiOperation({
       summary: 'List exercises with pagination',
       description:
-        'Get a paginated list of all exercises. Accessible by all authenticated users.',
+        'Get a paginated list of all exercises. Filter by muscle target to get specific exercises. Accessible by all authenticated users.',
     }),
     ApiBearerAuth(),
     ApiQuery({
@@ -77,6 +94,14 @@ export function ApiListExercises() {
       type: Number,
       description: 'Number of items to skip',
       example: 0,
+    }),
+    ApiQuery({
+      name: 'muscleTarget',
+      required: false,
+      type: [String],
+      isArray: true,
+      description: 'Filter by target muscles. Valid values: chest, core, trapezius, lats, deltoids, triceps, biceps, forearms, quads, hamstrings, glutes, adductors, calves, neck',
+      example: ['chest', 'triceps'],
     }),
     ApiResponse({
       status: 200,
@@ -101,6 +126,19 @@ export function ApiListExercises() {
             limit: 10,
             offset: 0,
           },
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Bad Request - Invalid muscleTarget value',
+      schema: {
+        example: {
+          message: [
+            'Each muscleTarget must be one of: chest, core, trapezius, lats, deltoids, triceps, biceps, forearms, quads, hamstrings, glutes, adductors, calves, neck',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
         },
       },
     }),
@@ -181,6 +219,21 @@ export function ApiUpdateExercise() {
             name: 'Barbell Bench Press',
             updatedAt: '2024-01-02T10:00:00Z',
           },
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Bad Request - Validation error. Invalid field values',
+      schema: {
+        example: {
+          message: [
+            'name must be longer than or equal to 3 characters',
+            'equipment must be one of: barbell, dumbbell, machine, bodyweight, kettlebell, resistance_band, cable, other',
+            'muscleTarget must contain at least 1 elements',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
         },
       },
     }),

@@ -25,7 +25,19 @@ export function ApiUpdateProfile() {
     }),
     ApiResponse({
       status: 400,
-      description: 'Bad Request - Validation error',
+      description: 'Bad Request - Validation error. Invalid field values',
+      schema: {
+        example: {
+          message: [
+            'name must be longer than or equal to 3 characters',
+            'phoneNumber must match phone format',
+            'gender must be one of: male, female, other',
+            'fitGoals must contain at least 1 elements',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
     }),
     ApiResponse({
       status: 401,
@@ -70,6 +82,19 @@ export function ApiCompleteProfileSetup() {
     ApiResponse({
       status: 400,
       description: 'Bad Request - Validation error or Profile already exists',
+      schema: {
+        example: {
+          message: [
+            'name must be longer than or equal to 3 characters',
+            'phoneNumber must match phone format',
+            'gender must be one of: male, female, other',
+            'fitGoals must contain at least 1 elements',
+            'Profile already exists for this account',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
     }),
     ApiResponse({
       status: 401,

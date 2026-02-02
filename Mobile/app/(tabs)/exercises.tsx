@@ -1,63 +1,228 @@
+import { Config } from '@/constants';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
+import { useAuth } from '@/context/auth-context';
+import { useExercises } from '@/hooks/use-exercises';
 import { GlobalStyles } from '@/styles/global';
-import { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
-const EXERCISE_CATEGORIES = [
-  { id: 'chest', label: 'Pecho' },
-  { id: 'back', label: 'Espalda' },
-  { id: 'legs', label: 'Piernas' },
-  { id: 'cardio', label: 'Cardio' },
-  { id: 'arms', label: 'Brazos' },
-];
-
-const EXERCISES = [
-  {
-    id: '1',
-    name: 'Press de Banca',
-    category: 'chest',
-    level: 'Intermedio',
-    image: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=200&h=200&fit=crop',
-  },
-  {
-    id: '2',
-    name: 'Aperturas con Mancuernas',
-    category: 'chest',
-    level: 'Principiante',
-    image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop',
-  },
-  {
-    id: '3',
-    name: 'Flexiones',
-    category: 'chest',
-    level: 'Principiante',
-    image: 'https://images.unsplash.com/photo-1598971639058-fab3c3109a00?w=200&h=200&fit=crop',
-  },
-  {
-    id: '4',
-    name: 'Remo con Barra',
-    category: 'back',
-    level: 'Intermedio',
-    image: 'https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=200&h=200&fit=crop',
-  },
-  {
-    id: '5',
-    name: 'Dominadas',
-    category: 'back',
-    level: 'Avanzado',
-    image: 'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=200&h=200&fit=crop',
-  },
+// Mapeo de valores del backend (inglés) a etiquetas para la UI (español)
+const MUSCLE_TARGETS = [
+  { id: 'chest', label: 'Pecho', icon: '💪' },
+  { id: 'core', label: 'Core', icon: '🔥' },
+  { id: 'trapezius', label: 'Trapecio', icon: '🦾' },
+  { id: 'lats', label: 'Dorsales', icon: '🦾' },
+  { id: 'deltoids', label: 'Deltoides', icon: '🏋️' },
+  { id: 'triceps', label: 'Tríceps', icon: '💪' },
+  { id: 'biceps', label: 'Bíceps', icon: '💪' },
+  { id: 'forearms', label: 'Antebrazos', icon: '✊' },
+  { id: 'quads', label: 'Cuádriceps', icon: '🦵' },
+  { id: 'hamstrings', label: 'Isquiotibiales', icon: '🦵' },
+  { id: 'glutes', label: 'Glúteos', icon: '🍑' },
+  { id: 'adductors', label: 'Aductores', icon: '🦵' },
+  { id: 'calves', label: 'Pantorrillas', icon: '🦿' },
+  { id: 'neck', label: 'Cuello', icon: '🧍' },
 ];
 
 export default function ExercisesScreen() {
-  const [selectedCategory, setSelectedCategory] = useState('chest');
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  const muscleTargetsScrollRef = useRef<ScrollView>(null);
+  const muscleTargetPositions = useRef<Record<string, number>>({});
+  const [selectedMuscleTarget, setSelectedMuscleTarget] = useState('chest');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    description: '',
+    equipment: 'barbell',
+    video: '',
+    minSets: '3',
+    maxSets: '5',
+    minReps: '8',
+    maxReps: '12',
+    minRestTime: '60',
+    maxRestTime: '120',
+    muscleTarget: 'chest',
+    exerciseType: 'strength',
+    instructions: '',
+  });
 
-  const filteredExercises = EXERCISES.filter(
-    (exercise) =>
-      exercise.category === selectedCategory &&
-      exercise.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Hook personalizado para ejercicios con autenticación
+  const { exercises, loading, error, refetch } = useExercises(selectedMuscleTarget);
+
+  // Redirigir si no está autenticado
+  useEffect(() => {
+    if (!authLoading && !user?.token) {
+      router.replace('/login');
+    }
+  }, [user?.token, authLoading, router]);
+
+  // Función auxiliar para traducir muscle target del backend al español
+  const getMuscleTargetLabel = (muscleTargetId?: string): string => {
+    const target = MUSCLE_TARGETS.find((t) => t.id === muscleTargetId);
+    return target?.label || 'General';
+  };
+
+  // Filtrar búsqueda localmente
+  const filteredExercises = exercises.filter((exercise) =>
+    exercise.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (authLoading) {
+    return (
+      <View style={[styles.screen, { justifyContent: 'center' }]}>
+        <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
+      </View>
+    );
+  }
+
+  const handleMuscleTargetChange = (targetId: string) => {
+    setSelectedMuscleTarget(targetId);
+    setSearchQuery('');
+    const x = muscleTargetPositions.current[targetId];
+    if (x !== undefined) {
+      muscleTargetsScrollRef.current?.scrollTo({
+        x: Math.max(0, x - Spacing.base),
+        animated: true,
+      });
+    }
+  };
+
+  const resetCreateForm = () => {
+    setCreateForm({
+      name: '',
+      description: '',
+      equipment: 'barbell',
+      video: '',
+      minSets: '3',
+      maxSets: '5',
+      minReps: '8',
+      maxReps: '12',
+      minRestTime: '60',
+      maxRestTime: '120',
+      muscleTarget: 'chest',
+      exerciseType: 'strength',
+      instructions: '',
+    });
+  };
+
+  const handleCreateExercise = async () => {
+    if (!user?.token) {
+      setCreateError('Usuario no autenticado');
+      return;
+    }
+
+    if (!createForm.name.trim() || !createForm.description.trim() || !createForm.video.trim()) {
+      setCreateError('Completa nombre, descripción y video');
+      return;
+    }
+
+    const toNumber = (value: string) => Number(value);
+    const minSets = toNumber(createForm.minSets);
+    const maxSets = toNumber(createForm.maxSets);
+    const minReps = toNumber(createForm.minReps);
+    const maxReps = toNumber(createForm.maxReps);
+    const minRestTime = toNumber(createForm.minRestTime);
+    const maxRestTime = toNumber(createForm.maxRestTime);
+
+    if ([minSets, maxSets, minReps, maxReps, minRestTime, maxRestTime].some((v) => Number.isNaN(v))) {
+      setCreateError('Revisa los campos numéricos');
+      return;
+    }
+
+    const muscleTarget = createForm.muscleTarget
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+    const exerciseType = createForm.exerciseType
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+    const instructions = createForm.instructions
+      .split('\n')
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    if (muscleTarget.length === 0 || exerciseType.length === 0) {
+      setCreateError('Agrega al menos un muscleTarget y un exerciseType');
+      return;
+    }
+
+    setCreateLoading(true);
+    setCreateError(null);
+    setCreateSuccess(null);
+
+    try {
+      const response = await fetch(`${Config.apiUrl}/workout/exercises`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: createForm.name.trim(),
+          description: createForm.description.trim(),
+          equipment: createForm.equipment.trim(),
+          video: createForm.video.trim(),
+          minSets,
+          maxSets,
+          minReps,
+          maxReps,
+          minRestTime,
+          maxRestTime,
+          muscleTarget,
+          exerciseType,
+          instructions: instructions.length > 0 ? instructions : undefined,
+        }),
+      });
+
+      let result: { message?: string } | null = null;
+      try {
+        result = await response.json();
+      } catch {
+        result = null;
+      }
+
+      if (response.status === 401) {
+        setCreateError(result?.message || 'Sesión expirada. Por favor, inicia sesión nuevamente.');
+        return;
+      }
+
+      if (response.status === 403) {
+        setCreateError(result?.message || 'No tienes permisos para crear ejercicios.');
+        return;
+      }
+
+      if (!response.ok) {
+        setCreateError(result?.message || `HTTP ${response.status}`);
+        return;
+      }
+
+      setCreateSuccess('Ejercicio creado correctamente');
+      resetCreateForm();
+      void refetch();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al crear ejercicio';
+      setCreateError(errorMessage);
+    } finally {
+      setCreateLoading(false);
+    }
+  };
 
   return (
     <View style={styles.screen}>
@@ -65,6 +230,18 @@ export default function ExercisesScreen() {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.title}>Biblioteca de Ejercicios</Text>
+          {user?.role === 'admin' && (
+            <Pressable
+              style={styles.addExerciseButton}
+              onPress={() => {
+                setCreateError(null);
+                setCreateSuccess(null);
+                setIsCreateModalVisible(true);
+              }}
+            >
+              <Text style={styles.addExerciseButtonText}>+ Nuevo</Text>
+            </Pressable>
+          )}
         </View>
 
         {/* Search Bar */}
@@ -80,58 +257,276 @@ export default function ExercisesScreen() {
         </View>
       </View>
 
-      {/* Categories */}
+      {/* Error State */}
+      {error && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorIcon}>⚠️</Text>
+          <Text style={styles.errorText}>{error}</Text>
+          <Pressable onPress={() => void refetch()}>
+            <Text style={styles.retryText}>Reintentar</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/* Muscle Targets */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categoriesContainer}
         style={styles.categoriesScroll}
+        ref={muscleTargetsScrollRef}
       >
-        {EXERCISE_CATEGORIES.map((category) => (
+        {MUSCLE_TARGETS.map((target) => (
           <Pressable
-            key={category.id}
+            key={target.id}
             style={[
               styles.categoryPill,
-              selectedCategory === category.id && styles.categoryPillActive,
+              selectedMuscleTarget === target.id && styles.categoryPillActive,
             ]}
-            onPress={() => setSelectedCategory(category.id)}
+            onLayout={(event) => {
+              muscleTargetPositions.current[target.id] = event.nativeEvent.layout.x;
+            }}
+            onPress={() => handleMuscleTargetChange(target.id)}
           >
+            <Text style={styles.muscleIcon}>{target.icon}</Text>
             <Text
               style={[
                 styles.categoryText,
-                selectedCategory === category.id && styles.categoryTextActive,
+                selectedMuscleTarget === target.id && styles.categoryTextActive,
               ]}
             >
-              {category.label}
+              {target.label}
             </Text>
           </Pressable>
         ))}
       </ScrollView>
 
       {/* Exercise List */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.exerciseList}>
-          {filteredExercises.map((exercise) => (
-            <Pressable key={exercise.id} style={styles.exerciseCard}>
-              <View style={styles.exerciseImage}>
-                <Image
-                  source={{ uri: exercise.image }}
-                  style={styles.image}
-                  resizeMode="cover"
-                />
-              </View>
-              <View style={styles.exerciseInfo}>
-                <Text style={styles.exerciseName}>{exercise.name}</Text>
-                <Text style={styles.exerciseMeta}>
-                  {EXERCISE_CATEGORIES.find((c) => c.id === exercise.category)?.label} •{' '}
-                  {exercise.level}
-                </Text>
-              </View>
-              <Text style={styles.chevron}>›</Text>
-            </Pressable>
-          ))}
+      {loading && exercises.length === 0 ? (
+        <View style={[styles.content, { justifyContent: 'center' }]}>
+          <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
+          <Text style={styles.loadingText}>Cargando ejercicios...</Text>
         </View>
-      </ScrollView>
+      ) : (
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          {filteredExercises.length > 0 ? (
+            <View style={styles.exerciseList}>
+              {filteredExercises.map((exercise) => (
+                <Pressable
+                  key={exercise.id}
+                  style={styles.exerciseCard}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/exercise-detail/[id]',
+                      params: { id: exercise.id },
+                    })
+                  }
+                >
+                  <View style={styles.exerciseImage}>
+                    <Image
+                      source={{ uri: exercise.imageUrl }}
+                      style={styles.image}
+                      resizeMode="cover"
+                    />
+                  </View>
+                  <View style={styles.exerciseInfo}>
+                    <Text style={styles.exerciseName}>{exercise.name}</Text>
+                    <Text style={styles.exerciseMeta}>
+                      {getMuscleTargetLabel(exercise.muscleTarget)}{' '}
+                      {exercise.difficulty}
+                    </Text>
+                  </View>
+                  <Text style={styles.chevron}>›</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyIcon}>🏋️</Text>
+              <Text style={styles.emptyTitle}>Sin ejercicios</Text>
+              <Text style={styles.emptyText}>
+                No hay ejercicios disponibles en esta categoría.
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+      )}
+
+      <Modal
+        visible={isCreateModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setIsCreateModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Nuevo ejercicio</Text>
+              <Pressable onPress={() => setIsCreateModalVisible(false)}>
+                <Text style={styles.modalClose}>✕</Text>
+              </Pressable>
+            </View>
+
+            <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+              {createError && <Text style={styles.modalError}>{createError}</Text>}
+              {createSuccess && <Text style={styles.modalSuccess}>{createSuccess}</Text>}
+
+              <Text style={styles.modalLabel}>Nombre</Text>
+              <TextInput
+                style={styles.modalInput}
+                value={createForm.name}
+                onChangeText={(value) => setCreateForm((prev) => ({ ...prev, name: value }))}
+                placeholder="Bench Press"
+                placeholderTextColor={Colors.text.muted}
+              />
+
+              <Text style={styles.modalLabel}>Descripción</Text>
+              <TextInput
+                style={[styles.modalInput, styles.modalInputMultiline]}
+                value={createForm.description}
+                onChangeText={(value) => setCreateForm((prev) => ({ ...prev, description: value }))}
+                placeholder="Descripción del ejercicio"
+                placeholderTextColor={Colors.text.muted}
+                multiline
+              />
+
+              <Text style={styles.modalLabel}>Equipo (barbell, dumbbell, ...)</Text>
+              <TextInput
+                style={styles.modalInput}
+                value={createForm.equipment}
+                onChangeText={(value) => setCreateForm((prev) => ({ ...prev, equipment: value }))}
+                placeholder="barbell"
+                placeholderTextColor={Colors.text.muted}
+              />
+
+              <Text style={styles.modalLabel}>Video (URL)</Text>
+              <TextInput
+                style={styles.modalInput}
+                value={createForm.video}
+                onChangeText={(value) => setCreateForm((prev) => ({ ...prev, video: value }))}
+                placeholder="https://example.com/video"
+                placeholderTextColor={Colors.text.muted}
+              />
+
+              <View style={styles.modalRow}>
+                <View style={styles.modalColumn}>
+                  <Text style={styles.modalLabel}>Min Sets</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={createForm.minSets}
+                    onChangeText={(value) => setCreateForm((prev) => ({ ...prev, minSets: value }))}
+                    keyboardType="numeric"
+                  />
+                </View>
+                <View style={styles.modalColumn}>
+                  <Text style={styles.modalLabel}>Max Sets</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={createForm.maxSets}
+                    onChangeText={(value) => setCreateForm((prev) => ({ ...prev, maxSets: value }))}
+                    keyboardType="numeric"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.modalRow}>
+                <View style={styles.modalColumn}>
+                  <Text style={styles.modalLabel}>Min Reps</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={createForm.minReps}
+                    onChangeText={(value) => setCreateForm((prev) => ({ ...prev, minReps: value }))}
+                    keyboardType="numeric"
+                  />
+                </View>
+                <View style={styles.modalColumn}>
+                  <Text style={styles.modalLabel}>Max Reps</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={createForm.maxReps}
+                    onChangeText={(value) => setCreateForm((prev) => ({ ...prev, maxReps: value }))}
+                    keyboardType="numeric"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.modalRow}>
+                <View style={styles.modalColumn}>
+                  <Text style={styles.modalLabel}>Min Rest (s)</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={createForm.minRestTime}
+                    onChangeText={(value) => setCreateForm((prev) => ({ ...prev, minRestTime: value }))}
+                    keyboardType="numeric"
+                  />
+                </View>
+                <View style={styles.modalColumn}>
+                  <Text style={styles.modalLabel}>Max Rest (s)</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={createForm.maxRestTime}
+                    onChangeText={(value) => setCreateForm((prev) => ({ ...prev, maxRestTime: value }))}
+                    keyboardType="numeric"
+                  />
+                </View>
+              </View>
+
+              <Text style={styles.modalLabel}>muscleTarget (comma separados)</Text>
+              <TextInput
+                style={styles.modalInput}
+                value={createForm.muscleTarget}
+                onChangeText={(value) => setCreateForm((prev) => ({ ...prev, muscleTarget: value }))}
+                placeholder="chest, triceps"
+                placeholderTextColor={Colors.text.muted}
+              />
+
+              <Text style={styles.modalLabel}>exerciseType (comma separados)</Text>
+              <TextInput
+                style={styles.modalInput}
+                value={createForm.exerciseType}
+                onChangeText={(value) => setCreateForm((prev) => ({ ...prev, exerciseType: value }))}
+                placeholder="strength"
+                placeholderTextColor={Colors.text.muted}
+              />
+
+              <Text style={styles.modalLabel}>Instrucciones (una por línea)</Text>
+              <TextInput
+                style={[styles.modalInput, styles.modalInputMultiline]}
+                value={createForm.instructions}
+                onChangeText={(value) => setCreateForm((prev) => ({ ...prev, instructions: value }))}
+                placeholder="Paso 1\nPaso 2"
+                placeholderTextColor={Colors.text.muted}
+                multiline
+              />
+            </ScrollView>
+
+            <View style={styles.modalActions}>
+              <Pressable
+                style={[styles.modalButton, styles.modalButtonSecondary]}
+                onPress={() => {
+                  resetCreateForm();
+                  setCreateError(null);
+                  setCreateSuccess(null);
+                  setIsCreateModalVisible(false);
+                }}
+              >
+                <Text style={styles.modalButtonTextSecondary}>Cancelar</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.modalButton, styles.modalButtonPrimary]}
+                onPress={() => void handleCreateExercise()}
+                disabled={createLoading}
+              >
+                {createLoading ? (
+                  <ActivityIndicator color="#ffffff" />
+                ) : (
+                  <Text style={styles.modalButtonTextPrimary}>Crear</Text>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -154,6 +549,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  addExerciseButton: {
+    backgroundColor: Colors.primary.DEFAULT,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+  },
+  addExerciseButtonText: {
+    color: Colors.text.primary,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+  },
   title: {
     ...Typography.styles.h2,
   },
@@ -175,6 +581,28 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.medium,
   },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.error.DEFAULT,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.md,
+    gap: Spacing.sm,
+  },
+  errorIcon: {
+    fontSize: Typography.fontSize.lg,
+  },
+  errorText: {
+    flex: 1,
+    ...Typography.styles.small,
+    color: Colors.text.primary,
+  },
+  retryText: {
+    ...Typography.styles.small,
+    color: Colors.text.primary,
+    fontWeight: Typography.fontWeight.bold,
+    textDecorationLine: 'underline',
+  },
   categoriesScroll: {
     flexGrow: 0,
   },
@@ -184,14 +612,20 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   categoryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.background.secondary,
     marginRight: Spacing.sm,
+    gap: Spacing.xs,
   },
   categoryPillActive: {
     backgroundColor: Colors.primary.DEFAULT,
+  },
+  muscleIcon: {
+    fontSize: Typography.fontSize.base,
   },
   categoryText: {
     fontSize: Typography.fontSize.sm,
@@ -203,6 +637,32 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  loadingText: {
+    ...Typography.styles.body,
+    color: Colors.text.muted,
+    marginTop: Spacing.md,
+    textAlign: 'center',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing['4xl'],
+  },
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: Spacing.md,
+  },
+  emptyTitle: {
+    ...Typography.styles.h3,
+    color: Colors.text.primary,
+    marginBottom: Spacing.sm,
+  },
+  emptyText: {
+    ...Typography.styles.body,
+    color: Colors.text.muted,
+    textAlign: 'center',
   },
   exerciseList: {
     padding: Spacing.base,
@@ -245,5 +705,92 @@ const styles = StyleSheet.create({
   chevron: {
     fontSize: Typography.fontSize['2xl'],
     color: Colors.text.muted,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    padding: Spacing.base,
+  },
+  modalContainer: {
+    backgroundColor: Colors.background.DEFAULT,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.base,
+    maxHeight: '90%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.base,
+  },
+  modalTitle: {
+    ...Typography.styles.h3,
+  },
+  modalClose: {
+    fontSize: Typography.fontSize.lg,
+    color: Colors.text.muted,
+  },
+  modalContent: {
+    marginBottom: Spacing.base,
+  },
+  modalLabel: {
+    ...Typography.styles.small,
+    color: Colors.text.muted,
+    marginBottom: Spacing.xs,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: Colors.border.DEFAULT,
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    color: Colors.text.primary,
+    marginBottom: Spacing.base,
+  },
+  modalInputMultiline: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  modalRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  modalColumn: {
+    flex: 1,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: Spacing.sm,
+  },
+  modalButton: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+  },
+  modalButtonPrimary: {
+    backgroundColor: Colors.primary.DEFAULT,
+  },
+  modalButtonSecondary: {
+    backgroundColor: Colors.background.secondary,
+  },
+  modalButtonTextPrimary: {
+    color: Colors.text.primary,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  modalButtonTextSecondary: {
+    color: Colors.text.muted,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  modalError: {
+    ...Typography.styles.small,
+    color: Colors.error.DEFAULT,
+    marginBottom: Spacing.sm,
+  },
+  modalSuccess: {
+    ...Typography.styles.small,
+    color: Colors.success.DEFAULT,
+    marginBottom: Spacing.sm,
   },
 });

@@ -141,6 +141,22 @@ export function ApiCreateMeasurement() {
       },
     }),
     ApiResponse({
+      status: 400,
+      description: 'Bad Request - Validation error. Invalid or missing required fields',
+      schema: {
+        example: {
+          message: [
+            'weight must be a positive number',
+            'height must be a positive number',
+            'left_arm must be a positive number',
+            'checkTime must be one of: DAILY, WEEKLY, MONTHLY',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    }),
+    ApiResponse({
       status: 401,
       description: 'Unauthorized - No valid authentication token',
     }),
@@ -184,6 +200,20 @@ export function ApiUpdateMeasurement() {
             createdAt: '2024-01-01T10:00:00Z',
             updatedAt: '2024-01-02T11:30:00Z',
           },
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Bad Request - Validation error. Invalid field values',
+      schema: {
+        example: {
+          message: [
+            'weight must be a positive number',
+            'checkTime must be one of: DAILY, WEEKLY, MONTHLY',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
         },
       },
     }),

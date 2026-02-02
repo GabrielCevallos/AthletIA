@@ -12,5 +12,5 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   database: process.env.DB_NAME || 'athletia',
   entities: [__dirname + '../../../**/*.entity{.ts,.js}'],
   synchronize: true,
-  dropSchema: true,
+  dropSchema: true,//process.env.NODE_ENV === 'test',
 };

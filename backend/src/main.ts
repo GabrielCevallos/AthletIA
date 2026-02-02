@@ -1,13 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import helmet from 'helmet';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as dotenv from 'dotenv';
-import * as dotenvExpand from 'dotenv-expand';
+import { expand } from 'dotenv-expand';
+import { RateLimitGuard } from './common/guards/rate-limit.guard';
+import { RateLimitService } from './common/guards/rate-limit.service';
 
 const myEnv = dotenv.config();
-dotenvExpand.default(myEnv);
+expand(myEnv);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,11 +28,20 @@ async function bootstrap() {
       crossOriginResourcePolicy: { policy: 'cross-origin' },
     }),
   );
+  
+  // Rate Limiting Guard
+  const reflector = app.get(Reflector);
+  const rateLimitService = app.get(RateLimitService);
+  app.useGlobalGuards(new RateLimitGuard(reflector, rateLimitService));
+  
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // remove properties that do not have any decorators
       forbidNonWhitelisted: true, // throw an error if non-whitelisted properties are present
       transform: true, // automatically transform payloads to be objects typed according to their DTO classes
+      transformOptions: {
+        enableImplicitConversion: true, // enable implicit type conversion
+      },
     }),
   );
   app.enableCors({

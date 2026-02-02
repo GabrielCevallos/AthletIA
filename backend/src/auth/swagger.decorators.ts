@@ -79,6 +79,22 @@ export function ApiAuthRegisterAccount() {
         },
       },
     }),
+    ApiResponse({
+      status: 400,
+      description: 'Bad Request - Validation error or account already exists',
+      schema: {
+        example: {
+          message: [
+            'email must be an email',
+            'password must be longer than or equal to 8 characters',
+            'password must contain uppercase, lowercase, number and special character',
+            'Email already registered',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    }),
   );
 }
 
@@ -141,11 +157,15 @@ export function ApiAuthResendVerification() {
     }),
     ApiResponse({
       status: 400,
-      description: 'Too many requests',
+      description: 'Bad Request - Too many requests or invalid email',
       schema: {
         example: {
-          success: false,
-          message: 'Too many verification requests',
+          message: [
+            'email must be an email',
+            'Too many verification requests',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
         },
       },
     }),
@@ -215,6 +235,26 @@ export function ApiAuthChangePassword() {
       },
     }),
     ApiResponse({ status: 200, description: 'Password changed' }),
+    ApiResponse({
+      status: 400,
+      description: 'Bad Request - Invalid password or validation error',
+      schema: {
+        example: {
+          message: [
+            'currentPassword must be a string',
+            'newPassword must be longer than or equal to 8 characters',
+            'newPassword must contain uppercase, lowercase, number and special character',
+            'Current password is incorrect',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'Unauthorized - Invalid account',
+    }),
   );
 }
 

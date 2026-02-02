@@ -22,6 +22,7 @@ import * as dotenv from 'dotenv';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { GoogleUser } from './strategies/google.strategy';
 import { User } from 'src/users/accounts/dto/user-response.dtos';
+import { RateLimitService } from 'src/common/guards/rate-limit.service';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ export class AuthService {
     private accountsService: AccountsService,
     private jwtService: JwtService,
     private mailService: MailService,
+    private rateLimitService: RateLimitService,
   ) {
     this.logger = new Logger(AuthService.name);
     this.logger.log('AuthService initialized');
@@ -157,8 +159,11 @@ export class AuthService {
   }
 
   async signIn(loginRequest: LoginRequest): Promise<TokenResponse> {
+    const key = loginRequest.email;
+    
     const account = await this.accountsService.findByEmail(loginRequest.email);
     if (!account) {
+      this.rateLimitService.recordFailedAttempt(key);
       throw new UnauthorizedException(messages.invalidCredentials);
     }
 
@@ -171,11 +176,15 @@ export class AuthService {
     }
     const ok = await argon2.verify(account.password, loginRequest.password);
     if (!ok) {
-      throw new UnauthorizedException();
+      this.rateLimitService.recordFailedAttempt(key);
+      throw new UnauthorizedException(messages.invalidCredentials);
     }
     if (!account.isEmailVerified) {
       throw new BadRequestException(messages.emailNotVerified);
     }
+    
+    this.rateLimitService.recordSuccessfulAttempt(key);
+    
     const payload = this.createJwtPayload(account);
 
     const tokens = await this.createTokenResponse(payload);

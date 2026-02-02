@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { z } from 'zod';
 
+import { DumbbellIcon } from '@/components/ui/dumbbell-icon';
 import { FormInput } from '@/components/ui/form-input';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SelectField } from '@/components/ui/select-field';
@@ -146,7 +147,10 @@ export default function CompleteProfileScreen() {
             <View style={styles.heroHeader}>
               <View style={styles.heroIcon} />
               <View>
-                <Text style={styles.brand}>AthletIA</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <DumbbellIcon size={28} />
+                  <Text style={styles.brand}>AthletIA</Text>
+                </View>
                 <Text style={styles.heading}>Completar Perfil</Text>
                 <Text style={styles.subheading}>
                   Ayúdanos a personalizar tu experiencia de entrenamiento.

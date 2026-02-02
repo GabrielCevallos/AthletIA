@@ -16,10 +16,12 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { MuscleTarget } from '../enum/muscle-target.enum';
 import { ExerciseType } from '../enum/exercise-type.enum';
 import { Equipment } from '../enum/equipment.enum';
+import { PaginationRequest } from '../../../common/request/pagination.request.dto';
 
 export class ExerciseRequest {
   @IsString()
@@ -538,3 +540,24 @@ export class ExerciseUpdate {
     categories?: string[];
   };
 }
+
+export class ExerciseFilterRequest extends PaginationRequest {
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === undefined || value === null) return undefined;
+    return Array.isArray(value) ? value : [value];
+  })
+  @IsArray()
+  @IsEnum(MuscleTarget, {
+    each: true,
+    message: `Each muscleTarget must be one of: ${Object.values(MuscleTarget).join(', ')}`,
+  })
+  @ApiPropertyOptional({
+    description: 'Filter by target muscles - Valid values: chest, core, trapezius, lats, deltoids, triceps, biceps, forearms, quads, hamstrings, glutes, adductors, calves, neck',
+    enum: MuscleTarget,
+    isArray: true,
+    example: [MuscleTarget.CHEST, MuscleTarget.TRICEPS],
+  })
+  muscleTarget?: MuscleTarget[];
+}
+

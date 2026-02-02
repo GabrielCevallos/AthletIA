@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-google-oauth20';
 import * as dotenv from 'dotenv';
-import * as dotenvExpand from 'dotenv-expand';
+import { expand } from 'dotenv-expand';
 import { domain } from '../constants';
 
 const myEnv = dotenv.config();
-dotenvExpand.default(myEnv);
+expand(myEnv);
 
 export type GoogleUser = {
   provider: 'google';

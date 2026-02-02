@@ -264,90 +264,105 @@ export class MeasurementUpdate {
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'User weight in kg', type: Number, example: 75.5 })
   weight?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'User height in cm', type: Number, example: 180 })
   height?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Left arm measurement in cm', type: Number })
   left_arm?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Right arm measurement in cm', type: Number })
   right_arm?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Left forearm measurement in cm', type: Number })
   left_forearm?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Right forearm measurement in cm', type: Number })
   right_forearm?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Clavicular width in cm', type: Number })
   clavicular_width?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Neck diameter in cm', type: Number })
   neck_diameter?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Chest size in cm', type: Number })
   chest_size?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Back width in cm', type: Number })
   back_width?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Hip diameter in cm', type: Number })
   hip_diameter?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Left leg measurement in cm', type: Number })
   left_leg?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Right leg measurement in cm', type: Number })
   right_leg?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Left calve measurement in cm', type: Number })
   left_calve?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
+  @ApiPropertyOptional({ description: 'Right calve measurement in cm', type: Number })
   right_calve?: number;
 
   @IsOptional()

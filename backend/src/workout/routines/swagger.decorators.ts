@@ -34,6 +34,22 @@ export function ApiCreateRoutine() {
       },
     }),
     ApiResponse({
+      status: 400,
+      description: 'Bad Request - Validation error. Invalid or missing required fields',
+      schema: {
+        example: {
+          message: [
+            'name must be longer than or equal to 3 characters',
+            'description must be longer than or equal to 10 characters',
+            'exerciseIds must contain at least 1 elements',
+            'routineGoal must contain at least 1 elements',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    }),
+    ApiResponse({
       status: 401,
       description: 'Unauthorized - No valid authentication token',
     }),
@@ -167,6 +183,20 @@ export function ApiUpdateRoutine() {
             updatedAt: '2024-01-02T12:00:00Z',
             nExercises: 5,
           },
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Bad Request - Validation error. Invalid field values',
+      schema: {
+        example: {
+          message: [
+            'name must be longer than or equal to 3 characters',
+            'exerciseIds must contain at least 1 elements',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
         },
       },
     }),

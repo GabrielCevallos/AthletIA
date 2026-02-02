@@ -27,6 +27,8 @@ const MAPPING = {
   'calendar': 'calendar-today',
   'person.crop.circle': 'account-circle',
   'rectangle.portrait.and.arrow.right': 'logout',
+  'plus': 'add',
+  'square.split.2x2': 'grid-view',
 } as IconMapping;
 
 /**
