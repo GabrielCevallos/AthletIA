@@ -1,11 +1,15 @@
+import { ExerciseSelectorModal } from '@/components/exercise-selector-modal';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
+import { useAuth } from '@/context/auth-context';
+import { Exercise } from '@/hooks/use-exercises';
+import { type RoutineGoal, createRoutine } from '@/services/routines-api';
 import { GlobalStyles } from '@/styles/global';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-interface Exercise {
+interface RoutineExercise {
   id: string;
   name: string;
   sets: number;
@@ -13,18 +17,24 @@ interface Exercise {
   weight: number;
 }
 
-const INITIAL_EXERCISES: Exercise[] = [
-  { id: '1', name: 'Press de Banca', sets: 4, reps: 10, weight: 80 },
-  { id: '2', name: 'Aperturas con Mancuernas', sets: 3, reps: 12, weight: 15 },
-];
+const DEFAULT_ROUTINE_GOALS: RoutineGoal[] = ['general_fitness'];
 
 export default function RoutineBuilderScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [routineName, setRoutineName] = useState('');
   const [description, setDescription] = useState('');
-  const [exercises, setExercises] = useState<Exercise[]>(INITIAL_EXERCISES);
+  const [exercises, setExercises] = useState<RoutineExercise[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const updateExercise = (id: string, field: keyof Exercise, value: number) => {
+  const exerciseIds = useMemo(
+    () => exercises.map((exercise) => exercise.id).filter(Boolean),
+    [exercises]
+  );
+
+  const updateExercise = (id: string, field: keyof RoutineExercise, value: number) => {
     setExercises((prev) =>
       prev.map((ex) => (ex.id === id ? { ...ex, [field]: value } : ex))
     );
@@ -32,6 +42,58 @@ export default function RoutineBuilderScreen() {
 
   const removeExercise = (id: string) => {
     setExercises((prev) => prev.filter((ex) => ex.id !== id));
+  };
+
+  const handleSelectExercises = (selectedExercises: Exercise[]) => {
+    // Convert selected exercises to routine exercises with default sets/reps/weight
+    const newExercises = selectedExercises.map((ex) => ({
+      id: ex.id,
+      name: ex.name,
+      sets: ex.maxSets || 3,
+      reps: ex.maxReps || 10,
+      weight: 0,
+    }));
+    setExercises((prev) => [...prev, ...newExercises]);
+  };
+
+  const handleSave = async () => {
+    if (!user?.token) {
+      setError('Usuario no autenticado');
+      return;
+    }
+
+    if (!routineName.trim()) {
+      setError('El nombre de la rutina es obligatorio');
+      return;
+    }
+
+    if (!description.trim()) {
+      setError('La descripción es obligatoria');
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      await createRoutine(
+        {
+          name: routineName.trim(),
+          description: description.trim(),
+          routineGoal: DEFAULT_ROUTINE_GOALS,
+          official: false,
+          exerciseIds: exerciseIds.length ? exerciseIds : undefined,
+        },
+        { token: user.token }
+      );
+
+      router.back();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al guardar la rutina';
+      setError(message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -69,7 +131,10 @@ export default function RoutineBuilderScreen() {
               placeholder="Ej: Hipertrofia Pecho/Triceps"
               placeholderTextColor={Colors.text.muted}
               value={routineName}
-              onChangeText={setRoutineName}
+              onChangeText={(text) => {
+                setRoutineName(text);
+                if (error) setError(null);
+              }}
             />
           </View>
 
@@ -80,12 +145,17 @@ export default function RoutineBuilderScreen() {
               placeholder="Describe el objetivo..."
               placeholderTextColor={Colors.text.muted}
               value={description}
-              onChangeText={setDescription}
+              onChangeText={(text) => {
+                setDescription(text);
+                if (error) setError(null);
+              }}
               multiline
               numberOfLines={2}
             />
           </View>
         </View>
+
+        {error && <Text style={styles.errorText}>{error}</Text>}
 
         {/* Exercises Section */}
         <View style={styles.section}>
@@ -153,16 +223,33 @@ export default function RoutineBuilderScreen() {
             </View>
           ))}
 
-          {/* Add Exercise Button */}
+          {/* Add Exercise Buttons */}
+          {user?.role === 'admin' && (
+            <Pressable
+              style={styles.addExerciseButton}
+              onPress={() => setModalVisible(true)}
+            >
+              <Text style={styles.addIcon}>+</Text>
+              <Text style={styles.addText}>Agregar Ejercicios Existentes</Text>
+            </Pressable>
+          )}
+
           <Pressable style={styles.addExerciseButton}>
             <Text style={styles.addIcon}>+</Text>
-            <Text style={styles.addText}>Agregar Ejercicio</Text>
+            <Text style={styles.addText}>Crear Ejercicio Personalizado</Text>
           </Pressable>
         </View>
 
         {/* Save Button */}
-        <PrimaryButton label="Guardar Rutina" onPress={() => router.back()} />
+        <PrimaryButton label="Guardar Rutina" onPress={handleSave} loading={saving} />
       </ScrollView>
+
+      {/* Exercise Selector Modal */}
+      <ExerciseSelectorModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onConfirm={handleSelectExercises}
+      />
     </View>
   );
 }
@@ -218,6 +305,11 @@ const styles = StyleSheet.create({
   },
   intro: {
     gap: Spacing.xs,
+  },
+  errorText: {
+    ...Typography.styles.body,
+    color: Colors.error.DEFAULT,
+    textAlign: 'center',
   },
   heading: {
     ...Typography.styles.h2,

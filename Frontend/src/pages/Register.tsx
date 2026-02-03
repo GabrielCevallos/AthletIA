@@ -28,11 +28,11 @@ export default function Register() {
     setServerError(null)
     setSuccessMessage(null)
     try {
+      console.log('Intentando registrar usuario...')
       await registerUser(data.email, data.password)
-      setSuccessMessage('Cuenta creada exitosamente. Redirigiendo al login...')
-      setTimeout(() => {
-        navigate('/login')
-      }, 2000)
+      console.log('Registro exitoso, navegando a check-email')
+      // Redirigir a la página de CheckEmail con el email del usuario
+      navigate('/check-email', { state: { email: data.email }, replace: true })
     } catch (err: any) {
       let msg = err?.response?.data?.message
       if (Array.isArray(msg)) msg = msg.join(', ')

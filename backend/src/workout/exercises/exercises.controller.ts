@@ -13,7 +13,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ExercisesService } from './exercises.service';
-import { ExerciseRequest, ExerciseUpdate } from './dto/exercises.dto';
+import { ExerciseRequest, ExerciseUpdate, ExerciseFilterRequest } from './dto/exercises.dto';
 import { ResponseBody } from '../../common/response/api.response';
 import { Exercise } from './exercises.entity';
 import {
@@ -25,7 +25,6 @@ import {
 } from './swagger.decorators';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
-import { PaginationRequest } from '../../common/request/pagination.request.dto';
 import { PaginationResponse } from '../../common/interfaces/pagination-response.interface';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -48,9 +47,9 @@ export class ExercisesController {
   @Get()
   @ApiListExercises()
   async findAll(
-    @Query() pagination: PaginationRequest,
+    @Query() query: ExerciseFilterRequest,
   ): Promise<ResponseBody<PaginationResponse<Exercise>>> {
-    const data = await this.exercisesService.findAll(pagination);
+    const data = await this.exercisesService.findAll(query);
     return new ResponseBody(true, 'Exercises retrieved successfully', data);
   }
 

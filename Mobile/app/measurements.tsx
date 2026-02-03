@@ -1,144 +1,493 @@
+import { FormInput } from '@/components/ui/form-input';
+import { PrimaryButton } from '@/components/ui/primary-button';
+import { Config } from '@/constants';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
+import { useAuth } from '@/context/auth-context';
+import { handleApiError } from '@/services/api-error-handler';
 import { GlobalStyles } from '@/styles/global';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+} from 'react-native';
 
-const { width } = Dimensions.get('window');
+type Measurement = {
+  id: string;
+  weight: number;
+  height: number;
+  imc: number;
+  left_arm: number;
+  right_arm: number;
+  left_forearm: number;
+  right_forearm: number;
+  clavicular_width: number;
+  neck_diameter: number;
+  chest_size: number;
+  back_width: number;
+  hip_diameter: number;
+  left_leg: number;
+  right_leg: number;
+  left_calve: number;
+  right_calve: number;
+  checkTime: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
-const MEASUREMENTS = [
-  { id: 'weight', label: 'Peso', value: '75.2', unit: 'kg', icon: '⚖️', change: '-2.1' },
-  { id: 'body_fat', label: 'Grasa Corporal', value: '18.5', unit: '%', icon: '📊', change: '-1.2' },
-  { id: 'muscle', label: 'Masa Muscular', value: '32.4', unit: 'kg', icon: '💪', change: '+0.8' },
-  { id: 'water', label: 'Agua', value: '58.2', unit: '%', icon: '💧', change: '+0.3' },
+type MeasurementFormData = {
+  weight: string;
+  height: string;
+  left_arm: string;
+  right_arm: string;
+  left_forearm: string;
+  right_forearm: string;
+  clavicular_width: string;
+  neck_diameter: string;
+  chest_size: string;
+  back_width: string;
+  hip_diameter: string;
+  left_leg: string;
+  right_leg: string;
+  left_calve: string;
+  right_calve: string;
+  checkTime: string;
+};
+
+type FieldConfig = {
+  key: keyof MeasurementFormData;
+  label: string;
+  unit?: string;
+  required?: boolean;
+};
+
+const CHECK_TIME_OPTIONS = [
+  { value: 'WEEKLY', label: 'Semanal' },
+  { value: 'MONTHLY', label: 'Mensual' },
+  { value: 'YEARLY', label: 'Anual' },
 ];
 
-const BODY_MEASUREMENTS = [
-  { id: 'chest', label: 'Pecho', value: '102', unit: 'cm' },
-  { id: 'waist', label: 'Cintura', value: '82', unit: 'cm' },
-  { id: 'hips', label: 'Cadera', value: '95', unit: 'cm' },
-  { id: 'arms', label: 'Brazos', value: '38', unit: 'cm' },
-  { id: 'thighs', label: 'Muslos', value: '58', unit: 'cm' },
-  { id: 'calves', label: 'Pantorrillas', value: '38', unit: 'cm' },
+const FIELD_SECTIONS: { title: string; fields: FieldConfig[] }[] = [
+  {
+    title: 'Composición (Requeridos)',
+    fields: [
+      { key: 'weight', label: 'Peso', unit: 'kg', required: true },
+      { key: 'height', label: 'Estatura', unit: 'cm', required: true },
+    ],
+  },
+  {
+    title: 'Tren superior (Opcional)',
+    fields: [
+      { key: 'left_arm', label: 'Brazo izquierdo', unit: 'cm' },
+      { key: 'right_arm', label: 'Brazo derecho', unit: 'cm' },
+      { key: 'left_forearm', label: 'Antebrazo izquierdo', unit: 'cm' },
+      { key: 'right_forearm', label: 'Antebrazo derecho', unit: 'cm' },
+      { key: 'clavicular_width', label: 'Ancho clavicular', unit: 'cm' },
+      { key: 'neck_diameter', label: 'Diámetro cuello', unit: 'cm' },
+      { key: 'chest_size', label: 'Pecho', unit: 'cm' },
+      { key: 'back_width', label: 'Ancho espalda', unit: 'cm' },
+    ],
+  },
+  {
+    title: 'Tren inferior (Opcional)',
+    fields: [
+      { key: 'hip_diameter', label: 'Cadera', unit: 'cm' },
+      { key: 'left_leg', label: 'Pierna izquierda', unit: 'cm' },
+      { key: 'right_leg', label: 'Pierna derecha', unit: 'cm' },
+      { key: 'left_calve', label: 'Pantorrilla izquierda', unit: 'cm' },
+      { key: 'right_calve', label: 'Pantorrilla derecha', unit: 'cm' },
+    ],
+  },
 ];
+
+const normalizeCheckTime = (value?: string) => {
+  if (!value) return undefined;
+  const normalized = value.toUpperCase();
+  return CHECK_TIME_OPTIONS.some((option) => option.value === normalized) ? normalized : undefined;
+};
+
+const formatDate = (value?: string) => {
+  if (!value) return '--';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('es-ES');
+};
+
+const formatValue = (value: number | string | undefined | null, unit?: string) => {
+  if (value === undefined || value === null) return '--';
+  return unit ? `${value} ${unit}` : String(value);
+};
+
+const measurementToFormData = (measurement: Measurement | null): MeasurementFormData => {
+  if (!measurement) {
+    return {
+      weight: '',
+      height: '',
+      left_arm: '',
+      right_arm: '',
+      left_forearm: '',
+      right_forearm: '',
+      clavicular_width: '',
+      neck_diameter: '',
+      chest_size: '',
+      back_width: '',
+      hip_diameter: '',
+      left_leg: '',
+      right_leg: '',
+      left_calve: '',
+      right_calve: '',
+      checkTime: 'WEEKLY',
+    };
+  }
+
+  return {
+    weight: String(measurement.weight || ''),
+    height: String(measurement.height || ''),
+    left_arm: String(measurement.left_arm || ''),
+    right_arm: String(measurement.right_arm || ''),
+    left_forearm: String(measurement.left_forearm || ''),
+    right_forearm: String(measurement.right_forearm || ''),
+    clavicular_width: String(measurement.clavicular_width || ''),
+    neck_diameter: String(measurement.neck_diameter || ''),
+    chest_size: String(measurement.chest_size || ''),
+    back_width: String(measurement.back_width || ''),
+    hip_diameter: String(measurement.hip_diameter || ''),
+    left_leg: String(measurement.left_leg || ''),
+    right_leg: String(measurement.right_leg || ''),
+    left_calve: String(measurement.left_calve || ''),
+    right_calve: String(measurement.right_calve || ''),
+    checkTime: normalizeCheckTime(measurement.checkTime) || 'WEEKLY',
+  };
+};
 
 export default function MeasurementsScreen() {
   const router = useRouter();
-  const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
+  const { user } = useAuth();
+
+  const [measurement, setMeasurement] = useState<Measurement | null>(null);
+  const [formData, setFormData] = useState<MeasurementFormData>(measurementToFormData(null));
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const summaryRows = useMemo(
+    () => [
+      { label: 'Última actualización', value: formatDate(measurement?.updatedAt) },
+      { label: 'IMC', value: formatValue(measurement?.imc) },
+    ],
+    [measurement]
+  );
+
+  const loadMeasurement = async () => {
+    if (!user?.token) {
+      setError('No hay sesión activa');
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${Config.apiUrl}/measurements/me`, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      if (response.status === 401) {
+        const sessionError = new Error('Sesión expirada');
+        (sessionError as any).statusCode = 401;
+        throw sessionError;
+      }
+
+      const result = await response.json();
+
+      if (response.status === 404) {
+        setMeasurement(null);
+        setFormData(measurementToFormData(null));
+        setIsEditing(true);
+        return;
+      }
+
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.message || 'No se pudieron cargar las medidas');
+      }
+
+      setMeasurement(result.data);
+      setFormData(measurementToFormData(result.data));
+      setIsEditing(false);
+    } catch (err) {
+      await handleApiError(err);
+      setError(err instanceof Error ? err.message : 'No se pudieron cargar las medidas');
+      console.error('Error fetching measurements:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (key: keyof MeasurementFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const validateForm = (): string | null => {
+    if (!formData.weight || !formData.height || !formData.checkTime) {
+      return 'Peso, estatura y frecuencia de control son obligatorios';
+    }
+
+    const weight = parseFloat(formData.weight);
+    const height = parseFloat(formData.height);
+
+    if (isNaN(weight) || weight <= 0) {
+      return 'El peso debe ser un número válido mayor a 0';
+    }
+
+    if (isNaN(height) || height <= 0) {
+      return 'La estatura debe ser un número válido mayor a 0';
+    }
+
+    return null;
+  };
+
+  const handleSave = async () => {
+    if (!user?.token) return;
+
+    const validationError = validateForm();
+    if (validationError) {
+      Alert.alert('Error de validación', validationError);
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const payload: any = {
+        weight: parseFloat(formData.weight),
+        height: parseFloat(formData.height),
+        checkTime: formData.checkTime,
+      };
+
+      // Agregar campos opcionales solo si tienen valor
+      const optionalFields = [
+        'left_arm',
+        'right_arm',
+        'left_forearm',
+        'right_forearm',
+        'clavicular_width',
+        'neck_diameter',
+        'chest_size',
+        'back_width',
+        'hip_diameter',
+        'left_leg',
+        'right_leg',
+        'left_calve',
+        'right_calve',
+      ];
+
+      optionalFields.forEach((field) => {
+        const value = formData[field as keyof MeasurementFormData];
+        if (value && value.trim() !== '') {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue)) {
+            payload[field] = numValue;
+          }
+        }
+      });
+
+      const isCreating = !measurement;
+      const response = await fetch(`${Config.apiUrl}/measurements/me`, {
+        method: isCreating ? 'POST' : 'PATCH',
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.status === 401) {
+        const sessionError = new Error('Sesión expirada');
+        (sessionError as any).statusCode = 401;
+        throw sessionError;
+      }
+
+      const result = await response.json();
+
+      if (response.status === 404 && !isCreating) {
+        Alert.alert(
+          'Error',
+          'No se encontraron medidas para actualizar. Por favor, recarga la pantalla.',
+          [{ text: 'OK', onPress: () => void loadMeasurement() }]
+        );
+        return;
+      }
+
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.message || 'No se pudieron guardar las medidas');
+      }
+
+      setMeasurement(result.data);
+      setFormData(measurementToFormData(result.data));
+      setIsEditing(false);
+      Alert.alert('Éxito', isCreating ? 'Medidas creadas exitosamente' : 'Medidas actualizadas exitosamente');
+    } catch (err) {
+      await handleApiError(err);
+      setError(err instanceof Error ? err.message : 'No se pudieron guardar las medidas');
+      console.error('Error saving measurements:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setFormData(measurementToFormData(measurement));
+  };
+
+  const handleCancel = () => {
+    if (!measurement) {
+      router.back();
+      return;
+    }
+    setIsEditing(false);
+    setFormData(measurementToFormData(measurement));
+    setError(null);
+  };
+
+  useEffect(() => {
+    void loadMeasurement();
+  }, [user?.token]);
+
+  if (loading) {
+    return (
+      <View style={[styles.screen, styles.centered]}>
+        <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.screen}>
-      {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View style={styles.brandRow}>
-            <Text style={styles.brandIcon}>💪</Text>
-            <Text style={styles.brandText}>AthletIA</Text>
-          </View>
-          <Pressable style={styles.notificationButton}>
-            <Text style={styles.bellIcon}>🔔</Text>
-            <View style={styles.notificationBadge} />
-          </Pressable>
+        <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backIcon}>‹</Text>
+        </Pressable>
+        <View style={styles.headerTitles}>
+          <Text style={styles.headerTitle}>Medidas</Text>
+          <Text style={styles.headerSubtitle}>
+            {measurement ? 'Actualiza y sigue tu progreso' : 'Registra tus medidas iniciales'}
+          </Text>
         </View>
+        {measurement && !isEditing && (
+          <Pressable style={styles.editButton} onPress={handleEdit}>
+            <Text style={styles.editIcon}>✏️</Text>
+          </Pressable>
+        )}
       </View>
 
-      {/* Content */}
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Title */}
-        <View style={styles.titleSection}>
-          <Text style={styles.title}>Mis Medidas</Text>
-          <Text style={styles.subtitle}>Registra y controla tu progreso físico.</Text>
-        </View>
-
-        {/* Progress Chart Card */}
-        <View style={styles.chartCard}>
-          <View style={styles.chartHeader}>
-            <View style={styles.chartTitleRow}>
-              <Text style={styles.chartIcon}>📈</Text>
-              <Text style={styles.chartTitle}>Progreso</Text>
-            </View>
-            <View style={styles.viewModeSelector}>
-              <Pressable
-                style={[styles.viewModeButton, viewMode === 'month' && styles.viewModeButtonActive]}
-                onPress={() => setViewMode('month')}
-              >
-                <Text
-                  style={[styles.viewModeText, viewMode === 'month' && styles.viewModeTextActive]}
-                >
-                  Mes
-                </Text>
-              </Pressable>
-              <Pressable
-                style={[styles.viewModeButton, viewMode === 'year' && styles.viewModeButtonActive]}
-                onPress={() => setViewMode('year')}
-              >
-                <Text
-                  style={[styles.viewModeText, viewMode === 'year' && styles.viewModeTextActive]}
-                >
-                  Año
-                </Text>
-              </Pressable>
-            </View>
+        {error ? (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorText}>{error}</Text>
           </View>
+        ) : null}
 
-          {/* Simple Chart Placeholder */}
-          <View style={styles.chartArea}>
-            <View style={styles.chartGrid}>
-              {[0, 1, 2, 3, 4].map((i) => (
-                <View key={i} style={styles.gridLine} />
-              ))}
-            </View>
-            <View style={styles.chartBars}>
-              {[60, 80, 70, 90, 75, 85, 78].map((height, i) => (
-                <View key={i} style={styles.barContainer}>
-                  <View style={[styles.bar, { height: height }]} />
+        {!measurement && !isEditing ? (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>Sin datos disponibles</Text>
+            <Text style={styles.emptyText}>Aún no hay medidas registradas para tu cuenta.</Text>
+            <PrimaryButton
+              label="Registrar Medidas"
+              onPress={() => setIsEditing(true)}
+              style={styles.emptyButton}
+            />
+          </View>
+        ) : (
+          <>
+            {measurement && !isEditing && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Resumen</Text>
+                <View style={styles.summaryCard}>
+                  {summaryRows.map((row) => (
+                    <View key={row.label} style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>{row.label}</Text>
+                      <Text style={styles.summaryValue}>{row.value}</Text>
+                    </View>
+                  ))}
                 </View>
-              ))}
-            </View>
-          </View>
-        </View>
+              </View>
+            )}
 
-        {/* Key Metrics Grid */}
-        <View style={styles.metricsGrid}>
-          {MEASUREMENTS.map((metric) => (
-            <View key={metric.id} style={styles.metricCard}>
-              <Text style={styles.metricIcon}>{metric.icon}</Text>
-              <Text style={styles.metricLabel}>{metric.label}</Text>
-              <Text style={styles.metricValue}>
-                {metric.value}
-                <Text style={styles.metricUnit}> {metric.unit}</Text>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Frecuencia de control *</Text>
+              <Text style={styles.sectionHint}>
+                Selecciona cada cuánto deseas revisar tus medidas.
               </Text>
-              <Text style={[styles.metricChange, metric.change.startsWith('-') && styles.metricChangeNegative]}>
-                {metric.change} kg
-              </Text>
+              <View style={styles.optionGroup}>
+                {CHECK_TIME_OPTIONS.map((option) => {
+                  const isActive = formData.checkTime === option.value;
+                  return (
+                    <Pressable
+                      key={option.value}
+                      style={[styles.optionChip, isActive && styles.optionChipActive]}
+                      onPress={() => isEditing && handleInputChange('checkTime', option.value)}
+                      disabled={!isEditing}
+                    >
+                      <Text
+                        style={[styles.optionChipText, isActive && styles.optionChipTextActive]}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
             </View>
-          ))}
-        </View>
 
-        {/* Body Measurements Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Medidas Corporales</Text>
-          <View style={styles.bodyMeasurementsGrid}>
-            {BODY_MEASUREMENTS.map((measurement) => (
-              <View key={measurement.id} style={styles.bodyMeasurementCard}>
-                <Text style={styles.bodyMeasurementLabel}>{measurement.label}</Text>
-                <Text style={styles.bodyMeasurementValue}>
-                  {measurement.value} <Text style={styles.bodyMeasurementUnit}>{measurement.unit}</Text>
-                </Text>
+            {FIELD_SECTIONS.map((section) => (
+              <View key={section.title} style={styles.section}>
+                <Text style={styles.sectionTitle}>{section.title}</Text>
+                <View style={styles.card}>
+                  {section.fields.map((field) => (
+                    <FormInput
+                      key={field.key}
+                      label={`${field.label}${field.required ? ' *' : ''}`}
+                      value={formData[field.key]}
+                      onChangeText={(value) => handleInputChange(field.key, value)}
+                      keyboardType="numeric"
+                      placeholder={field.unit ? `Ej: 70 ${field.unit}` : 'Ingresa un valor'}
+                      editable={isEditing}
+                    />
+                  ))}
+                </View>
               </View>
             ))}
-          </View>
-        </View>
 
-        {/* Add Measurement Button */}
-        <Pressable style={styles.addButton}>
-          <Text style={styles.addButtonIcon}>+</Text>
-          <Text style={styles.addButtonText}>Registrar Nueva Medida</Text>
-        </Pressable>
+            {isEditing && (
+              <View style={styles.actionButtons}>
+                <Pressable style={styles.cancelButton} onPress={handleCancel} disabled={saving}>
+                  <Text style={styles.cancelButtonText}>Cancelar</Text>
+                </Pressable>
+                <PrimaryButton
+                  label={measurement ? 'Guardar Cambios' : 'Crear Medidas'}
+                  onPress={handleSave}
+                  loading={saving}
+                  style={styles.saveButtonFlex}
+                />
+              </View>
+            )}
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -148,52 +497,43 @@ const styles = StyleSheet.create({
   screen: {
     ...GlobalStyles.container,
   },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   header: {
-    backgroundColor: Colors.background.DEFAULT,
-    paddingHorizontal: Spacing['3xl'],
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
     paddingTop: Spacing['3xl'],
     paddingBottom: Spacing.base,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border.DEFAULT,
+    backgroundColor: Colors.background.DEFAULT,
   },
-  headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  brandIcon: {
-    fontSize: Typography.fontSize['2xl'],
-    color: Colors.primary.DEFAULT,
-  },
-  brandText: {
-    ...Typography.styles.h4,
-    fontSize: Typography.fontSize.lg,
-  },
-  notificationButton: {
-    position: 'relative',
+  backButton: {
     width: 40,
     height: 40,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.background.secondary,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: Colors.background.secondary,
   },
-  bellIcon: {
-    fontSize: Typography.fontSize.lg,
+  backIcon: {
+    fontSize: Typography.fontSize['2xl'],
+    color: Colors.text.primary,
+    marginTop: -2,
   },
-  notificationBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.error.DEFAULT,
+  headerTitles: {
+    flex: 1,
+  },
+  headerTitle: {
+    ...Typography.styles.h3,
+  },
+  headerSubtitle: {
+    ...Typography.styles.body,
+    color: Colors.text.muted,
   },
   content: {
     flex: 1,
@@ -203,136 +543,35 @@ const styles = StyleSheet.create({
     gap: Spacing.xl,
     paddingBottom: Spacing['6xl'],
   },
-  titleSection: {
-    gap: Spacing.xs,
+  errorBanner: {
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    borderRadius: BorderRadius.md,
+    padding: Spacing.base,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.4)',
   },
-  title: {
-    ...Typography.styles.h1,
-    fontSize: Typography.fontSize['4xl'],
-  },
-  subtitle: {
+  errorText: {
+    color: Colors.error.DEFAULT,
     ...Typography.styles.body,
-    color: Colors.text.muted,
   },
-  chartCard: {
+  emptyCard: {
     backgroundColor: Colors.surface.DEFAULT,
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
     ...Shadows.base,
-    borderWidth: 1,
-    borderColor: Colors.border.subtle,
+    gap: Spacing.base,
   },
-  chartHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: Spacing['3xl'],
-  },
-  chartTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  chartIcon: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.primary.DEFAULT,
-  },
-  chartTitle: {
-    ...Typography.styles.bodyBold,
-    fontSize: Typography.fontSize.lg,
-  },
-  viewModeSelector: {
-    flexDirection: 'row',
-    backgroundColor: Colors.background.DEFAULT,
-    borderRadius: BorderRadius.sm,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: Colors.border.DEFAULT,
-  },
-  viewModeButton: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.sm,
-  },
-  viewModeButtonActive: {
-    backgroundColor: Colors.border.DEFAULT,
-  },
-  viewModeText: {
-    ...Typography.styles.tiny,
-    color: Colors.text.muted,
-  },
-  viewModeTextActive: {
-    color: Colors.text.primary,
-  },
-  chartArea: {
-    height: 180,
-    position: 'relative',
-  },
-  chartGrid: {
-    position: 'absolute',
-    inset: 0,
-    justifyContent: 'space-between',
-  },
-  gridLine: {
-    height: 1,
-    backgroundColor: Colors.border.DEFAULT,
-    opacity: 0.3,
-  },
-  chartBars: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-around',
-    height: '100%',
-    paddingTop: Spacing.base,
-  },
-  barContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 2,
-  },
-  bar: {
-    width: '100%',
-    backgroundColor: Colors.primary.DEFAULT,
-    borderRadius: BorderRadius.sm,
-  },
-  metricsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.md,
-  },
-  metricCard: {
-    width: '48%',
-    backgroundColor: Colors.surface.DEFAULT,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.base,
-    alignItems: 'center',
-    gap: Spacing.xs,
-    borderWidth: 1,
-    borderColor: Colors.border.subtle,
-  },
-  metricIcon: {
-    fontSize: Typography.fontSize['2xl'],
-  },
-  metricLabel: {
-    ...Typography.styles.small,
-    color: Colors.text.muted,
-  },
-  metricValue: {
+  emptyTitle: {
     ...Typography.styles.h3,
-    fontSize: Typography.fontSize['2xl'],
   },
-  metricUnit: {
+  emptyText: {
     ...Typography.styles.body,
     color: Colors.text.muted,
   },
-  metricChange: {
-    ...Typography.styles.tiny,
-    color: Colors.success.DEFAULT,
-    fontWeight: Typography.fontWeight.bold,
-  },
-  metricChangeNegative: {
-    color: Colors.primary.DEFAULT,
+  emptyButton: {
+    marginTop: Spacing.sm,
   },
   section: {
     gap: Spacing.base,
@@ -341,49 +580,94 @@ const styles = StyleSheet.create({
     ...Typography.styles.h3,
     fontSize: Typography.fontSize.lg,
   },
-  bodyMeasurementsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.md,
-  },
-  bodyMeasurementCard: {
-    width: '48%',
-    backgroundColor: Colors.surface.DEFAULT,
-    borderRadius: BorderRadius.sm,
-    padding: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.border.subtle,
-  },
-  bodyMeasurementLabel: {
+  sectionHint: {
     ...Typography.styles.small,
     color: Colors.text.muted,
-    marginBottom: Spacing.xs,
   },
-  bodyMeasurementValue: {
-    ...Typography.styles.bodyBold,
-    fontSize: Typography.fontSize.lg,
-    color: Colors.text.primary,
+  summaryCard: {
+    backgroundColor: Colors.surface.DEFAULT,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
+    ...Shadows.base,
+    gap: Spacing.base,
   },
-  bodyMeasurementUnit: {
-    fontSize: Typography.fontSize.sm,
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  summaryLabel: {
+    ...Typography.styles.body,
     color: Colors.text.muted,
   },
-  addButton: {
-    backgroundColor: Colors.primary.DEFAULT,
-    borderRadius: BorderRadius.xl,
-    paddingVertical: Spacing.base,
+  summaryValue: {
+    ...Typography.styles.bodyBold,
+  },
+  optionGroup: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+  },
+  optionChip: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: Colors.border.DEFAULT,
+    backgroundColor: Colors.background.secondary,
+  },
+  optionChipActive: {
+    backgroundColor: Colors.primary.DEFAULT,
+    borderColor: Colors.primary.DEFAULT,
+  },
+  optionChipText: {
+    ...Typography.styles.bodyBold,
+    color: Colors.text.muted,
+  },
+  optionChipTextActive: {
+    color: Colors.background.DEFAULT,
+  },
+  card: {
+    backgroundColor: Colors.surface.DEFAULT,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
+    ...Shadows.base,
+    gap: Spacing.base,
+  },
+  editButton: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.sm,
-    ...Shadows.cyan,
+    backgroundColor: Colors.primary.DEFAULT,
   },
-  addButtonIcon: {
-    fontSize: Typography.fontSize['2xl'],
-    color: Colors.background.DEFAULT,
+  editIcon: {
+    fontSize: Typography.fontSize.base,
   },
-  addButtonText: {
+  actionButtons: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: Colors.background.secondary,
+    borderRadius: BorderRadius.xl,
+    paddingVertical: Spacing.base,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border.DEFAULT,
+  },
+  cancelButtonText: {
     ...Typography.styles.bodyBold,
-    color: Colors.background.DEFAULT,
+    color: Colors.text.primary,
+  },
+  saveButtonFlex: {
+    flex: 1,
   },
 });

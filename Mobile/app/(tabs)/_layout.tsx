@@ -23,28 +23,35 @@ export default function TabLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: 'Dashboard',
+          title: 'Inicio',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="chart.bar" color={color} />,
         }}
       />
       <Tabs.Screen
         name="exercises"
         options={{
-          title: 'Exercises',
+          title: 'Ejercicios',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="figure.run" color={color} />,
         }}
       />
       <Tabs.Screen
         name="routines"
         options={{
-          title: 'Routines',
+          title: 'Rutinas',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="calendar" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="splits"
+        options={{
+          title: 'Splits',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="square.split.2x2" color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: 'Perfil',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle" color={color} />,
         }}
       />

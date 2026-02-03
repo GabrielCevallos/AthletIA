@@ -75,8 +75,23 @@ export function ApiAuthRegisterAccount() {
       schema: {
         example: {
           success: true,
-          data: { accountId: 'uuid' },
-          message: 'Account was registered, continue with profile setup',
+          message: messages.verificationEmailSent,
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Bad Request - Validation error or account already exists',
+      schema: {
+        example: {
+          message: [
+            'email must be an email',
+            'password must be longer than or equal to 8 characters',
+            'password must contain uppercase, lowercase, number and special character',
+            'Email already registered',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
         },
       },
     }),
@@ -91,7 +106,27 @@ export function ApiAuthVerifyEmail() {
         properties: { token: { type: 'string', example: 'jwt-token' } },
       },
     }),
-    ApiResponse({ status: 200, description: 'Verification done' }),
+    ApiResponse({
+      status: 200,
+      description: 'Email verified successfully',
+      schema: {
+        example: {
+          success: true,
+          data: undefined,
+          message: 'Email verified successfully',
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Invalid or expired token',
+      schema: {
+        example: {
+          success: false,
+          message: 'Invalid or expired token',
+        },
+      },
+    }),
   );
 }
 
@@ -109,7 +144,31 @@ export function ApiAuthResendVerification() {
         },
       },
     }),
-    ApiResponse({ status: 200, description: 'Verification sent' }),
+    ApiResponse({
+      status: 200,
+      description: 'Verification email sent',
+      schema: {
+        example: {
+          success: true,
+          data: undefined,
+          message: 'Verification email sent',
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Bad Request - Too many requests or invalid email',
+      schema: {
+        example: {
+          message: [
+            'email must be an email',
+            'Too many verification requests',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    }),
   );
 }
 
@@ -151,7 +210,7 @@ export function ApiAuthCompleteProfileSetup() {
         type: 'object',
         properties: {
           accountId: { type: 'string', example: 'uuid' },
-          profileRequest: { $ref: getSchemaRef(ProfileRequest) as string },
+          profileRequest: { $ref: getSchemaPath(ProfileRequest) },
         },
         required: ['accountId', 'profileRequest'],
       },
@@ -169,13 +228,33 @@ export function ApiAuthChangePassword() {
         properties: {
           accountId: { type: 'string', example: 'uuid' },
           changePasswordRequest: {
-            $ref: getSchemaRef(ChangePasswordRequest) as string,
+            $ref: getSchemaPath(ChangePasswordRequest),
           },
         },
         required: ['accountId', 'changePasswordRequest'],
       },
     }),
     ApiResponse({ status: 200, description: 'Password changed' }),
+    ApiResponse({
+      status: 400,
+      description: 'Bad Request - Invalid password or validation error',
+      schema: {
+        example: {
+          message: [
+            'currentPassword must be a string',
+            'newPassword must be longer than or equal to 8 characters',
+            'newPassword must contain uppercase, lowercase, number and special character',
+            'Current password is incorrect',
+          ],
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'Unauthorized - Invalid account',
+    }),
   );
 }
 
@@ -244,7 +323,27 @@ export function ApiAuthLogout() {
         properties: { accountId: { type: 'string', example: 'uuid' } },
       },
     }),
-    ApiResponse({ status: 200, description: 'Logged out' }),
+    ApiResponse({
+      status: 200,
+      description: 'Logged out successfully',
+      schema: {
+        example: {
+          success: true,
+          data: undefined,
+          message: 'Logged out successfully',
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Invalid Account ID',
+      schema: {
+        example: {
+          success: false,
+          message: 'Invalid account ID',
+        },
+      },
+    }),
   );
 }
 
@@ -274,7 +373,7 @@ export function ApiAuthMe() {
       schema: {
         properties: {
           success: { type: 'boolean' },
-          data: getSchemaRef(User),
+          data: { $ref: getSchemaPath(User) },
           message: { type: 'string' },
         },
         example: {
@@ -284,6 +383,7 @@ export function ApiAuthMe() {
             email: 'user@example.com',
             status: 'ACTIVE',
             role: 'USER',
+            hasProfile: true,
             name: 'Jane Doe',
             birthDate: null,
           },
@@ -304,8 +404,37 @@ export function ApiAuthMe() {
   );
 }
 
+export function ApiAuthGoogleMobileLogin() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Google Mobile Login',
+      description:
+        'Authenticate user using a Google Access Token obtained from a mobile device.',
+    }),
+    ApiBody({
+      schema: {
+        type: 'object',
+        properties: {
+          token: { type: 'string', example: 'ya29.a0AfH6SM...' },
+        },
+      },
+      description: 'Google Access Token',
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Authentication successful',
+      type: TokenResponse,
+    }),
+    ApiResponse({
+      status: 401,
+      description: 'Invalid Google Token',
+    }),
+  );
+}
+
 // Utility to reference DTOs in schema without circular issues
 import { getSchemaPath } from '@nestjs/swagger';
+import { messages } from './constants';
 function getSchemaRef(cls: any) {
   return { $ref: getSchemaPath(cls) } as any;
 }

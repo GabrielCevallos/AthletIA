@@ -1,37 +1,96 @@
-import { useState } from 'react';
+import * as Google from 'expo-auth-session/providers/google';
+import { router } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
+import { useEffect, useRef, useState } from 'react';
 import {
-  ImageBackground,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
+    Image,
+    ImageBackground,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    StyleSheet,
+    Text,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
 
+import { DumbbellIcon } from '@/components/ui/dumbbell-icon';
 import { FormInput } from '@/components/ui/form-input';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { Config } from '@/constants';
 import { useAuth } from '@/context/auth-context';
 
+WebBrowser.maybeCompleteAuthSession();
+
 export default function LoginScreen() {
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    // Debes obtener estos IDs en Google Cloud Console
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+    //iosClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+  });
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { authentication } = response;
+      if (authentication?.accessToken) {
+        setLoading(true);
+        signInWithGoogle(authentication.accessToken)
+          .catch((error) => console.error(error))
+          .finally(() => setLoading(false));
+      }
+    }
+  }, [response, signInWithGoogle]);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) return;
     setLoading(true);
+    setErrorMessage('');
+    
     try {
-      await signIn('fake-dev-token', false);
+      await signIn(email, password);
     } catch (error) {
-      console.error('Login simulation failed', error);
+      let message = 'Error al iniciar sesión. Intenta nuevamente.';
+      
+      if (error instanceof Error) {
+        // Mensajes de error específicos del backend
+        if (error.message.includes('Credenciales inválidas') || error.message.includes('Invalid credentials')) {
+          message = 'Credenciales inválidas. Verifica tu email y contraseña.';
+        } else if (error.message.includes('expirado') || error.message.includes('expired')) {
+          message = 'Sesión ha expirado, vuelva a iniciar sesión.';
+        } else if (error.message.includes('usuario no encontrado') || error.message.includes('not found')) {
+          message = 'El usuario no fue encontrado.';
+        } else if (error.message.includes('usuario no verificado') || error.message.includes('not verified')) {
+          message = 'Verifica tu email antes de iniciar sesión.';
+        } else {
+          message = error.message;
+        }
+      }
+      
+      setErrorMessage(message);
+      
+      // Auto-limpiar el error después de 6 segundos
+      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = setTimeout(() => {
+        setErrorMessage('');
+      }, 6000);
     } finally {
       setLoading(false);
     }
+  };
+
+  const clearError = () => {
+    setErrorMessage('');
+    if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
   };
 
   const behavior = Platform.OS === 'ios' ? 'padding' : 'height';
@@ -48,7 +107,10 @@ export default function LoginScreen() {
           <View style={styles.overlay}>
             <View style={styles.container}>
               <View style={styles.header}>
-                <Text style={styles.logo}>ATHLET<Text style={styles.logoAccent}>IA</Text></Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <DumbbellIcon size={32} />
+                  <Text style={styles.logo}>ATHLET<Text style={styles.logoAccent}>IA</Text></Text>
+                </View>
                 <Text style={styles.subtitle}>¡Comienza tu transformación hoy!</Text>
               </View>
 
@@ -57,6 +119,19 @@ export default function LoginScreen() {
                   <Text style={styles.title}>Bienvenido</Text>
                   <Text style={styles.caption}>Inicia sesión en tu cuenta</Text>
                 </View>
+
+                {errorMessage ? (
+                  <View style={styles.errorContainer}>
+                    <Text style={styles.errorIcon}>⚠️</Text>
+                    <View style={styles.errorContent}>
+                      <Text style={styles.errorTitle}>Error de autenticación</Text>
+                      <Text style={styles.errorMessage}>{errorMessage}</Text>
+                    </View>
+                    <Pressable onPress={clearError} style={styles.errorCloseButton}>
+                      <Text style={styles.errorCloseIcon}>✕</Text>
+                    </Pressable>
+                  </View>
+                ) : null}
 
                 <View style={styles.form}>
                   <FormInput
@@ -100,9 +175,17 @@ export default function LoginScreen() {
                     <View style={styles.divider} />
                   </View>
 
-                  <Pressable style={styles.googleButton}>
+                  <Pressable 
+                    style={styles.googleButton}
+                    onPress={() => WebBrowser.openBrowserAsync(`${Config.apiUrl}/auth/google`)}
+                    disabled={loading}
+                  >
                     <View style={styles.googleIconWrapper}>
-                      <Text style={styles.googleIcon}>G</Text>
+                      <Image 
+                        source={require('@/assets/images/g-logo.png')} 
+                        style={{ width: 18, height: 18 }}
+                        resizeMode="contain"
+                      />
                     </View>
                     <Text style={styles.googleLabel}>Google</Text>
                   </Pressable>
@@ -111,7 +194,7 @@ export default function LoginScreen() {
 
               <View style={styles.footer}>
                 <Text style={styles.footerText}>¿No tienes cuenta?</Text>
-                <Pressable>
+                <Pressable onPress={() => router.push('/signup' as any)} disabled={loading}>
                   <Text style={styles.footerLink}>Regístrate aquí</Text>
                 </Pressable>
               </View>
@@ -134,7 +217,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingTop: 32,
-    paddingBottom: 24,
+    paddingBottom: 64,
     justifyContent: 'space-between',
   },
   header: {
@@ -143,7 +226,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logo: {
-    fontSize: 42,
+    fontSize: 38,
     fontWeight: '900',
     color: '#e5e7eb',
     letterSpacing: 0.5,
@@ -181,6 +264,46 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
     fontSize: 14,
     fontWeight: '500',
+  },
+  errorContainer: {
+    backgroundColor: 'rgba(220, 38, 38, 0.12)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(220, 38, 38, 0.5)',
+    padding: 12,
+    marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  errorIcon: {
+    fontSize: 20,
+    marginTop: 2,
+  },
+  errorContent: {
+    flex: 1,
+    gap: 4,
+  },
+  errorTitle: {
+    color: '#fca5a5',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  errorMessage: {
+    color: '#f8d7da',
+    fontSize: 13,
+    fontWeight: '500',
+    lineHeight: 18,
+  },
+  errorCloseButton: {
+    padding: 4,
+    marginTop: -2,
+  },
+  errorCloseIcon: {
+    color: '#ef4444',
+    fontSize: 16,
+    fontWeight: '700',
   },
   form: {
     gap: 16,

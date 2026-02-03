@@ -61,6 +61,7 @@ export class RoutinesController {
     @Query() pagination: PaginationRequest,
   ): Promise<ResponseBody<PaginationResponse<Routine>>> {
     const data = await this.routinesService.findAll(pagination);
+    console.log("Routines retrieved:", data);
     return new ResponseBody(true, 'Routines retrieved successfully', data);
   }
 

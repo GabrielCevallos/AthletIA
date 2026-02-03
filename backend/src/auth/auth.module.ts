@@ -8,6 +8,8 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { MailModule } from 'src/common/mail/mail.module';
 import { AdminGuard } from './guards/admin.guard';
 import { OwnershipGuard } from './guards/ownership.guard';
+import { RateLimitService } from 'src/common/guards/rate-limit.service';
+import { RateLimitCleanupService } from 'src/common/guards/rate-limit-cleanup.service';
 
 @Module({
   imports: [
@@ -19,8 +21,15 @@ import { OwnershipGuard } from './guards/ownership.guard';
     AccountsModule,
     MailModule,
   ],
-  providers: [AuthService, GoogleStrategy, AdminGuard, OwnershipGuard],
+  providers: [
+    AuthService,
+    GoogleStrategy,
+    AdminGuard,
+    OwnershipGuard,
+    RateLimitService,
+    RateLimitCleanupService,
+  ],
   controllers: [AuthController],
-  exports: [AuthService, AdminGuard, OwnershipGuard],
+  exports: [AuthService, AdminGuard, OwnershipGuard, RateLimitService],
 })
 export class AuthModule {}

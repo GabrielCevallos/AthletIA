@@ -1,47 +1,42 @@
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
+import { useRoutines } from '@/hooks/use-routines';
+import { translateRoutineGoal } from '@/services/routines-api';
 import { GlobalStyles } from '@/styles/global';
+import { useRouter } from 'expo-router';
+import { useEffect, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-const ROUTINES = [
-  {
-    id: '1',
-    name: 'Full Body A',
-    type: 'Fuerza Hipertrofia',
-    duration: '60 min',
-    level: 'Intermedio',
-    exercises: 8,
-    active: true,
-  },
-  {
-    id: '2',
-    name: 'Push Day',
-    type: 'Hipertrofia',
-    duration: '75 min',
-    level: 'Avanzado',
-    exercises: 10,
-    active: false,
-  },
-  {
-    id: '3',
-    name: 'Pull Day',
-    type: 'Hipertrofia',
-    duration: '70 min',
-    level: 'Avanzado',
-    exercises: 9,
-    active: false,
-  },
-  {
-    id: '4',
-    name: 'Leg Day',
-    type: 'Fuerza',
-    duration: '80 min',
-    level: 'Intermedio',
-    exercises: 7,
-    active: false,
-  },
-];
-
 export default function RoutinesScreen() {
+  const router = useRouter();
+  const { routines, loading, error } = useRoutines();
+
+  useEffect(() => {
+    console.log('🎬 [RoutinesScreen] Componente montado/actualizado');
+  }, []);
+
+  console.log('🔍 [RoutinesScreen] Estado actual:');
+  console.log('  - routines:', routines?.length || 0, 'items');
+  console.log('  - loading:', loading);
+  console.log('  - error:', error);
+  console.log('  - routines completas:', JSON.stringify(routines, null, 2));
+
+  const routinesUi = useMemo(
+    () =>
+      routines.map((routine) => ({
+        id: routine.id,
+        name: routine.name,
+        type: routine.routineGoal?.length 
+          ? routine.routineGoal.map(translateRoutineGoal).join(' · ') 
+          : 'Objetivo general',
+        duration: '—',
+        level: routine.official ? 'Oficial' : 'Personal',
+        exercises: routine.nExercises ?? routine.exercises?.length ?? 0,
+        active: routine.official,
+      })),
+    [routines]
+  );
+
   return (
     <View style={styles.screen}>
       {/* Header */}
@@ -63,8 +58,18 @@ export default function RoutinesScreen() {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {ROUTINES.map((routine) => (
-          <Pressable key={routine.id} style={styles.routineCard}>
+        {loading && <Text style={styles.statusText}>Cargando rutinas...</Text>}
+        {!loading && error && <Text style={styles.errorText}>{error}</Text>}
+        {!loading && !error && routinesUi.length === 0 && (
+          <Text style={styles.statusText}>Aún no tienes rutinas.</Text>
+        )}
+
+        {routinesUi.map((routine) => (
+          <Pressable 
+            key={routine.id} 
+            style={styles.routineCard}
+            onPress={() => router.push(`/routine-detail/${routine.id}`)}
+          >
             <View style={styles.routineHeader}>
               <View style={styles.routineHeaderLeft}>
                 <Text style={styles.routineName}>{routine.name}</Text>
@@ -96,8 +101,11 @@ export default function RoutinesScreen() {
         ))}
 
         {/* Add New Button */}
-        <Pressable style={styles.addButton}>
-          <Text style={styles.addIcon}>+</Text>
+        <Pressable 
+          style={styles.addButton}
+          onPress={() => router.push('/routine-builder')}
+        >
+          <IconSymbol size={32} name="plus" color={Colors.primary.DEFAULT} />
           <Text style={styles.addText}>Nueva Rutina</Text>
         </Pressable>
       </ScrollView>
@@ -147,6 +155,18 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: Spacing.base,
     gap: Spacing.base,
+  },
+  statusText: {
+    ...Typography.styles.body,
+    color: Colors.text.tertiary,
+    textAlign: 'center',
+    marginTop: Spacing.base,
+  },
+  errorText: {
+    ...Typography.styles.body,
+    color: Colors.error?.DEFAULT || '#ef4444',
+    textAlign: 'center',
+    marginTop: Spacing.base,
   },
   routineCard: {
     backgroundColor: Colors.surface.DEFAULT,
@@ -228,10 +248,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.sm,
     marginTop: Spacing.base,
-  },
-  addIcon: {
-    fontSize: Typography.fontSize['4xl'],
-    color: Colors.primary.DEFAULT,
   },
   addText: {
     ...Typography.styles.bodyBold,

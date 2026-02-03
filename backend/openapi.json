@@ -1,0 +1,3735 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns a hello message."
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/health-check": {
+      "get": {
+        "operationId": "AppController_healthCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns the system health status."
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "description": "Authenticate user with email and password credentials. Returns access and refresh tokens upon successful authentication.",
+        "operationId": "AuthController_signIn",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Login credentials",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              },
+              "examples": {
+                "example1": {
+                  "summary": "Valid login request",
+                  "value": {
+                    "email": "user@example.com",
+                    "password": "Str0ngP@ssw0rd"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful - Returns access and refresh tokens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "accountId": "123e4567-e89b-12d3-a456-426614174000"
+                  },
+                  "message": "Login successful"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid email format or missing fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": false,
+                    "message": "email must be an email"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials or email not verified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": false,
+                    "message": "Invalid email or password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Sign in with email and password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/register-account": {
+      "post": {
+        "operationId": "AuthController_registerAccount",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterAccountRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "We have sent a verification email to your inbox"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error or account already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "email must be an email",
+                      "password must be longer than or equal to 8 characters",
+                      "password must contain uppercase, lowercase, number and special character",
+                      "Email already registered"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Register a new account",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/verify-email": {
+      "post": {
+        "operationId": "AuthController_verifyEmail",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "example": "jwt-token"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email verified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Email verified successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": false,
+                    "message": "Invalid or expired token"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Verify email using token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/resend-verification": {
+      "post": {
+        "operationId": "AuthController_resendVerification",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification email sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Verification email sent"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Too many requests or invalid email",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "email must be an email",
+                      "Too many verification requests"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Resend email verification link",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/resend-verification-status": {
+      "post": {
+        "operationId": "AuthController_resendVerificationStatus",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "data": {
+                      "allowed": true,
+                      "secondsToWait": 0
+                    },
+                    "message": "Status fetched"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get status for resend verification (allowed / wait time)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/change-password": {
+      "patch": {
+        "operationId": "AuthController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "accountId": {
+                    "type": "string",
+                    "example": "uuid"
+                  },
+                  "changePasswordRequest": {
+                    "$ref": "#/components/schemas/ChangePasswordRequest"
+                  }
+                },
+                "required": [
+                  "accountId",
+                  "changePasswordRequest"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed"
+          },
+          "400": {
+            "description": "Bad Request - Invalid password or validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "currentPassword must be a string",
+                      "newPassword must be longer than or equal to 8 characters",
+                      "newPassword must contain uppercase, lowercase, number and special character",
+                      "Current password is incorrect"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid account"
+          }
+        },
+        "summary": "Change account password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/refresh-token": {
+      "post": {
+        "description": "Generate new access and refresh tokens using a valid refresh token. Useful when the access token has expired.",
+        "operationId": "AuthController_refreshToken",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Refresh token request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "Valid refresh token",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  }
+                },
+                "required": [
+                  "refreshToken"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New tokens generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "accountId": "123e4567-e89b-12d3-a456-426614174000"
+                  },
+                  "message": "Token refreshed"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Missing refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": false,
+                    "message": "refreshToken is required"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid, expired, or revoked refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": false,
+                    "message": "Invalid refresh token"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Refresh tokens using a refresh token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "accountId": {
+                    "type": "string",
+                    "example": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logged out successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Logged out successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Account ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": false,
+                    "message": "Invalid account ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Logout and clear refresh token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/google/mobile": {
+      "post": {
+        "description": "Authenticate user using a Google Access Token obtained from a mobile device.",
+        "operationId": "AuthController_googleMobileLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Google Access Token",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "example": "ya29.a0AfH6SM..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid Google Token"
+          }
+        },
+        "summary": "Google Mobile Login",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/google": {
+      "get": {
+        "operationId": "AuthController_googleAuth",
+        "parameters": [],
+        "responses": {
+          "302": {
+            "description": "Redirect to Google"
+          }
+        },
+        "summary": "Start Google OAuth flow",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/google/redirect": {
+      "get": {
+        "operationId": "AuthController_googleCallback",
+        "parameters": [],
+        "responses": {
+          "302": {
+            "description": "Redirect to frontend with tokens"
+          }
+        },
+        "summary": "Google OAuth callback",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Authenticated user returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "email": "user@example.com",
+                      "status": "ACTIVE",
+                      "role": "USER",
+                      "hasProfile": true,
+                      "name": "Jane Doe",
+                      "birthDate": null
+                    },
+                    "message": "Authenticated user fetched"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": false,
+                    "message": "Unauthorized"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get authenticated user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "AccountsController_findAll",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Pagination offset",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "User list fetched successfully",
+                    "items": [
+                      {
+                        "email": "user@example.com",
+                        "id": "123e4567-e89b-12d3-a456-426614174000",
+                        "state": "ACTIVE",
+                        "role": "user",
+                        "hasProfile": true,
+                        "name": "Jane Doe",
+                        "birthDate": "1990-01-01"
+                      }
+                    ],
+                    "total": 100,
+                    "limit": 10,
+                    "offset": 0
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          }
+        },
+        "summary": "List users with pagination",
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "AccountsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "User fetched successfully",
+                    "data": {
+                      "email": "user@example.com",
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "state": "ACTIVE",
+                      "role": "user",
+                      "hasProfile": true,
+                      "name": "Jane Doe",
+                      "birthDate": "1990-01-01"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Get user by ID",
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/users/{id}/suspend": {
+      "patch": {
+        "operationId": "AccountsController_suspendAccount",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User suspended successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Account suspended/activated successfully"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Admin/Moderator only"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Suspend user by ID",
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/users/{id}/give-role": {
+      "patch": {
+        "operationId": "AccountsController_giveRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "user",
+                      "admin",
+                      "moderator"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role assigned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Role updated successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid role or operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "role must be one of: user, moderator, admin",
+                      "You cannot change your own role"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Admin only"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Assign role to user",
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/users/request-moderator": {
+      "post": {
+        "operationId": "AccountsController_requestModeratorRole",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Moderator role request submitted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Moderator role requested successfully"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Request moderator role",
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/profiles": {
+      "patch": {
+        "operationId": "ProfilesController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Profile updated successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error. Invalid field values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "name must be longer than or equal to 3 characters",
+                      "phoneNumber must match phone format",
+                      "gender must be one of: male, female, other",
+                      "fitGoals must contain at least 1 elements"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Account suspended or deactivated"
+          },
+          "404": {
+            "description": "Profile not found"
+          }
+        },
+        "summary": "Update own profile",
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
+    "/profiles/complete-setup": {
+      "post": {
+        "operationId": "ProfilesController_completeProfileSetup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Profile created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Profile created successfully",
+                    "data": {
+                      "name": "Jane Doe",
+                      "birthDate": "1990-01-01",
+                      "phoneNumber": "5512345678",
+                      "gender": "female",
+                      "fitGoals": [
+                        "lose_weight"
+                      ],
+                      "email": "user@example.com",
+                      "createdAt": "2024-01-01T12:00:00Z",
+                      "updatedAt": "2024-01-01T12:00:00Z",
+                      "age": 34
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error or Profile already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "name must be longer than or equal to 3 characters",
+                      "phoneNumber must match phone format",
+                      "gender must be one of: male, female, other",
+                      "fitGoals must contain at least 1 elements",
+                      "Profile already exists for this account"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Complete profile setup",
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
+    "/profiles/by-account/{accountId}": {
+      "get": {
+        "operationId": "ProfilesController_getProfileByAccountId",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-v4",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Profile fetched successfully",
+                    "data": {
+                      "name": "Jane Doe",
+                      "birthDate": "1990-01-01",
+                      "phoneNumber": "5512345678",
+                      "gender": "female",
+                      "fitGoals": [
+                        "lose_weight"
+                      ],
+                      "email": "user@example.com",
+                      "createdAt": "2024-01-01T12:00:00Z",
+                      "updatedAt": "2024-01-02T12:00:00Z",
+                      "age": 34
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Profile not found"
+          }
+        },
+        "summary": "Get profile by account ID",
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
+    "/profiles/me": {
+      "get": {
+        "operationId": "ProfilesController_findMyProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profile fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Profile fetched successfully",
+                    "data": {
+                      "name": "Jane Doe",
+                      "birthDate": "1990-01-01",
+                      "phoneNumber": "5512345678",
+                      "gender": "female",
+                      "fitGoals": [
+                        "lose_weight",
+                        "build_muscle"
+                      ],
+                      "email": "user@example.com",
+                      "createdAt": "2024-01-01T12:00:00Z",
+                      "updatedAt": "2024-01-02T12:00:00Z",
+                      "age": 34
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Profile not found"
+          }
+        },
+        "summary": "Get current user profile",
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
+    "/workout/splits": {
+      "post": {
+        "description": "Create a new split. Any authenticated user can create splits. Official flag is automatically set to false.",
+        "operationId": "SplitsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SplitRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Split created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Split created successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "name": "Upper/Lower",
+                      "description": "4-day weekly program split into upper and lower.",
+                      "routineIds": [
+                        "123e4567-e89b-12d3-a456-426614174001"
+                      ],
+                      "trainingDays": [
+                        "Monday",
+                        "Tuesday",
+                        "Thursday",
+                        "Friday"
+                      ],
+                      "official": false,
+                      "createdAt": "2024-01-01T12:00:00Z",
+                      "updatedAt": "2024-01-01T12:00:00Z",
+                      "routines": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error. Invalid or missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "name must be longer than or equal to 3 characters",
+                      "description must be longer than or equal to 10 characters",
+                      "trainingDays must contain at least 1 elements",
+                      "routineIds must contain at least 1 elements"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create split",
+        "tags": [
+          "Splits"
+        ]
+      },
+      "get": {
+        "description": "Get a paginated list of all splits. Accessible by all authenticated users.",
+        "operationId": "SplitsController_findAll",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of items to skip",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated split list retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Splits retrieved successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Split"
+                          }
+                        },
+                        "total": {
+                          "type": "number",
+                          "example": 20
+                        },
+                        "limit": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "offset": {
+                          "type": "number",
+                          "example": 0
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List splits with pagination",
+        "tags": [
+          "Splits"
+        ]
+      }
+    },
+    "/workout/splits/{id}": {
+      "get": {
+        "description": "Retrieve a specific split by its ID. Accessible by all authenticated users.",
+        "operationId": "SplitsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Split UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Split retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Split retrieved successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "name": "Upper/Lower",
+                      "description": "4-day weekly program split into upper and lower.",
+                      "trainingDays": [
+                        "Monday",
+                        "Tuesday",
+                        "Thursday",
+                        "Friday"
+                      ],
+                      "official": false,
+                      "createdAt": "2024-01-01T12:00:00Z",
+                      "updatedAt": "2024-01-01T12:00:00Z",
+                      "routines": [
+                        {
+                          "id": "123e4567-e89b-12d3-a456-426614174001",
+                          "name": "Upper Body A"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "404": {
+            "description": "Split not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get split by ID",
+        "tags": [
+          "Splits"
+        ]
+      },
+      "patch": {
+        "description": "Update a split. Only the owner of the split or users with ADMIN role can update it.",
+        "operationId": "SplitsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Split UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SplitUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Split updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Split updated successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "name": "Upper/Lower",
+                      "description": "4-day weekly program split into upper and lower.",
+                      "trainingDays": [
+                        "Monday",
+                        "Tuesday",
+                        "Thursday",
+                        "Friday"
+                      ],
+                      "official": false,
+                      "createdAt": "2024-01-01T12:00:00Z",
+                      "updatedAt": "2024-01-01T12:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error. Invalid field values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "name must be longer than or equal to 3 characters",
+                      "trainingDays must contain at least 1 elements"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "403": {
+            "description": "Forbidden - You can only modify splits that belong to you"
+          },
+          "404": {
+            "description": "Split not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update split",
+        "tags": [
+          "Splits"
+        ]
+      },
+      "delete": {
+        "description": "Delete a split. Only the owner of the split or users with ADMIN role can delete it.",
+        "operationId": "SplitsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Split UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Split deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "403": {
+            "description": "Forbidden - You can only delete splits that belong to you"
+          },
+          "404": {
+            "description": "Split not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete split",
+        "tags": [
+          "Splits"
+        ]
+      }
+    },
+    "/workout/routines": {
+      "post": {
+        "description": "Create a new routine. Any authenticated user can create routines. Routines created by ADMIN users are automatically marked as official.",
+        "operationId": "RoutinesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoutineRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Routine created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Routine created successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "name": "Upper/Lower Hypertrophy",
+                      "description": "4-day program focused on strength and hypertrophy.",
+                      "exerciseIds": [
+                        "123e4567-e89b-12d3-a456-426614174001"
+                      ],
+                      "routineGoal": [
+                        "muscle_gain"
+                      ],
+                      "official": false,
+                      "createdAt": "2024-01-01T12:00:00Z",
+                      "updatedAt": "2024-01-01T12:00:00Z",
+                      "nExercises": 1,
+                      "userId": "123e4567-e89b-12d3-a456-426614174099"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error. Invalid or missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "name must be longer than or equal to 3 characters",
+                      "description must be longer than or equal to 10 characters",
+                      "exerciseIds must contain at least 1 elements",
+                      "routineGoal must contain at least 1 elements"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create routine",
+        "tags": [
+          "Routines"
+        ]
+      },
+      "get": {
+        "description": "Get a paginated list of all routines. Accessible by all authenticated users.",
+        "operationId": "RoutinesController_findAll",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of items to skip",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated routine list retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Routines retrieved successfully",
+                    "data": {
+                      "items": [
+                        {
+                          "id": "123e4567-e89b-12d3-a456-426614174000",
+                          "name": "Upper/Lower Hypertrophy",
+                          "description": "4-day program focused on strength and hypertrophy.",
+                          "routineGoal": [
+                            "muscle_gain"
+                          ],
+                          "official": false,
+                          "exercises": [
+                            {
+                              "id": "123e4567-e89b-12d3-a456-426614174001",
+                              "name": "Barbell Bench Press",
+                              "description": "Composite exercise for chest development."
+                            }
+                          ],
+                          "nExercises": 1,
+                          "createdAt": "2024-01-01T12:00:00Z",
+                          "updatedAt": "2024-01-01T12:00:00Z"
+                        }
+                      ],
+                      "total": 30,
+                      "limit": 10,
+                      "offset": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List routines with pagination",
+        "tags": [
+          "Routines"
+        ]
+      }
+    },
+    "/workout/routines/{id}": {
+      "get": {
+        "description": "Retrieve a specific routine by its ID. Accessible by all authenticated users.",
+        "operationId": "RoutinesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Routine UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Routine retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Routine retrieved successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "name": "Upper/Lower Hypertrophy",
+                      "description": "Description...",
+                      "routineGoal": [
+                        "muscle_gain"
+                      ],
+                      "official": false,
+                      "createdAt": "2024-01-01T12:00:00Z",
+                      "updatedAt": "2024-01-01T12:00:00Z",
+                      "nExercises": 5,
+                      "exercises": [
+                        {
+                          "id": "123e4567-e89b-12d3-a456-426614174001",
+                          "name": "Bench Press"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "404": {
+            "description": "Routine not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get routine by ID",
+        "tags": [
+          "Routines"
+        ]
+      },
+      "patch": {
+        "description": "Update a routine. Only the owner of the routine or users with ADMIN role can update it.",
+        "operationId": "RoutinesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Routine UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoutineUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Routine updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Routine updated successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "name": "Upper/Lower Hypertrophy",
+                      "description": "Updated description...",
+                      "routineGoal": [
+                        "muscle_gain"
+                      ],
+                      "official": false,
+                      "createdAt": "2024-01-01T12:00:00Z",
+                      "updatedAt": "2024-01-02T12:00:00Z",
+                      "nExercises": 5
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error. Invalid field values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "name must be longer than or equal to 3 characters",
+                      "exerciseIds must contain at least 1 elements"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "403": {
+            "description": "Forbidden - You can only modify routines that belong to you"
+          },
+          "404": {
+            "description": "Routine not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update routine",
+        "tags": [
+          "Routines"
+        ]
+      },
+      "delete": {
+        "description": "Delete a routine. Only the owner of the routine or users with ADMIN role can delete it.",
+        "operationId": "RoutinesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Routine UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Routine deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "403": {
+            "description": "Forbidden - You can only delete routines that belong to you"
+          },
+          "404": {
+            "description": "Routine not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete routine",
+        "tags": [
+          "Routines"
+        ]
+      }
+    },
+    "/workout/exercises": {
+      "post": {
+        "description": "Create a new exercise. Only accessible by users with ADMIN role.",
+        "operationId": "ExercisesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExerciseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Exercise created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Exercise created successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "name": "Barbell Bench Press",
+                      "description": "Composite exercise for chest development.",
+                      "equipment": "barbell",
+                      "parentExerciseId": null,
+                      "video": "https://example.com/bench-press",
+                      "minSets": 3,
+                      "maxSets": 5,
+                      "minReps": 8,
+                      "maxReps": 12,
+                      "minRestTime": 90,
+                      "maxRestTime": 180,
+                      "muscleTarget": [
+                        "chest",
+                        "triceps",
+                        "deltoids"
+                      ],
+                      "exerciseType": [
+                        "strength",
+                        "bodybuilding"
+                      ],
+                      "instructions": [
+                        "Lie on bench",
+                        "Lower bar to chest",
+                        "Press up"
+                      ],
+                      "benefit": {
+                        "title": "Builds upper body strength",
+                        "description": "Focuses on pectorals and triceps",
+                        "categories": [
+                          "Strength"
+                        ]
+                      },
+                      "createdAt": "2024-01-01T10:00:00Z",
+                      "updatedAt": "2024-01-01T10:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error. Invalid or missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "name must be longer than or equal to 3 characters",
+                      "description must be longer than or equal to 10 characters",
+                      "equipment must be one of: barbell, dumbbell, machine, bodyweight, kettlebell, resistance_band, cable, other",
+                      "muscleTarget must contain at least 1 elements",
+                      "exerciseType must contain at least 1 elements"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "403": {
+            "description": "Forbidden - Only administrators can create exercises"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create exercise",
+        "tags": [
+          "Exercises"
+        ]
+      },
+      "get": {
+        "description": "Get a paginated list of all exercises. Filter by muscle target to get specific exercises. Accessible by all authenticated users.",
+        "operationId": "ExercisesController_findAll",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of items to skip",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "muscleTarget",
+            "required": false,
+            "in": "query",
+            "description": "Filter by target muscles. Valid values: chest, core, trapezius, lats, deltoids, triceps, biceps, forearms, quads, hamstrings, glutes, adductors, calves, neck",
+            "schema": {
+              "example": [
+                "chest",
+                "triceps"
+              ],
+              "items": {
+                "type": "string",
+                "enum": [
+                  "chest",
+                  "core",
+                  "trapezius",
+                  "lats",
+                  "deltoids",
+                  "triceps",
+                  "biceps",
+                  "forearms",
+                  "quads",
+                  "hamstrings",
+                  "glutes",
+                  "adductors",
+                  "calves",
+                  "neck"
+                ]
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated exercise list retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Exercises retrieved successfully",
+                    "data": {
+                      "items": [
+                        {
+                          "id": "123e4567-e89b-12d3-a456-426614174000",
+                          "name": "Barbell Bench Press",
+                          "description": "Composite exercise for chest development.",
+                          "equipment": "barbell",
+                          "muscleTarget": [
+                            "chest",
+                            "triceps"
+                          ],
+                          "exerciseType": [
+                            "strength"
+                          ],
+                          "video": "https://example.com/video"
+                        }
+                      ],
+                      "total": 50,
+                      "limit": 10,
+                      "offset": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid muscleTarget value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "Each muscleTarget must be one of: chest, core, trapezius, lats, deltoids, triceps, biceps, forearms, quads, hamstrings, glutes, adductors, calves, neck"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List exercises with pagination",
+        "tags": [
+          "Exercises"
+        ]
+      }
+    },
+    "/workout/exercises/{id}": {
+      "get": {
+        "description": "Retrieve a specific exercise by its ID. Accessible by all authenticated users.",
+        "operationId": "ExercisesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Exercise UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exercise retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Exercise retrieved successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "name": "Barbell Bench Press",
+                      "description": "Composite exercise for chest development.",
+                      "equipment": "barbell",
+                      "video": "https://example.com/bench-press",
+                      "muscleTarget": [
+                        "chest",
+                        "triceps"
+                      ],
+                      "exerciseType": [
+                        "strength"
+                      ],
+                      "createdAt": "2024-01-01T10:00:00Z",
+                      "updatedAt": "2024-01-01T10:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "404": {
+            "description": "Exercise not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get exercise by ID",
+        "tags": [
+          "Exercises"
+        ]
+      },
+      "patch": {
+        "description": "Update an existing exercise. Only accessible by users with ADMIN role.",
+        "operationId": "ExercisesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Exercise UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExerciseUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Exercise updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Exercise updated successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "name": "Barbell Bench Press",
+                      "updatedAt": "2024-01-02T10:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error. Invalid field values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "name must be longer than or equal to 3 characters",
+                      "equipment must be one of: barbell, dumbbell, machine, bodyweight, kettlebell, resistance_band, cable, other",
+                      "muscleTarget must contain at least 1 elements"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "403": {
+            "description": "Forbidden - Only administrators can update exercises"
+          },
+          "404": {
+            "description": "Exercise not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update exercise",
+        "tags": [
+          "Exercises"
+        ]
+      },
+      "delete": {
+        "description": "Delete an exercise. Only accessible by users with ADMIN role.",
+        "operationId": "ExercisesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Exercise UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Exercise deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Exercise deleted successfully"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "403": {
+            "description": "Forbidden - Only administrators can delete exercises"
+          },
+          "404": {
+            "description": "Exercise not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete exercise",
+        "tags": [
+          "Exercises"
+        ]
+      }
+    },
+    "/measurements": {
+      "get": {
+        "description": "Get all measurements. Only accessible by administrators.",
+        "operationId": "MeasurementsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Measurements retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Measurements retrieved successfully",
+                    "data": [
+                      {
+                        "id": "123e4567-e89b-12d3-a456-426614174000",
+                        "weight": 75.5,
+                        "height": 180,
+                        "imc": 23.3,
+                        "left_arm": 35,
+                        "right_arm": 35,
+                        "left_forearm": 28,
+                        "right_forearm": 28,
+                        "clavicular_width": 38,
+                        "neck_diameter": 38,
+                        "chest_size": 98,
+                        "back_width": 42,
+                        "hip_diameter": 98,
+                        "left_leg": 60,
+                        "right_leg": 60,
+                        "left_calve": 38,
+                        "right_calve": 38,
+                        "checkTime": "WEEKLY",
+                        "createdAt": "2024-01-01T10:00:00Z",
+                        "updatedAt": "2024-01-01T10:00:00Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List measurements (admin use)",
+        "tags": [
+          "Measurements"
+        ]
+      }
+    },
+    "/measurements/me": {
+      "get": {
+        "description": "Retrieve the authenticated user's current measurement.",
+        "operationId": "MeasurementsController_getMyMeasurement",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Measurement retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Measurement retrieved successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "weight": 75.5,
+                      "height": 180,
+                      "imc": 23.3,
+                      "left_arm": 35,
+                      "right_arm": 35,
+                      "left_forearm": 28,
+                      "right_forearm": 28,
+                      "clavicular_width": 38,
+                      "neck_diameter": 38,
+                      "chest_size": 98,
+                      "back_width": 42,
+                      "hip_diameter": 98,
+                      "left_leg": 60,
+                      "right_leg": 60,
+                      "left_calve": 38,
+                      "right_calve": 38,
+                      "checkTime": "morning",
+                      "createdAt": "2024-01-01T10:00:00Z",
+                      "updatedAt": "2024-01-01T10:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "404": {
+            "description": "Measurement not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get my measurement",
+        "tags": [
+          "Measurements"
+        ]
+      },
+      "post": {
+        "description": "Create a new measurement or update existing one for authenticated user.",
+        "operationId": "MeasurementsController_createMyMeasurement",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeasurementRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Measurement created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Measurement created successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "weight": 75.5,
+                      "height": 180,
+                      "imc": 23.3,
+                      "left_arm": 35,
+                      "right_arm": 35,
+                      "left_forearm": 28,
+                      "right_forearm": 28,
+                      "clavicular_width": 38,
+                      "neck_diameter": 38,
+                      "chest_size": 98,
+                      "back_width": 42,
+                      "hip_diameter": 98,
+                      "left_leg": 60,
+                      "right_leg": 60,
+                      "left_calve": 38,
+                      "right_calve": 38,
+                      "checkTime": "morning",
+                      "createdAt": "2024-01-01T10:00:00Z",
+                      "updatedAt": "2024-01-01T10:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error. Invalid or missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "weight must be a positive number",
+                      "height must be a positive number",
+                      "left_arm must be a positive number",
+                      "checkTime must be one of: DAILY, WEEKLY, MONTHLY"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create or update measurement",
+        "tags": [
+          "Measurements"
+        ]
+      },
+      "patch": {
+        "description": "Update the authenticated user's measurement.",
+        "operationId": "MeasurementsController_editMyMeasurement",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeasurementUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Measurement updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Measurement updated successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "weight": 76,
+                      "height": 180,
+                      "imc": 23.5,
+                      "left_arm": 35.5,
+                      "right_arm": 35.5,
+                      "left_forearm": 28.5,
+                      "right_forearm": 28.5,
+                      "clavicular_width": 38,
+                      "neck_diameter": 38,
+                      "chest_size": 99,
+                      "back_width": 42,
+                      "hip_diameter": 99,
+                      "left_leg": 60.5,
+                      "right_leg": 60.5,
+                      "left_calve": 38.5,
+                      "right_calve": 38.5,
+                      "checkTime": "morning",
+                      "createdAt": "2024-01-01T10:00:00Z",
+                      "updatedAt": "2024-01-02T11:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error. Invalid field values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "weight must be a positive number",
+                      "checkTime must be one of: DAILY, WEEKLY, MONTHLY"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "404": {
+            "description": "Measurement not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update measurement",
+        "tags": [
+          "Measurements"
+        ]
+      }
+    },
+    "/measurements/{id}": {
+      "get": {
+        "operationId": "MeasurementsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Measurement retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Measurement retrieved successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "weight": 75.5,
+                      "height": 180,
+                      "imc": 23.3,
+                      "left_arm": 35,
+                      "right_arm": 35,
+                      "left_forearm": 28,
+                      "right_forearm": 28,
+                      "clavicular_width": 38,
+                      "neck_diameter": 38,
+                      "chest_size": 98,
+                      "back_width": 42,
+                      "hip_diameter": 98,
+                      "left_leg": 60,
+                      "right_leg": 60,
+                      "left_calve": 38,
+                      "right_calve": 38,
+                      "checkTime": "morning",
+                      "createdAt": "2024-01-01T10:00:00Z",
+                      "updatedAt": "2024-01-01T10:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Measurement not found"
+          }
+        },
+        "summary": "Get a measurement by id (admin use)",
+        "tags": [
+          "Measurements"
+        ]
+      },
+      "delete": {
+        "description": "Delete the authenticated user's measurement.",
+        "operationId": "MeasurementsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Measurement deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "404": {
+            "description": "Measurement not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete measurement",
+        "tags": [
+          "Measurements"
+        ]
+      }
+    },
+    "/ai/generate-exercise": {
+      "post": {
+        "operationId": "AiController_generateExerciseDescription",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Exercise description generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "description": "Este es un ejercicio para trabajar el pecho..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generate exercise description using AI",
+        "tags": [
+          "AI"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "AthletIA API",
+    "description": "API documentation for AthletIA",
+    "version": "0.0.1",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "access-token": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "ProfileRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Full name",
+            "example": "Jane Doe"
+          },
+          "birthDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Birth date in ISO format",
+            "example": "1990-01-01"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "10-digit phone number",
+            "example": "5512345678"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Gender - Valid values: male, female",
+            "enum": [
+              "male",
+              "female"
+            ],
+            "example": "male"
+          },
+          "fitGoals": {
+            "type": "array",
+            "description": "Fitness goals - Valid values: weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement",
+            "example": [
+              "weight_loss",
+              "muscle_gain"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "weight_loss",
+                "muscle_gain",
+                "weight_maintenance",
+                "endurance",
+                "flexibility",
+                "general_fitness",
+                "rehabilitation",
+                "improved_posture",
+                "balance_and_coordination",
+                "cardiovascular_health",
+                "strength_training",
+                "athletic_performance",
+                "lifestyle_enhancement"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "birthDate",
+          "phoneNumber",
+          "gender",
+          "fitGoals"
+        ]
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "description": "Current password",
+            "example": "OldP@ss123"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "New password",
+            "example": "NewP@ss1234",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User email",
+            "example": "user@example.com"
+          },
+          "id": {
+            "type": "string",
+            "description": "User ID",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "state": {
+            "type": "string",
+            "description": "Account status - Valid values: ACTIVE, SUSPENDED, DEACTIVATED",
+            "enum": [
+              "ACTIVE",
+              "SUSPENDED",
+              "DEACTIVATED"
+            ],
+            "example": "ACTIVE"
+          },
+          "role": {
+            "type": "string",
+            "description": "Assigned role - Valid values: user, admin, moderator",
+            "enum": [
+              "user",
+              "admin",
+              "moderator"
+            ],
+            "example": "user"
+          },
+          "hasProfile": {
+            "type": "boolean",
+            "description": "Indicates if profile exists",
+            "example": true
+          },
+          "name": {
+            "type": "object",
+            "description": "Full name",
+            "example": "Jane Doe",
+            "nullable": true
+          },
+          "birthDate": {
+            "type": "object",
+            "description": "Birth date",
+            "example": "1990-01-01",
+            "nullable": true
+          }
+        },
+        "required": [
+          "email",
+          "id",
+          "state",
+          "role",
+          "hasProfile",
+          "name",
+          "birthDate"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User email",
+            "example": "user@example.com",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "description": "User password",
+            "example": "Str0ngP@ssw0rd"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "JWT refresh token"
+          },
+          "accountId": {
+            "type": "string",
+            "description": "Account ID when applicable",
+            "example": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken"
+        ]
+      },
+      "RegisterAccountRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User email",
+            "example": "user@example.com",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password (min 8 chars)",
+            "minLength": 8,
+            "example": "Str0ngP@ssw0rd"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Full name",
+            "example": "Jane Doe"
+          },
+          "birthDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Birth date in ISO format",
+            "example": "1990-01-01"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "10-digit phone number",
+            "example": "5512345678"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Gender - Valid values: male, female",
+            "enum": [
+              "male",
+              "female"
+            ],
+            "example": "male"
+          },
+          "fitGoals": {
+            "type": "array",
+            "description": "Fitness goals - Valid values: weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement",
+            "example": [
+              "weight_loss",
+              "muscle_gain"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "weight_loss",
+                "muscle_gain",
+                "weight_maintenance",
+                "endurance",
+                "flexibility",
+                "general_fitness",
+                "rehabilitation",
+                "improved_posture",
+                "balance_and_coordination",
+                "cardiovascular_health",
+                "strength_training",
+                "athletic_performance",
+                "lifestyle_enhancement"
+              ]
+            }
+          },
+          "email": {
+            "type": "string",
+            "description": "Associated email",
+            "example": "user@example.com"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Creation date",
+            "example": "2024-01-01T12:00:00Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Last update date",
+            "example": "2024-01-02T12:00:00Z"
+          },
+          "age": {
+            "type": "number",
+            "description": "Calculated age",
+            "example": 30
+          }
+        },
+        "required": [
+          "name",
+          "birthDate",
+          "phoneNumber",
+          "gender",
+          "fitGoals",
+          "email",
+          "createdAt",
+          "updatedAt",
+          "age"
+        ]
+      },
+      "ProfileUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Full name",
+            "example": "Jane Doe"
+          },
+          "birthDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Birth date in ISO format",
+            "example": "1990-01-01"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "10-digit phone number",
+            "example": "5512345678"
+          }
+        }
+      },
+      "Split": {
+        "type": "object",
+        "properties": {}
+      },
+      "SplitRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Split name",
+            "minLength": 3,
+            "maxLength": 50,
+            "example": "Upper/Lower"
+          },
+          "description": {
+            "type": "string",
+            "description": "Split description",
+            "minLength": 10,
+            "maxLength": 500,
+            "example": "4-day weekly program split into upper and lower."
+          },
+          "routineIds": {
+            "description": "Included routine IDs",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "trainingDays": {
+            "type": "array",
+            "description": "Training days - Valid values: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ]
+            }
+          },
+          "official": {
+            "type": "boolean",
+            "description": "Official split flag",
+            "example": false
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "trainingDays",
+          "official"
+        ]
+      },
+      "SplitUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Split name",
+            "minLength": 3,
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "description": "Split description",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "routineIds": {
+            "description": "Included routine IDs",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "trainingDays": {
+            "type": "array",
+            "description": "Training days",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ]
+            }
+          },
+          "official": {
+            "type": "boolean",
+            "description": "Official split flag",
+            "example": false
+          }
+        }
+      },
+      "RoutineRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Routine name",
+            "minLength": 3,
+            "maxLength": 50,
+            "example": "Upper/Lower Hypertrophy"
+          },
+          "description": {
+            "type": "string",
+            "description": "Routine description",
+            "minLength": 10,
+            "maxLength": 500,
+            "example": "4-day program focused on strength and hypertrophy."
+          },
+          "exerciseIds": {
+            "description": "Associated exercise IDs",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "routineGoal": {
+            "type": "array",
+            "description": "Routine goals - Valid values: weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement",
+            "items": {
+              "type": "string",
+              "enum": [
+                "weight_loss",
+                "muscle_gain",
+                "weight_maintenance",
+                "endurance",
+                "flexibility",
+                "general_fitness",
+                "rehabilitation",
+                "improved_posture",
+                "balance_and_coordination",
+                "cardiovascular_health",
+                "strength_training",
+                "athletic_performance",
+                "lifestyle_enhancement"
+              ]
+            }
+          },
+          "official": {
+            "type": "boolean",
+            "description": "Official routine flag",
+            "example": false
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "routineGoal",
+          "official"
+        ]
+      },
+      "RoutineUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Routine name",
+            "minLength": 3,
+            "maxLength": 50,
+            "example": "Upper/Lower Hypertrophy"
+          },
+          "description": {
+            "type": "string",
+            "description": "Routine description",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "exerciseIds": {
+            "description": "Associated exercise IDs",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "routineGoal": {
+            "type": "array",
+            "description": "Routine goals",
+            "items": {
+              "type": "string",
+              "enum": [
+                "weight_loss",
+                "muscle_gain",
+                "weight_maintenance",
+                "endurance",
+                "flexibility",
+                "general_fitness",
+                "rehabilitation",
+                "improved_posture",
+                "balance_and_coordination",
+                "cardiovascular_health",
+                "strength_training",
+                "athletic_performance",
+                "lifestyle_enhancement"
+              ]
+            }
+          },
+          "official": {
+            "type": "boolean",
+            "description": "Official routine flag",
+            "example": false
+          }
+        }
+      },
+      "ExerciseRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Exercise name",
+            "minLength": 3,
+            "maxLength": 50,
+            "example": "Bench Press"
+          },
+          "description": {
+            "type": "string",
+            "description": "Exercise description",
+            "minLength": 10,
+            "maxLength": 500,
+            "example": "Barbell bench press on a flat bench."
+          },
+          "equipment": {
+            "type": "string",
+            "description": "Equipment required for the exercise - Valid values: barbell, dumbbell, machine, bodyweight, kettlebell, resistance_band, cable, other",
+            "enum": [
+              "barbell",
+              "dumbbell",
+              "machine",
+              "bodyweight",
+              "kettlebell",
+              "resistance_band",
+              "cable",
+              "other"
+            ],
+            "example": "barbell"
+          },
+          "parentExerciseId": {
+            "type": "string",
+            "description": "Parent exercise ID if this is a variant",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "video": {
+            "type": "string",
+            "description": "Demo video URL",
+            "example": "https://example.com/video"
+          },
+          "minSets": {
+            "type": "number",
+            "description": "Minimum sets",
+            "minimum": 1,
+            "example": 3
+          },
+          "maxSets": {
+            "type": "number",
+            "description": "Maximum sets",
+            "maximum": 10,
+            "example": 5
+          },
+          "minReps": {
+            "type": "number",
+            "description": "Minimum reps",
+            "minimum": 1,
+            "example": 8
+          },
+          "maxReps": {
+            "type": "number",
+            "description": "Maximum reps",
+            "maximum": 60,
+            "example": 15
+          },
+          "minRestTime": {
+            "type": "number",
+            "description": "Minimum rest time in seconds",
+            "minimum": 10,
+            "example": 60
+          },
+          "maxRestTime": {
+            "type": "number",
+            "description": "Maximum rest time in seconds",
+            "maximum": 600,
+            "example": 120
+          },
+          "muscleTarget": {
+            "type": "array",
+            "description": "Target muscles - Valid values: chest, core, trapezius, lats, deltoids, triceps, biceps, forearms, quads, hamstrings, glutes, adductors, calves, neck",
+            "items": {
+              "type": "string",
+              "enum": [
+                "chest",
+                "core",
+                "trapezius",
+                "lats",
+                "deltoids",
+                "triceps",
+                "biceps",
+                "forearms",
+                "quads",
+                "hamstrings",
+                "glutes",
+                "adductors",
+                "calves",
+                "neck"
+              ]
+            }
+          },
+          "exerciseType": {
+            "type": "array",
+            "description": "Exercise types - Valid values: cardio, strength, flexibility, hiit, pilates, yoga, crossfit, calisthenics, aerobics, endurance, powerlifting, olympic_weightlifting, bodybuilding, functional_training, rehabilitation, sports_specific, warm_up, cool_down",
+            "items": {
+              "type": "string",
+              "enum": [
+                "cardio",
+                "strength",
+                "flexibility",
+                "hiit",
+                "pilates",
+                "yoga",
+                "crossfit",
+                "calisthenics",
+                "aerobics",
+                "endurance",
+                "powerlifting",
+                "olympic_weightlifting",
+                "bodybuilding",
+                "functional_training",
+                "rehabilitation",
+                "sports_specific",
+                "warm_up",
+                "cool_down"
+              ]
+            }
+          },
+          "instructions": {
+            "description": "Exercise instructions (steps)",
+            "example": [
+              "Step 1: Position yourself",
+              "Step 2: Execute the movement"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "benefit": {
+            "type": "object",
+            "description": "Exercise benefit information",
+            "example": {
+              "title": "Increases strength",
+              "description": "Builds chest and triceps strength",
+              "categories": [
+                "Cardio",
+                "Fuerza",
+                "Resistencia"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "equipment",
+          "video",
+          "minSets",
+          "maxSets",
+          "minReps",
+          "maxReps",
+          "minRestTime",
+          "maxRestTime",
+          "muscleTarget",
+          "exerciseType"
+        ]
+      },
+      "ExerciseUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Exercise name",
+            "minLength": 3,
+            "maxLength": 50,
+            "example": "Bench Press"
+          },
+          "description": {
+            "type": "string",
+            "description": "Exercise description",
+            "minLength": 10,
+            "maxLength": 500,
+            "example": "Barbell bench press on a flat bench."
+          },
+          "video": {
+            "type": "string",
+            "description": "Demo video URL",
+            "example": "https://example.com/video"
+          },
+          "equipment": {
+            "type": "string",
+            "description": "Equipment required for the exercise",
+            "enum": [
+              "barbell",
+              "dumbbell",
+              "machine",
+              "bodyweight",
+              "kettlebell",
+              "resistance_band",
+              "cable",
+              "other"
+            ],
+            "example": "barbell"
+          },
+          "minSets": {
+            "type": "number",
+            "description": "Minimum sets",
+            "minimum": 1,
+            "example": 3
+          },
+          "maxSets": {
+            "type": "number",
+            "description": "Maximum sets",
+            "maximum": 10,
+            "example": 5
+          },
+          "minReps": {
+            "type": "number",
+            "description": "Minimum reps",
+            "minimum": 1,
+            "example": 8
+          },
+          "maxReps": {
+            "type": "number",
+            "description": "Maximum reps",
+            "maximum": 60,
+            "example": 15
+          },
+          "minRestTime": {
+            "type": "number",
+            "description": "Minimum rest time in seconds",
+            "minimum": 10,
+            "example": 60
+          },
+          "maxRestTime": {
+            "type": "number",
+            "description": "Maximum rest time in seconds",
+            "maximum": 600,
+            "example": 120
+          },
+          "parentExerciseId": {
+            "type": "string",
+            "description": "Parent exercise ID if this is a variant",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "muscleTarget": {
+            "type": "array",
+            "description": "Target muscles",
+            "items": {
+              "type": "string",
+              "enum": [
+                "chest",
+                "core",
+                "trapezius",
+                "lats",
+                "deltoids",
+                "triceps",
+                "biceps",
+                "forearms",
+                "quads",
+                "hamstrings",
+                "glutes",
+                "adductors",
+                "calves",
+                "neck"
+              ]
+            }
+          },
+          "exerciseType": {
+            "type": "array",
+            "description": "Exercise types",
+            "items": {
+              "type": "string",
+              "enum": [
+                "cardio",
+                "strength",
+                "flexibility",
+                "hiit",
+                "pilates",
+                "yoga",
+                "crossfit",
+                "calisthenics",
+                "aerobics",
+                "endurance",
+                "powerlifting",
+                "olympic_weightlifting",
+                "bodybuilding",
+                "functional_training",
+                "rehabilitation",
+                "sports_specific",
+                "warm_up",
+                "cool_down"
+              ]
+            }
+          },
+          "instructions": {
+            "description": "Exercise instructions (steps)",
+            "example": [
+              "Step 1: Position yourself",
+              "Step 2: Execute the movement"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "benefit": {
+            "type": "object",
+            "description": "Exercise benefit information",
+            "example": {
+              "title": "Increases strength",
+              "description": "Builds chest and triceps strength",
+              "categories": [
+                "Cardio",
+                "Fuerza",
+                "Resistencia"
+              ]
+            }
+          }
+        }
+      },
+      "MeasurementRequest": {
+        "type": "object",
+        "properties": {
+          "weight": {
+            "type": "number",
+            "description": "User weight in kg",
+            "example": 75.5
+          },
+          "height": {
+            "type": "number",
+            "description": "User height in cm",
+            "example": 180
+          },
+          "left_arm": {
+            "type": "number",
+            "description": "Left arm measurement in cm"
+          },
+          "right_arm": {
+            "type": "number",
+            "description": "Right arm measurement in cm"
+          },
+          "left_forearm": {
+            "type": "number",
+            "description": "Left forearm measurement in cm"
+          },
+          "right_forearm": {
+            "type": "number",
+            "description": "Right forearm measurement in cm"
+          },
+          "clavicular_width": {
+            "type": "number",
+            "description": "Clavicular width in cm"
+          },
+          "neck_diameter": {
+            "type": "number",
+            "description": "Neck diameter in cm"
+          },
+          "chest_size": {
+            "type": "number",
+            "description": "Chest size in cm"
+          },
+          "back_width": {
+            "type": "number",
+            "description": "Back width in cm"
+          },
+          "hip_diameter": {
+            "type": "number",
+            "description": "Hip diameter in cm"
+          },
+          "left_leg": {
+            "type": "number",
+            "description": "Left leg measurement in cm"
+          },
+          "right_leg": {
+            "type": "number",
+            "description": "Right leg measurement in cm"
+          },
+          "left_calve": {
+            "type": "number",
+            "description": "Left calve measurement in cm"
+          },
+          "right_calve": {
+            "type": "number",
+            "description": "Right calve measurement in cm"
+          },
+          "checkTime": {
+            "type": "string",
+            "description": "Check time - Valid values: WEEKLY, MONTHLY, YEARLY",
+            "enum": [
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ],
+            "example": "WEEKLY"
+          }
+        },
+        "required": [
+          "weight",
+          "height",
+          "checkTime"
+        ]
+      },
+      "MeasurementUpdate": {
+        "type": "object",
+        "properties": {
+          "weight": {
+            "type": "number",
+            "description": "User weight in kg",
+            "example": 75.5
+          },
+          "height": {
+            "type": "number",
+            "description": "User height in cm",
+            "example": 180
+          },
+          "left_arm": {
+            "type": "number",
+            "description": "Left arm measurement in cm"
+          },
+          "right_arm": {
+            "type": "number",
+            "description": "Right arm measurement in cm"
+          },
+          "left_forearm": {
+            "type": "number",
+            "description": "Left forearm measurement in cm"
+          },
+          "right_forearm": {
+            "type": "number",
+            "description": "Right forearm measurement in cm"
+          },
+          "clavicular_width": {
+            "type": "number",
+            "description": "Clavicular width in cm"
+          },
+          "neck_diameter": {
+            "type": "number",
+            "description": "Neck diameter in cm"
+          },
+          "chest_size": {
+            "type": "number",
+            "description": "Chest size in cm"
+          },
+          "back_width": {
+            "type": "number",
+            "description": "Back width in cm"
+          },
+          "hip_diameter": {
+            "type": "number",
+            "description": "Hip diameter in cm"
+          },
+          "left_leg": {
+            "type": "number",
+            "description": "Left leg measurement in cm"
+          },
+          "right_leg": {
+            "type": "number",
+            "description": "Right leg measurement in cm"
+          },
+          "left_calve": {
+            "type": "number",
+            "description": "Left calve measurement in cm"
+          },
+          "right_calve": {
+            "type": "number",
+            "description": "Right calve measurement in cm"
+          },
+          "checkTime": {
+            "type": "string",
+            "description": "Check time - Valid values: WEEKLY, MONTHLY, YEARLY",
+            "enum": [
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ],
+            "example": "WEEKLY"
+          }
+        }
+      }
+    }
+  }
+}

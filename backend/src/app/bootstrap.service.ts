@@ -15,8 +15,8 @@ export class BootstrapService implements OnApplicationBootstrap {
 
   async onApplicationBootstrap(): Promise<void> {
     const user = {
-      email: 'admin.jgraso@email.com',
-      password: 'administrator123',
+      email: process.env.ADMIN_EMAIL || 'admin.jgraso@email.com',
+      password: process.env.ADMIN_PASSWORD || 'administrator123',
     };
     const profile: ProfileRequest = {
       name: 'JGraso',

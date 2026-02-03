@@ -1,14 +1,120 @@
+import { DumbbellIcon } from '@/components/ui/dumbbell-icon';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Config } from '@/constants';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
+import { useAuth } from '@/context/auth-context';
 import { GlobalStyles } from '@/styles/global';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+type ProfileData = {
+  name: string;
+  birthDate: string;
+  phoneNumber: string;
+  gender: string;
+  fitGoals: string[];
+  email: string;
+  createdAt: string;
+  updatedAt: string;
+  age: number;
+};
+
+type AuthData = {
+  id: string;
+  email: string;
+  status: string;
+  role: string;
+  hasProfile: boolean;
+  name: string;
+};
+
+const GOAL_MAPPING: Record<string, string> = {
+  lose_weight: 'Perder peso',
+  build_muscle: 'Ganar músculo',
+  stay_fit: 'Mantenerse en forma',
+  improve_endurance: 'Mejorar resistencia',
+  reduce_stress: 'Reducir estrés',
+  increase_flexibility: 'Aumentar flexibilidad'
+};
+
+const GENDER_MAPPING: Record<string, string> = {
+  male: 'Masculino',
+  female: 'Femenino',
+  other: 'Otro',
+  prefer_not_to_say: 'Prefiero no decirlo'
+};
 
 export default function ProfileScreen() {
+  const router = useRouter();
+  const { signOut, user } = useAuth();
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [authData, setAuthData] = useState<AuthData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user?.token) return;
+
+      try {
+        const headers = { Authorization: `Bearer ${user.token}` };
+
+        const [profileRes, authRes] = await Promise.all([
+          fetch(`${Config.apiUrl}/profiles/me`, { headers }),
+          fetch(`${Config.apiUrl}/auth/me`, { headers }),
+        ]);
+
+        const profileJson = await profileRes.json();
+        const authJson = await authRes.json();
+
+        if (profileJson.success && profileJson.data) {
+          setProfile(profileJson.data);
+        }
+
+        if (authJson.success && authJson.data) {
+          setAuthData(authJson.data);
+        }
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user?.token]);
+
+  if (loading) {
+    return (
+      <View style={[styles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
+      </View>
+    );
+  }
+
+  const displayName = profile?.name || authData?.name || 'Usuario';
+  const displayEmail = profile?.email || authData?.email || '';
+  const displayPhone = profile?.phoneNumber || 'No registrado';
+  const displayMobileInitial = displayName.charAt(0).toUpperCase();
+  
+  const displayGender = profile?.gender ? (GENDER_MAPPING[profile.gender] || profile.gender) : 'No especificado';
+  const displayGoals = profile?.fitGoals?.map(goal => GOAL_MAPPING[goal] || goal).join(', ') || 'Sin objetivos definidos';
+  const displayAge = profile?.age ? `${profile.age} años` : 'Edad desconocida';
+
+  // TODO: Estos datos son estáticos por ahora. Conectar con endpoint de estadísticas cuando esté disponible.
+  const stats = {
+    workouts: 0,
+    streak: 0,
+    hours: '0h',
+    weight: '--'
+  };
+
   return (
     <View style={styles.screen}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.headerIcon}>💪</Text>
+          <DumbbellIcon size={20} />
           <Text style={styles.headerTitle}>AthletIA</Text>
         </View>
         <Pressable style={styles.notificationButton}>
@@ -27,19 +133,19 @@ export default function ProfileScreen() {
           <View style={styles.profileHeader}>
             <View style={styles.profileAvatarContainer}>
               <View style={styles.profileAvatar}>
-                <Text style={styles.avatarText}>J</Text>
+                <Text style={styles.avatarText}>{displayMobileInitial}</Text>
               </View>
               <View style={styles.onlineBadge} />
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>JGraso</Text>
+              <Text style={styles.profileName}>{displayName}</Text>
               <View style={styles.infoRow}>
                 <Text style={styles.infoIcon}>✉️</Text>
-                <Text style={styles.infoText}>admin.jgraso@email.com</Text>
+                <Text style={styles.infoText}>{displayEmail}</Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoIcon}>📱</Text>
-                <Text style={styles.infoText}>0000000000</Text>
+                <Text style={styles.infoText}>{displayPhone}</Text>
               </View>
             </View>
           </View>
@@ -48,8 +154,8 @@ export default function ProfileScreen() {
             <Pressable style={styles.primaryButton}>
               <Text style={styles.primaryButtonText}>Editar Perfil</Text>
             </Pressable>
-            <Pressable style={styles.logoutButton}>
-              <Text style={styles.logoutIcon}>🚪</Text>
+            <Pressable style={styles.logoutButton} onPress={() => signOut()}>
+              <IconSymbol name="rectangle.portrait.and.arrow.right" size={20} color={Colors.error.DEFAULT} />
               <Text style={styles.logoutText}>Logout</Text>
             </Pressable>
           </View>
@@ -59,22 +165,22 @@ export default function ProfileScreen() {
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <Text style={styles.statIcon}>🏋️</Text>
-            <Text style={styles.statValue}>24</Text>
+            <Text style={styles.statValue}>{stats.workouts}</Text>
             <Text style={styles.statLabel}>Entrenamientos</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statIcon}>🔥</Text>
-            <Text style={styles.statValue}>12</Text>
+            <Text style={styles.statValue}>{stats.streak}</Text>
             <Text style={styles.statLabel}>Racha Días</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statIcon}>⏱️</Text>
-            <Text style={styles.statValue}>18.5h</Text>
+            <Text style={styles.statValue}>{stats.hours}</Text>
             <Text style={styles.statLabel}>Total Horas</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statIcon}>💪</Text>
-            <Text style={styles.statValue}>75kg</Text>
+            <Text style={styles.statValue}>{stats.weight}</Text>
             <Text style={styles.statLabel}>Peso Actual</Text>
           </View>
         </View>
@@ -82,11 +188,13 @@ export default function ProfileScreen() {
         {/* Settings Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Configuración</Text>
-          
           <Pressable style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
               <Text style={styles.menuIcon}>👤</Text>
-              <Text style={styles.menuText}>Información Personal</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.menuText}>Información Personal</Text>
+                <Text style={styles.menuSubtext}>{displayAge} • {displayGender}</Text>
+              </View>
             </View>
             <Text style={styles.chevron}>›</Text>
           </Pressable>
@@ -94,12 +202,17 @@ export default function ProfileScreen() {
           <Pressable style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
               <Text style={styles.menuIcon}>🎯</Text>
-              <Text style={styles.menuText}>Objetivos Fitness</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.menuText}>Objetivos Fitness</Text>
+                <Text style={styles.menuSubtext} numberOfLines={1} ellipsizeMode="tail">
+                  {displayGoals}
+                </Text>
+              </View>
             </View>
             <Text style={styles.chevron}>›</Text>
           </Pressable>
 
-          <Pressable style={styles.menuItem}>
+          <Pressable style={styles.menuItem} onPress={() => router.push('/measurements')}>
             <View style={styles.menuItemLeft}>
               <Text style={styles.menuIcon}>📊</Text>
               <Text style={styles.menuText}>Medidas y Progreso</Text>
@@ -319,6 +432,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
+  },
+  menuSubtext: {
+    ...Typography.styles.small,
+    color: Colors.text.muted,
+    marginTop: 2,
   },
   menuIcon: {
     fontSize: Typography.fontSize.xl,

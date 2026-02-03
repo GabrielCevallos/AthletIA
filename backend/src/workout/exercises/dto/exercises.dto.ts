@@ -16,10 +16,12 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { MuscleTarget } from '../enum/muscle-target.enum';
 import { ExerciseType } from '../enum/exercise-type.enum';
 import { Equipment } from '../enum/equipment.enum';
+import { PaginationRequest } from '../../../common/request/pagination.request.dto';
 
 export class ExerciseRequest {
   @IsString()
@@ -51,7 +53,7 @@ export class ExerciseRequest {
   })
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Equipment required for the exercise',
+    description: 'Equipment required for the exercise - Valid values: barbell, dumbbell, machine, bodyweight, kettlebell, resistance_band, cable, other',
     enum: Equipment,
     example: Equipment.BARBELL,
   })
@@ -140,7 +142,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @ArrayMinSize(1)
   @ApiProperty({
-    description: 'Target muscles',
+    description: 'Target muscles - Valid values: chest, core, trapezius, lats, deltoids, triceps, biceps, forearms, quads, hamstrings, glutes, adductors, calves, neck',
     enum: MuscleTarget,
     isArray: true,
   })
@@ -156,7 +158,7 @@ export class ExerciseRequest {
   @IsNotEmpty()
   @ArrayMinSize(1)
   @ApiProperty({
-    description: 'Exercise types',
+    description: 'Exercise types - Valid values: cardio, strength, flexibility, hiit, pilates, yoga, crossfit, calisthenics, aerobics, endurance, powerlifting, olympic_weightlifting, bodybuilding, functional_training, rehabilitation, sports_specific, warm_up, cool_down',
     enum: ExerciseType,
     isArray: true,
   })
@@ -188,10 +190,175 @@ export class ExerciseRequest {
   };
 }
 
-export class Exercise extends ExerciseRequest {
+export class Exercise {
   @IsUUID()
   @ApiProperty({ description: 'Exercise ID', format: 'uuid' })
   id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(50)
+  @ApiProperty({
+    description: 'Exercise name',
+    minLength: 3,
+    maxLength: 50,
+    example: 'Bench Press',
+  })
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(10)
+  @MaxLength(500)
+  @ApiProperty({
+    description: 'Exercise description',
+    minLength: 10,
+    maxLength: 500,
+    example: 'Barbell bench press on a flat bench.',
+  })
+  description: string;
+
+  @IsEnum(Equipment, {
+    message: `Equipment must be one of: ${Object.values(Equipment).join(', ')}`,
+  })
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Equipment required for the exercise - Valid values: barbell, dumbbell, machine, bodyweight, kettlebell, resistance_band, cable, other',
+    enum: Equipment,
+    example: Equipment.BARBELL,
+  })
+  equipment: Equipment;
+
+  @IsUUID()
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Parent exercise ID if this is a variant',
+    format: 'uuid',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  parentExerciseId?: string;
+
+  @IsUrl()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Demo video URL',
+    example: 'https://example.com/video',
+  })
+  video: string;
+
+  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @Min(1)
+  @ApiProperty({ description: 'Minimum sets', minimum: 1, example: 3 })
+  minSets: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @Max(10)
+  @ApiProperty({ description: 'Maximum sets', maximum: 10, example: 5 })
+  maxSets: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @Min(1)
+  @ApiProperty({ description: 'Minimum reps', minimum: 1, example: 8 })
+  minReps: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @Max(60)
+  @ApiProperty({ description: 'Maximum reps', maximum: 60, example: 15 })
+  maxReps: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @Min(10)
+  @ApiProperty({
+    description: 'Minimum rest time in seconds',
+    minimum: 10,
+    example: 60,
+  })
+  minRestTime: number;
+
+  @IsNumber()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @Max(600)
+  @ApiProperty({
+    description: 'Maximum rest time in seconds',
+    maximum: 600,
+    example: 120,
+  })
+  maxRestTime: number;
+
+  @IsArray()
+  @IsEnum(MuscleTarget, {
+    each: true,
+    message: `Each muscleTarget must be one of: ${Object.values(
+      MuscleTarget,
+    ).join(', ')}`,
+  })
+  @IsNotEmpty()
+  @ArrayMinSize(1)
+  @ApiProperty({
+    description: 'Target muscles - Valid values: chest, core, trapezius, lats, deltoids, triceps, biceps, forearms, quads, hamstrings, glutes, adductors, calves, neck',
+    enum: MuscleTarget,
+    isArray: true,
+  })
+  muscleTarget: MuscleTarget[];
+
+  @IsArray()
+  @IsEnum(ExerciseType, {
+    each: true,
+    message: `Each exerciseType must be one of: ${Object.values(
+      ExerciseType,
+    ).join(', ')}`,
+  })
+  @IsNotEmpty()
+  @ArrayMinSize(1)
+  @ApiProperty({
+    description: 'Exercise types - Valid values: cardio, strength, flexibility, hiit, pilates, yoga, crossfit, calisthenics, aerobics, endurance, powerlifting, olympic_weightlifting, bodybuilding, functional_training, rehabilitation, sports_specific, warm_up, cool_down',
+    enum: ExerciseType,
+    isArray: true,
+  })
+  exerciseType: ExerciseType[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Exercise instructions (steps)',
+    type: [String],
+    example: ['Step 1: Position yourself', 'Step 2: Execute the movement'],
+  })
+  instructions?: string[];
+
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Exercise benefit information',
+    example: {
+      title: 'Increases strength',
+      description: 'Builds chest and triceps strength',
+      categories: ['Cardio', 'Fuerza', 'Resistencia'],
+    },
+  })
+  benefit?: {
+    title: string;
+    description?: string;
+    categories?: string[];
+  };
 
   @IsDate()
   @ApiProperty({ description: 'Creation date', type: Date })
@@ -373,3 +540,24 @@ export class ExerciseUpdate {
     categories?: string[];
   };
 }
+
+export class ExerciseFilterRequest extends PaginationRequest {
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === undefined || value === null) return undefined;
+    return Array.isArray(value) ? value : [value];
+  })
+  @IsArray()
+  @IsEnum(MuscleTarget, {
+    each: true,
+    message: `Each muscleTarget must be one of: ${Object.values(MuscleTarget).join(', ')}`,
+  })
+  @ApiPropertyOptional({
+    description: 'Filter by target muscles - Valid values: chest, core, trapezius, lats, deltoids, triceps, biceps, forearms, quads, hamstrings, glutes, adductors, calves, neck',
+    enum: MuscleTarget,
+    isArray: true,
+    example: [MuscleTarget.CHEST, MuscleTarget.TRICEPS],
+  })
+  muscleTarget?: MuscleTarget[];
+}
+

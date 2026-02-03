@@ -9,6 +9,7 @@ import {
   Req,
   Res,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags, ApiExtraModels } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -25,28 +26,30 @@ import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GoogleUser } from './strategies/google.strategy';
 import type { Request, Response } from 'express';
+import { UserPayload } from './interfaces/user-payload.interface';
 import {
   ApiAuthSignIn,
   ApiAuthRegisterAccount,
   ApiAuthVerifyEmail,
   ApiAuthResendVerification,
   ApiAuthResendVerificationStatus,
-  //ApiAuthCompleteProfileSetup,
   ApiAuthChangePassword,
   ApiAuthRefreshToken,
   ApiAuthLogout,
   ApiAuthGoogleStart,
   ApiAuthGoogleCallback,
   ApiAuthMe,
+  ApiAuthGoogleMobileLogin,
 } from './swagger.decorators';
 import { User } from 'src/users/accounts/dto/user-response.dtos';
+import { RateLimit } from 'src/common/guards/rate-limit.decorator';
 //import { log } from 'console';
 
 type accountIdOnly = { accountId: string };
 
 @Controller('auth')
 @ApiTags('auth')
-@ApiExtraModels(ProfileRequest, ChangePasswordRequest)
+@ApiExtraModels(ProfileRequest, ChangePasswordRequest, User)
 export class AuthController {
   constructor(private authService: AuthService) {}
 
@@ -58,6 +61,12 @@ export class AuthController {
   @Post('login')
   @ApiAuthSignIn()
   @HttpCode(HttpStatus.OK)
+  @RateLimit({
+    maxAttempts: 5,
+    windowMs: 15 * 60 * 1000,
+    blockDurationMs: 30 * 60 * 1000,
+    keyGenerator: (req) => req.body?.email || req.ip,
+  })
   async signIn(@Body() loginRequest: LoginRequest): Promise<ResponseBody<TokenResponse>> {
     const tokenResponse = await this.authService.signIn(loginRequest);
     return ResponseBody.success(tokenResponse, 'Login successful');
@@ -69,10 +78,10 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   async registerAccount(
     @Body() registerRequest: RegisterAccountRequest,
-  ): Promise<ResponseBody<accountIdOnly>> {
+  ): Promise<ResponseBody<undefined>> {
     const result = await this.authService.registerAccount(registerRequest);
     return ResponseBody.success(
-      { accountId: result.accountId },
+      undefined,
       result.message,
     );
   }
@@ -88,6 +97,12 @@ export class AuthController {
   @Public()
   @Post('resend-verification')
   @ApiAuthResendVerification()
+  @RateLimit({
+    maxAttempts: 5,
+    windowMs: 60 * 60 * 1000,
+    blockDurationMs: 60 * 60 * 1000,
+    keyGenerator: (req) => req.body?.email || req.ip,
+  })
   async resendVerification(
     @Body('email') email: string,
   ): Promise<ResponseBody<void>> {
@@ -104,21 +119,6 @@ export class AuthController {
     const status = await this.authService.getResendVerificationStatus(email);
     return ResponseBody.success(status, 'Status fetched');
   }
-
-  /* @Public()
-  @Post('complete-profile-setup')
-  @ApiAuthCompleteProfileSetup()
-  @HttpCode(HttpStatus.OK)
-  async completeWithProfileSetup(
-    @Body('accountId') accountId: string,
-    @Body('profileRequest') profileRequest: ProfileRequest,
-  ): Promise<ResponseBody<void>> {
-    const result = await this.authService.completeWithProfileSetup(
-      accountId,
-      profileRequest,
-    );
-    return ResponseBody.success(undefined, result.message);
-  } */
 
   @UseGuards(AuthGuard)
   @Patch('change-password')
@@ -156,6 +156,45 @@ export class AuthController {
     return ResponseBody.success(undefined, result.message);
   }
 
+  @Public()
+  @Post('google/mobile')
+  @HttpCode(HttpStatus.OK)
+  @ApiAuthGoogleMobileLogin()
+  async googleMobileLogin(
+    @Body('token') googleAccessToken: string,
+  ): Promise<ResponseBody<TokenResponse>> {
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/oauth2/v3/userinfo`,
+        {
+          headers: { Authorization: `Bearer ${googleAccessToken}` },
+        },
+      );
+
+      if (!response.ok) {
+        throw new UnauthorizedException('Token inválido de Google');
+      }
+
+      const googleUserResponse = await response.json();
+
+      const googleUser: GoogleUser = {
+        provider: 'google',
+        sub: googleUserResponse.sub,
+        email: googleUserResponse.email,
+        name: googleUserResponse.name,
+        picture: googleUserResponse.picture,
+      };
+
+      const tokenResponse = await this.authService.signInWithGoogle(googleUser);
+      return ResponseBody.success(tokenResponse, 'Login successful');
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Error autenticando con Google');
+    }
+  }
+
   // Google OAuth
   @Public()
   @Get('google')
@@ -184,7 +223,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('me')
   @ApiAuthMe()
-  async me(@Req() req: Request): Promise<ResponseBody<User>> {
+  async me(@Req() req: Request & { user: UserPayload }): Promise<ResponseBody<User>> {
     const user = await this.authService.getCurrentUser(req.user);
     //log("Authenticated user: ", user);
     return ResponseBody.success(user, 'Authenticated user fetched');

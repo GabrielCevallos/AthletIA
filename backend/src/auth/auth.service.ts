@@ -22,6 +22,7 @@ import * as dotenv from 'dotenv';
 import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { GoogleUser } from './strategies/google.strategy';
 import { User } from 'src/users/accounts/dto/user-response.dtos';
+import { RateLimitService } from 'src/common/guards/rate-limit.service';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ export class AuthService {
     private accountsService: AccountsService,
     private jwtService: JwtService,
     private mailService: MailService,
+    private rateLimitService: RateLimitService,
   ) {
     this.logger = new Logger(AuthService.name);
     this.logger.log('AuthService initialized');
@@ -77,7 +79,7 @@ export class AuthService {
 
   async registerAccount(
     registerRequest: RegisterAccountRequest,
-  ): Promise<{ message: string; accountId: string }> {
+  ): Promise<{ message: string }> {
     const savedAccount = await this.accountsService.findByEmail(
       registerRequest.email,
     );
@@ -132,28 +134,8 @@ export class AuthService {
 
     return {
       message: messages.verificationEmailSent,
-      accountId: account.id,
     };
   }
-
-  /* async completeWithProfileSetup(
-    accountId: string,
-    profileRequest: ProfileRequest,
-  ): Promise<{ message: string }> {
-    const account = await this.accountsService.findById(accountId);
-    if (!account) {
-      throw new BadRequestException(messages.invalidAccountId);
-    }
-    if (!account.isEmailVerified) {
-      throw new BadRequestException(messages.emailNotVerified);
-    }
-    if (account.hasProfile) {
-      throw new BadRequestException(messages.profileAlreadySetUp);
-    }
-
-    await this.accountsService.completeProfileSetup(account, profileRequest);
-    return { message: messages.profileSetupCompleted };
-  } */
 
   async changePassword(
     accountId: string,
@@ -177,8 +159,11 @@ export class AuthService {
   }
 
   async signIn(loginRequest: LoginRequest): Promise<TokenResponse> {
+    const key = loginRequest.email;
+    
     const account = await this.accountsService.findByEmail(loginRequest.email);
     if (!account) {
+      this.rateLimitService.recordFailedAttempt(key);
       throw new UnauthorizedException(messages.invalidCredentials);
     }
 
@@ -191,11 +176,15 @@ export class AuthService {
     }
     const ok = await argon2.verify(account.password, loginRequest.password);
     if (!ok) {
-      throw new UnauthorizedException();
+      this.rateLimitService.recordFailedAttempt(key);
+      throw new UnauthorizedException(messages.invalidCredentials);
     }
     if (!account.isEmailVerified) {
       throw new BadRequestException(messages.emailNotVerified);
     }
+    
+    this.rateLimitService.recordSuccessfulAttempt(key);
+    
     const payload = this.createJwtPayload(account);
 
     const tokens = await this.createTokenResponse(payload);
@@ -284,7 +273,10 @@ export class AuthService {
         sub: string;
         email: string;
       }>(token, {
-        secret: process.env.JWT_SECRET_KEY_ACCESS || 'defaultSecretKey',
+        secret:
+          process.env.JWT_SECRET_KEY_EMAIL ||
+          process.env.JWT_SECRET_KEY_ACCESS ||
+          'defaultEmailSecret',
       });
       const accountId = payload.sub;
       if (!accountId) throw new BadRequestException('Invalid token payload');
