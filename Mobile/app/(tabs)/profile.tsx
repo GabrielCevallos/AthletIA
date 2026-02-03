@@ -151,7 +151,7 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.profileActions}>
-            <Pressable style={styles.primaryButton}>
+            <Pressable style={styles.primaryButton} onPress={() => router.push('/edit-profile')}>
               <Text style={styles.primaryButtonText}>Editar Perfil</Text>
             </Pressable>
             <Pressable style={styles.logoutButton} onPress={() => signOut()}>
