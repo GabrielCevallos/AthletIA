@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from './profile.entity';
 import { Repository } from 'typeorm';
@@ -74,6 +74,34 @@ export class ProfilesService {
     return age;
   }
 
+  private validateAge(birthDate: Date): void {
+    const age = this.calculateAgeSync(birthDate);
+    if (age < 18) {
+      throw new BadRequestException('User must be at least 18 years old');
+    }
+  }
+
+  private calculateAgeSync(birthDate: Date): number {
+    const birth = new Date(birthDate);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDifference = today.getMonth() - birth.getMonth();
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  }
+
+  private validatePhoneNumber(phoneNumber: string): void {
+    const cleaned = phoneNumber.replace(/\D/g, '');
+    if (cleaned.length !== 10 || !/^\d{10}$/.test(cleaned)) {
+      throw new BadRequestException('Phone number must be exactly 10 digits');
+    }
+  }
+
   async findByAccountId(accountId: string): Promise<ProfileResponse> {
     const profile = await this.profilesRepository.findOne({
       where: { account: { id: accountId } },
@@ -105,6 +133,20 @@ export class ProfilesService {
     if (!profile) {
       throw new NotFoundException(ResponseBody.error('Profile was not Found'));
     }
+
+    // Validate individual fields if provided
+    if (profileUpdate.birthDate) {
+      this.validateAge(profileUpdate.birthDate);
+    }
+
+    if (profileUpdate.phoneNumber) {
+      this.validatePhoneNumber(profileUpdate.phoneNumber);
+    }
+
+    if (profileUpdate.name !== undefined && profileUpdate.name.trim().length === 0) {
+      throw new BadRequestException('Name cannot be empty or only whitespace');
+    }
+
     await this.profilesRepository.save({
       ...profile,
       ...profileUpdate,

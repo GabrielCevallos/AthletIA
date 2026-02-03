@@ -8,26 +8,42 @@ import {
   IsOptional,
   IsString,
   Length,
+  Matches,
+  ValidateIf,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Gender } from '../enum/gender.enum';
 import { RoutineGoal } from 'src/workout/routines/enum/routine-goal.enum';
 
 export class ProfileRequest {
   @IsString()
+  @IsNotEmpty({ message: 'Name is required' })
+  @Transform(({ value }) => value?.trim())
   @ApiProperty({ description: 'Full name', example: 'Jane Doe' })
   name: string;
 
-  @IsNotEmpty()
-  @IsDateString()
+  @IsNotEmpty({ message: 'Birth date is required' })
+  @IsDateString({}, { message: 'Birth date must be a valid ISO date' })
+  @ValidateIf((o) => {
+    const birthDate = new Date(o.birthDate);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age < 18;
+  }, { message: 'Must be at least 18 years old' })
   @ApiProperty({
-    description: 'Birth date in ISO format',
+    description: 'Birth date in ISO format (user must be 18+)',
     example: '1990-01-01',
   })
   birthDate: Date;
 
-  @IsNumberString()
-  @Length(10)
+  @IsNotEmpty({ message: 'Phone number is required' })
+  @Matches(/^[0-9]{10}$/, { message: 'Phone number must be exactly 10 digits' })
+  @Transform(({ value }) => value?.replace(/\D/g, ''))
   @ApiProperty({ description: '10-digit phone number', example: '5512345678' })
   phoneNumber: string;
 
@@ -54,29 +70,40 @@ export class ProfileRequest {
 }
 
 export class ProfileUpdate {
-  @IsString()
-  @IsNotEmpty()
   @IsOptional()
+  @IsString({ message: 'Name must be a string' })
+  @IsNotEmpty({ message: 'Name cannot be empty' })
+  @Transform(({ value }) => value?.trim())
   @ApiPropertyOptional({ description: 'Full name', example: 'Jane Doe' })
-  name: string;
+  name?: string;
 
-  @IsNotEmpty()
-  @IsDateString()
   @IsOptional()
+  @IsDateString({}, { message: 'Birth date must be a valid ISO date' })
+  @ValidateIf((o) => {
+    if (o.birthDate === undefined) return false;
+    const birthDate = new Date(o.birthDate);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age < 18;
+  }, { message: 'Must be at least 18 years old' })
   @ApiPropertyOptional({
-    description: 'Birth date in ISO format',
+    description: 'Birth date in ISO format (user must be 18+)',
     example: '1990-01-01',
   })
-  birthDate: Date;
+  birthDate?: Date;
 
-  @IsNumberString()
-  @Length(10)
   @IsOptional()
+  @Matches(/^[0-9]{10}$/, { message: 'Phone number must be exactly 10 digits' })
+  @Transform(({ value }) => value?.replace(/\D/g, ''))
   @ApiPropertyOptional({
     description: '10-digit phone number',
     example: '5512345678',
   })
-  phoneNumber: string;
+  phoneNumber?: string;
 }
 
 export class Profile {

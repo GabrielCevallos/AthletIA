@@ -26,13 +26,18 @@ export class BootstrapService implements OnApplicationBootstrap {
       fitGoals: [RoutineGoal.GENERAL_FITNESS],
     };
 
-    const result = await this.accountService.createAdmin(user);
-    const account = await this.accountService.findById(result.accountId);
-    if (!account) {
-      throw new Error('Admin account not found after creation');
-    }
+    try {
+      const result = await this.accountService.createAdmin(user);
+      const account = await this.accountService.findById(result.accountId);
+      if (!account) {
+        throw new Error('Admin account not found after creation');
+      }
 
-    await this.profilesService.create(account.id, profile);
-    await this.accountService.markProfileAsComplete(account.id);
+      await this.profilesService.create(account.id, profile);
+      await this.accountService.markProfileAsComplete(account.id);
+    } catch (error) {
+      console.error('Error during bootstrap admin creation:', error);
+    }
+    
   }
 }
