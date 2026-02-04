@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Split } from './splits.entity';
 import { Routine } from '../routines/routines.entity';
 import { AccountsModule } from 'src/users/accounts/accounts.module';
+import { ProfilesModule } from 'src/users/profiles/profiles.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Split, Routine]), AccountsModule],
+  imports: [TypeOrmModule.forFeature([Split, Routine]), AccountsModule, ProfilesModule],
   providers: [SplitsService],
   controllers: [SplitsController],
 })

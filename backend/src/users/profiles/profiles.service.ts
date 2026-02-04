@@ -6,12 +6,14 @@ import { ProfileRequest, ProfileUpdate } from './dto/profiles.dto';
 import { Account } from 'src/users/accounts/account.entity';
 import { ResponseBody } from 'src/common/response/api.response';
 import { Profile as ProfileResponse } from './dto/profiles.dto';
+import { MeasurementsService } from 'src/measurements/measurements.service';
 
 @Injectable()
 export class ProfilesService {
   constructor(
     @InjectRepository(Profile)
     private profilesRepository: Repository<Profile>,
+    private measurementsService: MeasurementsService,
   ) {}
 
   async create(
@@ -32,7 +34,7 @@ export class ProfilesService {
       updatedAt: new Date(),
     });
     const profileCreated = await this.profilesRepository.save(profileData);
-    const { name, birthDate, phoneNumber, gender, fitGoals, account } = profileCreated;
+    const { name, birthDate, phoneNumber, gender, fitGoals, account, currentStreak, maxStreak, language } = profileCreated;
 
     return {
       name,
@@ -40,10 +42,13 @@ export class ProfilesService {
       phoneNumber,
       gender,
       fitGoals,
+      language,
       email: account.email,
       createdAt: profileCreated.createdAt,
       updatedAt: profileCreated.updatedAt,
       age: await this.calculateAge(birthDate),
+      currentStreak,
+      maxStreak,
     };
   }
 
@@ -111,18 +116,25 @@ export class ProfilesService {
       throw new NotFoundException(ResponseBody.error('Profile was not Found'));
     }
     const { 
-      name, birthDate, phoneNumber, gender, fitGoals, updatedAt, account, createdAt
+      name, birthDate, phoneNumber, gender, fitGoals, updatedAt, account, createdAt, currentStreak, maxStreak, language
      } = profile;
+
+    const measurement = await this.measurementsService.findByAccountId(accountId);
+
     return { 
       name,
       birthDate,
       phoneNumber,
       gender,
       fitGoals,
+      language,
       createdAt,
       updatedAt,
       email: account.email,
       age: await this.calculateAge(birthDate),
+      currentStreak,
+      maxStreak,
+      lastWeight: measurement ? Number(measurement.weight) : undefined,
     };
   }
 
@@ -152,6 +164,61 @@ export class ProfilesService {
       ...profileUpdate,
       updatedAt: new Date(),
     });
+  }
+
+  async updateStreak(profileId: string) {
+    const profile = await this.profilesRepository.findOne({ where: { id: profileId } });
+    if (!profile) return;
+    
+    const now = new Date();
+    const lastActivity = profile.lastActivityDate;
+
+    // Si nunca ha habido actividad, inicializamos
+    if (!lastActivity) {
+      profile.currentStreak = 1;
+      profile.maxStreak = 1;
+      profile.lastActivityDate = now;
+      await this.profilesRepository.save(profile);
+      return;
+    }
+
+    // Comparamos fechas
+    const isSameDay = this.isSameDay(now, lastActivity);
+    const isYesterday = this.isYesterday(now, lastActivity);
+
+    if (isSameDay) {
+      // Ya contó hoy
+      return;
+    }
+
+    if (isYesterday) {
+      profile.currentStreak += 1;
+      if (profile.currentStreak > profile.maxStreak) {
+        profile.maxStreak = profile.currentStreak;
+      }
+    } else {
+      profile.currentStreak = 1;
+    }
+
+    profile.lastActivityDate = now;
+    await this.profilesRepository.save(profile);
+  }
+
+  async updateStreakByAccountId(accountId: string) {
+    const profile = await this.profilesRepository.findOne({ where: { account: { id: accountId } } });
+    if (profile) {
+      await this.updateStreak(profile.id);
+    }
+  }
+
+  private isSameDay(d1: Date, d2: Date): boolean {
+    return d1.toISOString().split('T')[0] === d2.toISOString().split('T')[0];
+  }
+
+  private isYesterday(now: Date, past: Date): boolean {
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    return this.isSameDay(yesterday, past);
   }
 
   async remove(id: string): Promise<void> {

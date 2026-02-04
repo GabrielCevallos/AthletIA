@@ -13,6 +13,7 @@ import { RoutinesModule } from 'src/workout/routines/routines.module';
 import { SplitsModule } from 'src/workout/splits/splits.module';
 import { MeasurementsModule } from 'src/measurements/measurements.module';
 import { AiModule } from 'src/ai/ai.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AiModule } from 'src/ai/ai.module';
     ExercisesModule,
     MeasurementsModule,
     AiModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService, BootstrapService],

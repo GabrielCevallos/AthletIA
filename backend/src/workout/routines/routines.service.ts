@@ -7,6 +7,9 @@ import { Exercise } from '../exercises/exercises.entity';
 import { In } from 'typeorm';
 import { PaginationRequest } from '../../common/request/pagination.request.dto';
 import { PaginationResponse } from '../../common/interfaces/pagination-response.interface';
+import { NotificationsService } from '../../notifications/notifications.service';
+import { NotificationType } from '../../notifications/enum/notification-type.enum';
+import { NotificationCategory } from '../../notifications/enum/notification-category.enum';
 
 @Injectable()
 export class RoutinesService {
@@ -15,6 +18,7 @@ export class RoutinesService {
     private routinesRepository: Repository<Routine>,
     @InjectRepository(Exercise)
     private exercisesRepository: Repository<Exercise>,
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -43,7 +47,18 @@ export class RoutinesService {
       // Ensure DB NOT NULL constraint isn't violated: default to 0 when none provided
       newRoutine.nExercises = 0;
     }
-    return await this.routinesRepository.save(newRoutine);
+    const savedRoutine = await this.routinesRepository.save(newRoutine);
+
+    // Send notification
+    await this.notificationsService.create(
+      userId,
+      'Rutina creada',
+      `La rutina "${savedRoutine.name}" ha sido creada exitosamente.`,
+      NotificationType.SUCCESS,
+      NotificationCategory.ROUTINE,
+    );
+
+    return savedRoutine;
   }
 
   async findAll(
@@ -88,7 +103,20 @@ export class RoutinesService {
       // Auto-calculate number of exercises
       routine.nExercises = exercises.length;
     }
-    return await this.routinesRepository.save(routine);
+    const updatedRoutine = await this.routinesRepository.save(routine);
+    
+    // Send notification
+    if (routine.userId) {
+      await this.notificationsService.create(
+        routine.userId,
+        'Rutina actualizada',
+        `La rutina "${updatedRoutine.name}" ha sido actualizada.`,
+        NotificationType.INFO,
+        NotificationCategory.ROUTINE,
+      );
+    }
+
+    return updatedRoutine;
   }
 
   async remove(id: string): Promise<void> {

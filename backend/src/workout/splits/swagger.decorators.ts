@@ -60,7 +60,7 @@ export function ApiListSplits() {
   return applyDecorators(
     ApiOperation({ 
       summary: 'List splits with pagination',
-      description: 'Get a paginated list of all splits. Accessible by all authenticated users.'
+      description: 'Get a paginated list of all splits. Accessible by all authenticated users. This action updates the user daily streak.'
     }),
     ApiBearerAuth(),
     ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page', example: 10 }),
@@ -69,17 +69,25 @@ export function ApiListSplits() {
       status: 200,
       description: 'Paginated split list retrieved successfully',
       schema: {
-        properties: {
-          success: { type: 'boolean', example: true },
-          message: { type: 'string', example: 'Splits retrieved successfully' },
+        example: {
+          success: true,
+          message: 'Splits retrieved successfully',
           data: {
-            type: 'object',
-            properties: {
-              items: { type: 'array', items: { $ref: getSchemaPath(Split) } },
-              total: { type: 'number', example: 20 },
-              limit: { type: 'number', example: 10 },
-              offset: { type: 'number', example: 0 },
-            },
+            items: [
+              {
+                id: '123e4567-e89b-12d3-a456-426614174000',
+                name: 'Upper/Lower',
+                description: '4-day weekly program split into upper and lower.',
+                trainingDays: ['Monday', 'Tuesday', 'Thursday', 'Friday'],
+                official: false,
+                createdAt: '2024-01-01T12:00:00Z',
+                updatedAt: '2024-01-01T12:00:00Z',
+                routines: [],
+              },
+            ],
+            total: 20,
+            limit: 10,
+            offset: 0,
           },
         },
       },

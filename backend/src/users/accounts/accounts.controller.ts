@@ -28,8 +28,10 @@ import {
   ApiGiveRole,
   ApiRequestModeratorRole,
 } from './swagger.decorators';
+import { ApiTags } from '@nestjs/swagger';
 
 @UseGuards(AuthGuard, RolesGuard)
+@ApiTags('Users')
 @Controller('users')
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}

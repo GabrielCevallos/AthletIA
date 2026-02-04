@@ -39,6 +39,13 @@ export class MeasurementsService {
     return measurement;
   }
 
+  async findByAccountId(accountId: string): Promise<Measurement | null> {
+    return await this.measurementRepository.findOne({
+      where: { account: { id: accountId } },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async update(id: string, measurementDto: MeasurementUpdate): Promise<Measurement> {
     const measurement = await this.findOne(id);
     
@@ -91,13 +98,6 @@ export class MeasurementsService {
     };
     const newMeasurement = this.measurementRepository.create(payload);
     return this.measurementRepository.save(newMeasurement);
-  }
-
-  async findByAccountId(accountId: string): Promise<Measurement | null> {
-    return this.measurementRepository.findOne({
-      where: { account: { id: accountId } },
-      
-    });
   }
 
   async remove(id: string): Promise<void> {

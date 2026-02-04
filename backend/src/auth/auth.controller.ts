@@ -48,7 +48,7 @@ import { RateLimit } from 'src/common/guards/rate-limit.decorator';
 type accountIdOnly = { accountId: string };
 
 @Controller('auth')
-@ApiTags('auth')
+@ApiTags('Auth')
 @ApiExtraModels(ProfileRequest, ChangePasswordRequest, User)
 export class AuthController {
   constructor(private authService: AuthService) {}

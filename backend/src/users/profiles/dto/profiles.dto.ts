@@ -1,20 +1,41 @@
 import {
   ArrayNotEmpty,
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsNotEmpty,
   IsNumberString,
+  IsObject,
   IsOptional,
   IsString,
   Length,
   Matches,
   ValidateIf,
+  ValidateNested,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Gender } from '../enum/gender.enum';
+import { Language } from '../enum/language.enum';
 import { RoutineGoal } from 'src/workout/routines/enum/routine-goal.enum';
+
+export class NotificationPreferencesDto {
+  @IsBoolean()
+  @IsOptional()
+  @ApiPropertyOptional({ description: 'Receive routine notifications', example: true })
+  routines?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  @ApiPropertyOptional({ description: 'Receive exercise notifications', example: true })
+  exercises?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  @ApiPropertyOptional({ description: 'Receive system notifications', example: true })
+  system?: boolean;
+}
 
 export class ProfileRequest {
   @IsString()
@@ -46,6 +67,16 @@ export class ProfileRequest {
   @Transform(({ value }) => value?.replace(/\D/g, ''))
   @ApiProperty({ description: '10-digit phone number', example: '5512345678' })
   phoneNumber: string;
+
+  @IsEnum(Language, {
+    message: 'Language must be one of: "english", "spanish"',
+  })
+  @ApiProperty({
+    description: 'Language preference - Valid values: english, spanish',
+    enum: Language,
+    example: Language.SPANISH,
+  })
+  language: Language;
 
   @IsEnum(Gender, {
     message: 'Gender must be one of: "male", "female"',
@@ -104,6 +135,24 @@ export class ProfileUpdate {
     example: '5512345678',
   })
   phoneNumber?: string;
+
+  @IsOptional()
+  @IsEnum(Language, {
+    message: 'Language must be one of: "english", "spanish"',
+  })
+  @ApiPropertyOptional({
+    description: 'Language preference - Valid values: english, spanish',
+    enum: Language,
+    example: Language.SPANISH,
+  })
+  language?: Language;
+
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => NotificationPreferencesDto)
+  @ApiPropertyOptional({ description: 'Notification preferences' })
+  notificationPreferences?: NotificationPreferencesDto;
 }
 
 export class Profile {
@@ -124,6 +173,16 @@ export class Profile {
   @ApiProperty({ description: '10-digit phone number', example: '5512345678' })
   phoneNumber: string;
 
+  @IsEnum(Language, {
+    message: 'Language must be one of: "english", "spanish"',
+  })
+  @ApiProperty({
+    description: 'Language preference - Valid values: english, spanish',
+    enum: Language,
+    example: Language.SPANISH,
+  })
+  language: Language;
+
   @IsEnum(Gender, {
     message: 'Gender must be one of: "male", "female"',
   })
@@ -137,16 +196,28 @@ export class Profile {
   @IsArray()
   @ArrayNotEmpty()
   @IsEnum(RoutineGoal, { each: true })
-  @ApiProperty({
-    description: 'Fitness goals - Valid values: weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement',
+  @ApiProperty({ description: 'Fitness goals - Valid values: weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement',
     isArray: true,
     enum: RoutineGoal,
     example: ['weight_loss', 'muscle_gain'],
   })
   fitGoals: RoutineGoal[];
 
+  @ApiProperty({ description: 'Current streak of consecutive days', example: 5 })
+  currentStreak: number;
+
+  @ApiProperty({ description: 'Maximum streak achieved', example: 10 })
+  maxStreak: number;
+
   @ApiProperty({ description: 'Associated email', example: 'user@example.com' })
   email: string;
+
+  @ApiPropertyOptional({ description: 'Notification preferences' })
+  notificationPreferences?: NotificationPreferencesDto;
+
+  @ApiPropertyOptional({ description: 'Last recorded weight in kg', example: 75.5 })
+  lastWeight?: number;
+
   @ApiProperty({ description: 'Creation date', type: Date, example: '2024-01-01T12:00:00Z' })
   createdAt: Date;
   @ApiProperty({ description: 'Last update date', type: Date, example: '2024-01-02T12:00:00Z' })

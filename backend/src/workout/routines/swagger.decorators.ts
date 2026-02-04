@@ -60,7 +60,7 @@ export function ApiListRoutines() {
   return applyDecorators(
     ApiOperation({ 
       summary: 'List routines with pagination',
-      description: 'Get a paginated list of all routines. Accessible by all authenticated users.'
+      description: 'Get a paginated list of all routines. Accessible by all authenticated users. This action updates the user daily streak.'
     }),
     ApiBearerAuth(),
     ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page', example: 10 }),
