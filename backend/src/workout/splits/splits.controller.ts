@@ -31,13 +31,17 @@ import { Role } from 'src/users/accounts/enum/role.enum';
 import { PaginationRequest } from '../../common/request/pagination.request.dto';
 import { PaginationResponse } from '../../common/interfaces/pagination-response.interface';
 import { ApiTags, ApiExtraModels } from '@nestjs/swagger';
+import { ProfilesService } from 'src/users/profiles/profiles.service';
 
 @ApiTags('Splits')
 @ApiExtraModels(Split, SplitRequest, SplitUpdate)
 @Controller('workout/splits')
 @UseGuards(AuthGuard)
 export class SplitsController {
-  constructor(private readonly splitsService: SplitsService) {}
+  constructor(
+    private readonly splitsService: SplitsService,
+    private readonly profilesService: ProfilesService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -54,8 +58,12 @@ export class SplitsController {
   @ApiListSplits()
   async findAll(
     @Query() pagination: PaginationRequest,
+    @Req() req: Request & { user?: any },
   ): Promise<ResponseBody<PaginationResponse<Split>>> {
     const data = await this.splitsService.findAll(pagination);
+    if (req.user && req.user.sub) {
+      await this.profilesService.updateStreakByAccountId(req.user.sub);
+    }
     return new ResponseBody(true, 'Splits retrieved successfully', data);
   }
 

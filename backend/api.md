@@ -32,7 +32,7 @@ Base URLs:
 
 <a id="opIdAppController_getHello"></a>
 
-> Code samples
+
 
 `GET /`
 
@@ -50,7 +50,7 @@ This operation does not require authentication
 
 <a id="opIdAppController_healthCheck"></a>
 
-> Code samples
+
 
 `GET /health-check`
 
@@ -64,13 +64,13 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
-<h1 id="athletia-api-auth">auth</h1>
+<h1 id="athletia-api-auth">Auth</h1>
 
 ## AuthController_signIn
 
 <a id="opIdAuthController_signIn"></a>
 
-> Code samples
+
 
 `POST /auth/login`
 
@@ -136,7 +136,7 @@ This operation does not require authentication
 
 <a id="opIdAuthController_registerAccount"></a>
 
-> Code samples
+
 
 `POST /auth/register-account`
 
@@ -185,7 +185,7 @@ This operation does not require authentication
 
 <a id="opIdAuthController_verifyEmail"></a>
 
-> Code samples
+
 
 `POST /auth/verify-email`
 
@@ -233,7 +233,7 @@ This operation does not require authentication
 
 <a id="opIdAuthController_resendVerification"></a>
 
-> Code samples
+
 
 `POST /auth/resend-verification`
 
@@ -281,7 +281,7 @@ This operation does not require authentication
 
 <a id="opIdAuthController_resendVerificationStatus"></a>
 
-> Code samples
+
 
 `POST /auth/resend-verification-status`
 
@@ -332,7 +332,7 @@ This operation does not require authentication
 
 <a id="opIdAuthController_changePassword"></a>
 
-> Code samples
+
 
 `PATCH /auth/change-password`
 
@@ -395,7 +395,7 @@ This operation does not require authentication
 
 <a id="opIdAuthController_refreshToken"></a>
 
-> Code samples
+
 
 `POST /auth/refresh-token`
 
@@ -461,7 +461,7 @@ This operation does not require authentication
 
 <a id="opIdAuthController_logout"></a>
 
-> Code samples
+
 
 `POST /auth/logout`
 
@@ -509,7 +509,7 @@ This operation does not require authentication
 
 <a id="opIdAuthController_googleMobileLogin"></a>
 
-> Code samples
+
 
 `POST /auth/google/mobile`
 
@@ -559,7 +559,7 @@ This operation does not require authentication
 
 <a id="opIdAuthController_googleAuth"></a>
 
-> Code samples
+
 
 `GET /auth/google`
 
@@ -579,7 +579,7 @@ This operation does not require authentication
 
 <a id="opIdAuthController_googleCallback"></a>
 
-> Code samples
+
 
 `GET /auth/google/redirect`
 
@@ -599,7 +599,7 @@ This operation does not require authentication
 
 <a id="opIdAuthController_me"></a>
 
-> Code samples
+
 
 `GET /auth/me`
 
@@ -664,13 +664,13 @@ Status Code **200**
 This operation does not require authentication
 </aside>
 
-<h1 id="athletia-api-accounts">Accounts</h1>
+<h1 id="athletia-api-users">Users</h1>
 
 ## AccountsController_findAll
 
 <a id="opIdAccountsController_findAll"></a>
 
-> Code samples
+
 
 `GET /users`
 
@@ -726,7 +726,7 @@ This operation does not require authentication
 
 <a id="opIdAccountsController_findOne"></a>
 
-> Code samples
+
 
 `GET /users/{id}`
 
@@ -777,7 +777,7 @@ This operation does not require authentication
 
 <a id="opIdAccountsController_suspendAccount"></a>
 
-> Code samples
+
 
 `PATCH /users/{id}/suspend`
 
@@ -819,7 +819,7 @@ This operation does not require authentication
 
 <a id="opIdAccountsController_giveRole"></a>
 
-> Code samples
+
 
 `PATCH /users/{id}/give-role`
 
@@ -871,7 +871,7 @@ This operation does not require authentication
 
 <a id="opIdAccountsController_requestModeratorRole"></a>
 
-> Code samples
+
 
 `POST /users/request-moderator`
 
@@ -903,13 +903,13 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
-<h1 id="athletia-api-profiles">profiles</h1>
+<h1 id="athletia-api-profiles">Profiles</h1>
 
 ## ProfilesController_updateProfile
 
 <a id="opIdProfilesController_updateProfile"></a>
 
-> Code samples
+
 
 `PATCH /profiles`
 
@@ -921,7 +921,13 @@ This operation does not require authentication
 {
   "name": "Jane Doe",
   "birthDate": "1990-01-01",
-  "phoneNumber": "5512345678"
+  "phoneNumber": "5512345678",
+  "language": "spanish",
+  "notificationPreferences": {
+    "routines": true,
+    "exercises": true,
+    "system": true
+  }
 }
 ```
 
@@ -962,7 +968,7 @@ This operation does not require authentication
 
 <a id="opIdProfilesController_completeProfileSetup"></a>
 
-> Code samples
+
 
 `POST /profiles/complete-setup`
 
@@ -975,6 +981,7 @@ This operation does not require authentication
   "name": "Jane Doe",
   "birthDate": "1990-01-01",
   "phoneNumber": "5512345678",
+  "language": "spanish",
   "gender": "male",
   "fitGoals": [
     "weight_loss",
@@ -1005,10 +1012,19 @@ This operation does not require authentication
     "fitGoals": [
       "lose_weight"
     ],
+    "language": "spanish",
     "email": "user@example.com",
     "createdAt": "2024-01-01T12:00:00Z",
     "updatedAt": "2024-01-01T12:00:00Z",
-    "age": 34
+    "age": 34,
+    "currentStreak": 1,
+    "maxStreak": 1,
+    "lastWeight": 75.5,
+    "notificationPreferences": {
+      "routines": true,
+      "exercises": true,
+      "system": true
+    }
   }
 }
 ```
@@ -1032,7 +1048,7 @@ This operation does not require authentication
 
 <a id="opIdProfilesController_getProfileByAccountId"></a>
 
-> Code samples
+
 
 `GET /profiles/by-account/{accountId}`
 
@@ -1060,10 +1076,19 @@ This operation does not require authentication
     "fitGoals": [
       "lose_weight"
     ],
+    "language": "english",
     "email": "user@example.com",
     "createdAt": "2024-01-01T12:00:00Z",
     "updatedAt": "2024-01-02T12:00:00Z",
-    "age": 34
+    "age": 34,
+    "currentStreak": 5,
+    "maxStreak": 10,
+    "lastWeight": 75.5,
+    "notificationPreferences": {
+      "routines": true,
+      "exercises": true,
+      "system": true
+    }
   }
 }
 ```
@@ -1087,7 +1112,7 @@ This operation does not require authentication
 
 <a id="opIdProfilesController_findMyProfile"></a>
 
-> Code samples
+
 
 `GET /profiles/me`
 
@@ -1110,10 +1135,19 @@ This operation does not require authentication
       "lose_weight",
       "build_muscle"
     ],
+    "language": "english",
     "email": "user@example.com",
     "createdAt": "2024-01-01T12:00:00Z",
     "updatedAt": "2024-01-02T12:00:00Z",
-    "age": 34
+    "age": 34,
+    "currentStreak": 5,
+    "maxStreak": 10,
+    "lastWeight": 75.5,
+    "notificationPreferences": {
+      "routines": true,
+      "exercises": true,
+      "system": true
+    }
   }
 }
 ```
@@ -1133,13 +1167,408 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
+<h1 id="athletia-api-measurements">Measurements</h1>
+
+## MeasurementsController_findAll
+
+<a id="opIdMeasurementsController_findAll"></a>
+
+
+
+`GET /measurements`
+
+*List measurements (admin use)*
+
+Get all measurements. Only accessible by administrators.
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "success": true,
+  "message": "Measurements retrieved successfully",
+  "data": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "weight": 75.5,
+      "height": 180,
+      "imc": 23.3,
+      "left_arm": 35,
+      "right_arm": 35,
+      "left_forearm": 28,
+      "right_forearm": 28,
+      "clavicular_width": 38,
+      "neck_diameter": 38,
+      "chest_size": 98,
+      "back_width": 42,
+      "hip_diameter": 98,
+      "left_leg": 60,
+      "right_leg": 60,
+      "left_calve": 38,
+      "right_calve": 38,
+      "checkTime": "WEEKLY",
+      "createdAt": "2024-01-01T10:00:00Z",
+      "updatedAt": "2024-01-01T10:00:00Z"
+    }
+  ]
+}
+```
+
+<h3 id="measurementscontroller_findall-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Measurements retrieved successfully|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - No valid authentication token|None|
+
+<h3 id="measurementscontroller_findall-responseschema">Response Schema</h3>
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+None
+</aside>
+
+## MeasurementsController_getMyMeasurement
+
+<a id="opIdMeasurementsController_getMyMeasurement"></a>
+
+
+
+`GET /measurements/me`
+
+*Get my measurement*
+
+Retrieve the authenticated user's current measurement.
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "success": true,
+  "message": "Measurement retrieved successfully",
+  "data": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "weight": 75.5,
+    "height": 180,
+    "imc": 23.3,
+    "left_arm": 35,
+    "right_arm": 35,
+    "left_forearm": 28,
+    "right_forearm": 28,
+    "clavicular_width": 38,
+    "neck_diameter": 38,
+    "chest_size": 98,
+    "back_width": 42,
+    "hip_diameter": 98,
+    "left_leg": 60,
+    "right_leg": 60,
+    "left_calve": 38,
+    "right_calve": 38,
+    "checkTime": "morning",
+    "createdAt": "2024-01-01T10:00:00Z",
+    "updatedAt": "2024-01-01T10:00:00Z"
+  }
+}
+```
+
+<h3 id="measurementscontroller_getmymeasurement-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Measurement retrieved successfully|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - No valid authentication token|None|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Measurement not found|None|
+
+<h3 id="measurementscontroller_getmymeasurement-responseschema">Response Schema</h3>
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+None
+</aside>
+
+## MeasurementsController_createMyMeasurement
+
+<a id="opIdMeasurementsController_createMyMeasurement"></a>
+
+
+
+`POST /measurements/me`
+
+*Create or update measurement*
+
+Create a new measurement or update existing one for authenticated user.
+
+> Body parameter
+
+```json
+{
+  "weight": 75.5,
+  "height": 180,
+  "left_arm": 0,
+  "right_arm": 0,
+  "left_forearm": 0,
+  "right_forearm": 0,
+  "clavicular_width": 0,
+  "neck_diameter": 0,
+  "chest_size": 0,
+  "back_width": 0,
+  "hip_diameter": 0,
+  "left_leg": 0,
+  "right_leg": 0,
+  "left_calve": 0,
+  "right_calve": 0,
+  "checkTime": "WEEKLY"
+}
+```
+
+<h3 id="measurementscontroller_createmymeasurement-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[MeasurementRequest](#schemameasurementrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "success": true,
+  "message": "Measurement created successfully",
+  "data": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "weight": 75.5,
+    "height": 180,
+    "imc": 23.3,
+    "left_arm": 35,
+    "right_arm": 35,
+    "left_forearm": 28,
+    "right_forearm": 28,
+    "clavicular_width": 38,
+    "neck_diameter": 38,
+    "chest_size": 98,
+    "back_width": 42,
+    "hip_diameter": 98,
+    "left_leg": 60,
+    "right_leg": 60,
+    "left_calve": 38,
+    "right_calve": 38,
+    "checkTime": "morning",
+    "createdAt": "2024-01-01T10:00:00Z",
+    "updatedAt": "2024-01-01T10:00:00Z"
+  }
+}
+```
+
+<h3 id="measurementscontroller_createmymeasurement-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|201|[Created](https://tools.ietf.org/html/rfc7231#section-6.3.2)|Measurement created successfully|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Validation error. Invalid or missing required fields|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - No valid authentication token|None|
+
+<h3 id="measurementscontroller_createmymeasurement-responseschema">Response Schema</h3>
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+None
+</aside>
+
+## MeasurementsController_editMyMeasurement
+
+<a id="opIdMeasurementsController_editMyMeasurement"></a>
+
+
+
+`PATCH /measurements/me`
+
+*Update measurement*
+
+Update the authenticated user's measurement.
+
+> Body parameter
+
+```json
+{
+  "weight": 75.5,
+  "height": 180,
+  "left_arm": 0,
+  "right_arm": 0,
+  "left_forearm": 0,
+  "right_forearm": 0,
+  "clavicular_width": 0,
+  "neck_diameter": 0,
+  "chest_size": 0,
+  "back_width": 0,
+  "hip_diameter": 0,
+  "left_leg": 0,
+  "right_leg": 0,
+  "left_calve": 0,
+  "right_calve": 0,
+  "checkTime": "WEEKLY"
+}
+```
+
+<h3 id="measurementscontroller_editmymeasurement-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[MeasurementUpdate](#schemameasurementupdate)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "success": true,
+  "message": "Measurement updated successfully",
+  "data": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "weight": 76,
+    "height": 180,
+    "imc": 23.5,
+    "left_arm": 35.5,
+    "right_arm": 35.5,
+    "left_forearm": 28.5,
+    "right_forearm": 28.5,
+    "clavicular_width": 38,
+    "neck_diameter": 38,
+    "chest_size": 99,
+    "back_width": 42,
+    "hip_diameter": 99,
+    "left_leg": 60.5,
+    "right_leg": 60.5,
+    "left_calve": 38.5,
+    "right_calve": 38.5,
+    "checkTime": "morning",
+    "createdAt": "2024-01-01T10:00:00Z",
+    "updatedAt": "2024-01-02T11:30:00Z"
+  }
+}
+```
+
+<h3 id="measurementscontroller_editmymeasurement-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Measurement updated successfully|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Validation error. Invalid field values|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - No valid authentication token|None|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Measurement not found|None|
+
+<h3 id="measurementscontroller_editmymeasurement-responseschema">Response Schema</h3>
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+None
+</aside>
+
+## MeasurementsController_findOne
+
+<a id="opIdMeasurementsController_findOne"></a>
+
+
+
+`GET /measurements/{id}`
+
+*Get a measurement by id (admin use)*
+
+<h3 id="measurementscontroller_findone-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|string|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "success": true,
+  "message": "Measurement retrieved successfully",
+  "data": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "weight": 75.5,
+    "height": 180,
+    "imc": 23.3,
+    "left_arm": 35,
+    "right_arm": 35,
+    "left_forearm": 28,
+    "right_forearm": 28,
+    "clavicular_width": 38,
+    "neck_diameter": 38,
+    "chest_size": 98,
+    "back_width": 42,
+    "hip_diameter": 98,
+    "left_leg": 60,
+    "right_leg": 60,
+    "left_calve": 38,
+    "right_calve": 38,
+    "checkTime": "morning",
+    "createdAt": "2024-01-01T10:00:00Z",
+    "updatedAt": "2024-01-01T10:00:00Z"
+  }
+}
+```
+
+<h3 id="measurementscontroller_findone-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Measurement retrieved successfully|Inline|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Measurement not found|None|
+
+<h3 id="measurementscontroller_findone-responseschema">Response Schema</h3>
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## MeasurementsController_remove
+
+<a id="opIdMeasurementsController_remove"></a>
+
+
+
+`DELETE /measurements/{id}`
+
+*Delete measurement*
+
+Delete the authenticated user's measurement.
+
+<h3 id="measurementscontroller_remove-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|string|true|none|
+
+<h3 id="measurementscontroller_remove-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|204|[No Content](https://tools.ietf.org/html/rfc7231#section-6.3.5)|Measurement deleted successfully|None|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - No valid authentication token|None|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Measurement not found|None|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+None
+</aside>
+
 <h1 id="athletia-api-splits">Splits</h1>
 
 ## SplitsController_create
 
 <a id="opIdSplitsController_create"></a>
 
-> Code samples
+
 
 `POST /workout/splits`
 
@@ -1217,13 +1646,13 @@ None
 
 <a id="opIdSplitsController_findAll"></a>
 
-> Code samples
+
 
 `GET /workout/splits`
 
 *List splits with pagination*
 
-Get a paginated list of all splits. Accessible by all authenticated users.
+Get a paginated list of all splits. Accessible by all authenticated users. This action updates the user daily streak.
 
 <h3 id="splitscontroller_findall-parameters">Parameters</h3>
 
@@ -1242,7 +1671,21 @@ Get a paginated list of all splits. Accessible by all authenticated users.
   "message": "Splits retrieved successfully",
   "data": {
     "items": [
-      {}
+      {
+        "id": "123e4567-e89b-12d3-a456-426614174000",
+        "name": "Upper/Lower",
+        "description": "4-day weekly program split into upper and lower.",
+        "trainingDays": [
+          "Monday",
+          "Tuesday",
+          "Thursday",
+          "Friday"
+        ],
+        "official": false,
+        "createdAt": "2024-01-01T12:00:00Z",
+        "updatedAt": "2024-01-01T12:00:00Z",
+        "routines": []
+      }
     ],
     "total": 20,
     "limit": 10,
@@ -1260,18 +1703,6 @@ Get a paginated list of all splits. Accessible by all authenticated users.
 
 <h3 id="splitscontroller_findall-responseschema">Response Schema</h3>
 
-Status Code **200**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» message|string|false|none|none|
-|» data|object|false|none|none|
-|»» items|[[Split](#schemasplit)]|false|none|none|
-|»» total|number|false|none|none|
-|»» limit|number|false|none|none|
-|»» offset|number|false|none|none|
-
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 None
@@ -1281,7 +1712,7 @@ None
 
 <a id="opIdSplitsController_findOne"></a>
 
-> Code samples
+
 
 `GET /workout/splits/{id}`
 
@@ -1345,7 +1776,7 @@ None
 
 <a id="opIdSplitsController_update"></a>
 
-> Code samples
+
 
 `PATCH /workout/splits/{id}`
 
@@ -1422,7 +1853,7 @@ None
 
 <a id="opIdSplitsController_remove"></a>
 
-> Code samples
+
 
 `DELETE /workout/splits/{id}`
 
@@ -1456,7 +1887,7 @@ None
 
 <a id="opIdRoutinesController_create"></a>
 
-> Code samples
+
 
 `POST /workout/routines`
 
@@ -1532,13 +1963,13 @@ None
 
 <a id="opIdRoutinesController_findAll"></a>
 
-> Code samples
+
 
 `GET /workout/routines`
 
 *List routines with pagination*
 
-Get a paginated list of all routines. Accessible by all authenticated users.
+Get a paginated list of all routines. Accessible by all authenticated users. This action updates the user daily streak.
 
 <h3 id="routinescontroller_findall-parameters">Parameters</h3>
 
@@ -1602,7 +2033,7 @@ None
 
 <a id="opIdRoutinesController_findOne"></a>
 
-> Code samples
+
 
 `GET /workout/routines/{id}`
 
@@ -1664,7 +2095,7 @@ None
 
 <a id="opIdRoutinesController_update"></a>
 
-> Code samples
+
 
 `PATCH /workout/routines/{id}`
 
@@ -1739,7 +2170,7 @@ None
 
 <a id="opIdRoutinesController_remove"></a>
 
-> Code samples
+
 
 `DELETE /workout/routines/{id}`
 
@@ -1767,13 +2198,188 @@ To perform this operation, you must be authenticated by means of one of the foll
 None
 </aside>
 
+<h1 id="athletia-api-notifications">Notifications</h1>
+
+## NotificationsController_getUserNotifications
+
+<a id="opIdNotificationsController_getUserNotifications"></a>
+
+
+
+`GET /Notifications`
+
+*Get user notifications*
+
+<h3 id="notificationscontroller_getusernotifications-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|limit|query|number|false|none|
+|offset|query|number|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "success": true,
+  "message": "Notifications retrieved successfully",
+  "data": {
+    "items": [
+      {
+        "id": "123e4567-e89b-12d3-a456-426614174000",
+        "title": "Rutina completada",
+        "message": "Has completado tu rutina de fuerza.",
+        "type": "success",
+        "isRead": false,
+        "createdAt": "2024-02-03T12:00:00Z",
+        "userId": "123e4567-e89b-12d3-a456-426614174001"
+      }
+    ],
+    "total": 1
+  }
+}
+```
+
+<h3 id="notificationscontroller_getusernotifications-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Notifications retrieved successfully|Inline|
+
+<h3 id="notificationscontroller_getusernotifications-responseschema">Response Schema</h3>
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+None
+</aside>
+
+## NotificationsController_getUnreadCount
+
+<a id="opIdNotificationsController_getUnreadCount"></a>
+
+
+
+`GET /Notifications/unread-count`
+
+*Get unread notifications count*
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "success": true,
+  "message": "Count retrieved successfully",
+  "data": {
+    "count": 5
+  }
+}
+```
+
+<h3 id="notificationscontroller_getunreadcount-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Count retrieved successfully|Inline|
+
+<h3 id="notificationscontroller_getunreadcount-responseschema">Response Schema</h3>
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+None
+</aside>
+
+## NotificationsController_markAsRead
+
+<a id="opIdNotificationsController_markAsRead"></a>
+
+
+
+`PATCH /Notifications/{id}/read`
+
+*Mark notification as read*
+
+<h3 id="notificationscontroller_markasread-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|string(uuid)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "success": true,
+  "message": "Notification marked as read",
+  "data": {
+    "success": true
+  }
+}
+```
+
+<h3 id="notificationscontroller_markasread-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Marked as read successfully|Inline|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Notification not found|None|
+
+<h3 id="notificationscontroller_markasread-responseschema">Response Schema</h3>
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+None
+</aside>
+
+## NotificationsController_markAllAsRead
+
+<a id="opIdNotificationsController_markAllAsRead"></a>
+
+
+
+`PATCH /Notifications/read-all`
+
+*Mark all notifications as read*
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "success": true,
+  "message": "All notifications marked as read",
+  "data": {
+    "success": true
+  }
+}
+```
+
+<h3 id="notificationscontroller_markallasread-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|All marked as read successfully|Inline|
+
+<h3 id="notificationscontroller_markallasread-responseschema">Response Schema</h3>
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+None
+</aside>
+
 <h1 id="athletia-api-exercises">Exercises</h1>
 
 ## ExercisesController_create
 
 <a id="opIdExercisesController_create"></a>
 
-> Code samples
+
 
 `POST /workout/exercises`
 
@@ -1892,7 +2498,7 @@ None
 
 <a id="opIdExercisesController_findAll"></a>
 
-> Code samples
+
 
 `GET /workout/exercises`
 
@@ -1978,7 +2584,7 @@ None
 
 <a id="opIdExercisesController_findOne"></a>
 
-> Code samples
+
 
 `GET /workout/exercises/{id}`
 
@@ -2038,7 +2644,7 @@ None
 
 <a id="opIdExercisesController_update"></a>
 
-> Code samples
+
 
 `PATCH /workout/exercises/{id}`
 
@@ -2127,7 +2733,7 @@ None
 
 <a id="opIdExercisesController_remove"></a>
 
-> Code samples
+
 
 `DELETE /workout/exercises/{id}`
 
@@ -2168,408 +2774,13 @@ To perform this operation, you must be authenticated by means of one of the foll
 None
 </aside>
 
-<h1 id="athletia-api-measurements">Measurements</h1>
-
-## MeasurementsController_findAll
-
-<a id="opIdMeasurementsController_findAll"></a>
-
-> Code samples
-
-`GET /measurements`
-
-*List measurements (admin use)*
-
-Get all measurements. Only accessible by administrators.
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "success": true,
-  "message": "Measurements retrieved successfully",
-  "data": [
-    {
-      "id": "123e4567-e89b-12d3-a456-426614174000",
-      "weight": 75.5,
-      "height": 180,
-      "imc": 23.3,
-      "left_arm": 35,
-      "right_arm": 35,
-      "left_forearm": 28,
-      "right_forearm": 28,
-      "clavicular_width": 38,
-      "neck_diameter": 38,
-      "chest_size": 98,
-      "back_width": 42,
-      "hip_diameter": 98,
-      "left_leg": 60,
-      "right_leg": 60,
-      "left_calve": 38,
-      "right_calve": 38,
-      "checkTime": "WEEKLY",
-      "createdAt": "2024-01-01T10:00:00Z",
-      "updatedAt": "2024-01-01T10:00:00Z"
-    }
-  ]
-}
-```
-
-<h3 id="measurementscontroller_findall-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Measurements retrieved successfully|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - No valid authentication token|None|
-
-<h3 id="measurementscontroller_findall-responseschema">Response Schema</h3>
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-None
-</aside>
-
-## MeasurementsController_getMyMeasurement
-
-<a id="opIdMeasurementsController_getMyMeasurement"></a>
-
-> Code samples
-
-`GET /measurements/me`
-
-*Get my measurement*
-
-Retrieve the authenticated user's current measurement.
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "success": true,
-  "message": "Measurement retrieved successfully",
-  "data": {
-    "id": "123e4567-e89b-12d3-a456-426614174000",
-    "weight": 75.5,
-    "height": 180,
-    "imc": 23.3,
-    "left_arm": 35,
-    "right_arm": 35,
-    "left_forearm": 28,
-    "right_forearm": 28,
-    "clavicular_width": 38,
-    "neck_diameter": 38,
-    "chest_size": 98,
-    "back_width": 42,
-    "hip_diameter": 98,
-    "left_leg": 60,
-    "right_leg": 60,
-    "left_calve": 38,
-    "right_calve": 38,
-    "checkTime": "morning",
-    "createdAt": "2024-01-01T10:00:00Z",
-    "updatedAt": "2024-01-01T10:00:00Z"
-  }
-}
-```
-
-<h3 id="measurementscontroller_getmymeasurement-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Measurement retrieved successfully|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - No valid authentication token|None|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Measurement not found|None|
-
-<h3 id="measurementscontroller_getmymeasurement-responseschema">Response Schema</h3>
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-None
-</aside>
-
-## MeasurementsController_createMyMeasurement
-
-<a id="opIdMeasurementsController_createMyMeasurement"></a>
-
-> Code samples
-
-`POST /measurements/me`
-
-*Create or update measurement*
-
-Create a new measurement or update existing one for authenticated user.
-
-> Body parameter
-
-```json
-{
-  "weight": 75.5,
-  "height": 180,
-  "left_arm": 0,
-  "right_arm": 0,
-  "left_forearm": 0,
-  "right_forearm": 0,
-  "clavicular_width": 0,
-  "neck_diameter": 0,
-  "chest_size": 0,
-  "back_width": 0,
-  "hip_diameter": 0,
-  "left_leg": 0,
-  "right_leg": 0,
-  "left_calve": 0,
-  "right_calve": 0,
-  "checkTime": "WEEKLY"
-}
-```
-
-<h3 id="measurementscontroller_createmymeasurement-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[MeasurementRequest](#schemameasurementrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "success": true,
-  "message": "Measurement created successfully",
-  "data": {
-    "id": "123e4567-e89b-12d3-a456-426614174000",
-    "weight": 75.5,
-    "height": 180,
-    "imc": 23.3,
-    "left_arm": 35,
-    "right_arm": 35,
-    "left_forearm": 28,
-    "right_forearm": 28,
-    "clavicular_width": 38,
-    "neck_diameter": 38,
-    "chest_size": 98,
-    "back_width": 42,
-    "hip_diameter": 98,
-    "left_leg": 60,
-    "right_leg": 60,
-    "left_calve": 38,
-    "right_calve": 38,
-    "checkTime": "morning",
-    "createdAt": "2024-01-01T10:00:00Z",
-    "updatedAt": "2024-01-01T10:00:00Z"
-  }
-}
-```
-
-<h3 id="measurementscontroller_createmymeasurement-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|201|[Created](https://tools.ietf.org/html/rfc7231#section-6.3.2)|Measurement created successfully|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Validation error. Invalid or missing required fields|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - No valid authentication token|None|
-
-<h3 id="measurementscontroller_createmymeasurement-responseschema">Response Schema</h3>
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-None
-</aside>
-
-## MeasurementsController_editMyMeasurement
-
-<a id="opIdMeasurementsController_editMyMeasurement"></a>
-
-> Code samples
-
-`PATCH /measurements/me`
-
-*Update measurement*
-
-Update the authenticated user's measurement.
-
-> Body parameter
-
-```json
-{
-  "weight": 75.5,
-  "height": 180,
-  "left_arm": 0,
-  "right_arm": 0,
-  "left_forearm": 0,
-  "right_forearm": 0,
-  "clavicular_width": 0,
-  "neck_diameter": 0,
-  "chest_size": 0,
-  "back_width": 0,
-  "hip_diameter": 0,
-  "left_leg": 0,
-  "right_leg": 0,
-  "left_calve": 0,
-  "right_calve": 0,
-  "checkTime": "WEEKLY"
-}
-```
-
-<h3 id="measurementscontroller_editmymeasurement-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[MeasurementUpdate](#schemameasurementupdate)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "success": true,
-  "message": "Measurement updated successfully",
-  "data": {
-    "id": "123e4567-e89b-12d3-a456-426614174000",
-    "weight": 76,
-    "height": 180,
-    "imc": 23.5,
-    "left_arm": 35.5,
-    "right_arm": 35.5,
-    "left_forearm": 28.5,
-    "right_forearm": 28.5,
-    "clavicular_width": 38,
-    "neck_diameter": 38,
-    "chest_size": 99,
-    "back_width": 42,
-    "hip_diameter": 99,
-    "left_leg": 60.5,
-    "right_leg": 60.5,
-    "left_calve": 38.5,
-    "right_calve": 38.5,
-    "checkTime": "morning",
-    "createdAt": "2024-01-01T10:00:00Z",
-    "updatedAt": "2024-01-02T11:30:00Z"
-  }
-}
-```
-
-<h3 id="measurementscontroller_editmymeasurement-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Measurement updated successfully|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Validation error. Invalid field values|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - No valid authentication token|None|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Measurement not found|None|
-
-<h3 id="measurementscontroller_editmymeasurement-responseschema">Response Schema</h3>
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-None
-</aside>
-
-## MeasurementsController_findOne
-
-<a id="opIdMeasurementsController_findOne"></a>
-
-> Code samples
-
-`GET /measurements/{id}`
-
-*Get a measurement by id (admin use)*
-
-<h3 id="measurementscontroller_findone-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|string|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "success": true,
-  "message": "Measurement retrieved successfully",
-  "data": {
-    "id": "123e4567-e89b-12d3-a456-426614174000",
-    "weight": 75.5,
-    "height": 180,
-    "imc": 23.3,
-    "left_arm": 35,
-    "right_arm": 35,
-    "left_forearm": 28,
-    "right_forearm": 28,
-    "clavicular_width": 38,
-    "neck_diameter": 38,
-    "chest_size": 98,
-    "back_width": 42,
-    "hip_diameter": 98,
-    "left_leg": 60,
-    "right_leg": 60,
-    "left_calve": 38,
-    "right_calve": 38,
-    "checkTime": "morning",
-    "createdAt": "2024-01-01T10:00:00Z",
-    "updatedAt": "2024-01-01T10:00:00Z"
-  }
-}
-```
-
-<h3 id="measurementscontroller_findone-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Measurement retrieved successfully|Inline|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Measurement not found|None|
-
-<h3 id="measurementscontroller_findone-responseschema">Response Schema</h3>
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## MeasurementsController_remove
-
-<a id="opIdMeasurementsController_remove"></a>
-
-> Code samples
-
-`DELETE /measurements/{id}`
-
-*Delete measurement*
-
-Delete the authenticated user's measurement.
-
-<h3 id="measurementscontroller_remove-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|string|true|none|
-
-<h3 id="measurementscontroller_remove-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|204|[No Content](https://tools.ietf.org/html/rfc7231#section-6.3.5)|Measurement deleted successfully|None|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - No valid authentication token|None|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Measurement not found|None|
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-None
-</aside>
-
 <h1 id="athletia-api-ai">AI</h1>
 
 ## AiController_generateExerciseDescription
 
 <a id="opIdAiController_generateExerciseDescription"></a>
 
-> Code samples
+
 
 `POST /ai/generate-exercise`
 
@@ -2612,6 +2823,7 @@ None
   "name": "Jane Doe",
   "birthDate": "1990-01-01",
   "phoneNumber": "5512345678",
+  "language": "spanish",
   "gender": "male",
   "fitGoals": [
     "weight_loss",
@@ -2626,8 +2838,9 @@ None
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |name|string|true|none|Full name|
-|birthDate|string(date-time)|true|none|Birth date in ISO format|
+|birthDate|string(date-time)|true|none|Birth date in ISO format (user must be 18+)|
 |phoneNumber|string|true|none|10-digit phone number|
+|language|string|true|none|Language preference - Valid values: english, spanish|
 |gender|string|true|none|Gender - Valid values: male, female|
 |fitGoals|[string]|true|none|Fitness goals - Valid values: weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement|
 
@@ -2635,6 +2848,8 @@ None
 
 |Property|Value|
 |---|---|
+|language|english|
+|language|spanish|
 |gender|male|
 |gender|female|
 
@@ -2771,6 +2986,30 @@ None
 |email|string(email)|true|none|User email|
 |password|string|true|none|Password (min 8 chars)|
 
+<h2 id="tocS_NotificationPreferencesDto">NotificationPreferencesDto</h2>
+<!-- backwards compatibility -->
+<a id="schemanotificationpreferencesdto"></a>
+<a id="schema_NotificationPreferencesDto"></a>
+<a id="tocSnotificationpreferencesdto"></a>
+<a id="tocsnotificationpreferencesdto"></a>
+
+```json
+{
+  "routines": true,
+  "exercises": true,
+  "system": true
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|routines|boolean|false|none|Receive routine notifications|
+|exercises|boolean|false|none|Receive exercise notifications|
+|system|boolean|false|none|Receive system notifications|
+
 <h2 id="tocS_Profile">Profile</h2>
 <!-- backwards compatibility -->
 <a id="schemaprofile"></a>
@@ -2783,12 +3022,21 @@ None
   "name": "Jane Doe",
   "birthDate": "1990-01-01",
   "phoneNumber": "5512345678",
+  "language": "spanish",
   "gender": "male",
   "fitGoals": [
     "weight_loss",
     "muscle_gain"
   ],
+  "currentStreak": 5,
+  "maxStreak": 10,
   "email": "user@example.com",
+  "notificationPreferences": {
+    "routines": true,
+    "exercises": true,
+    "system": true
+  },
+  "lastWeight": 75.5,
   "createdAt": "2024-01-01T12:00:00Z",
   "updatedAt": "2024-01-02T12:00:00Z",
   "age": 30
@@ -2803,9 +3051,14 @@ None
 |name|string|true|none|Full name|
 |birthDate|string(date-time)|true|none|Birth date in ISO format|
 |phoneNumber|string|true|none|10-digit phone number|
+|language|string|true|none|Language preference - Valid values: english, spanish|
 |gender|string|true|none|Gender - Valid values: male, female|
 |fitGoals|[string]|true|none|Fitness goals - Valid values: weight_loss, muscle_gain, weight_maintenance, endurance, flexibility, general_fitness, rehabilitation, improved_posture, balance_and_coordination, cardiovascular_health, strength_training, athletic_performance, lifestyle_enhancement|
+|currentStreak|number|true|none|Current streak of consecutive days|
+|maxStreak|number|true|none|Maximum streak achieved|
 |email|string|true|none|Associated email|
+|notificationPreferences|[NotificationPreferencesDto](#schemanotificationpreferencesdto)|false|none|Notification preferences|
+|lastWeight|number|false|none|Last recorded weight in kg|
 |createdAt|string(date-time)|true|none|Creation date|
 |updatedAt|string(date-time)|true|none|Last update date|
 |age|number|true|none|Calculated age|
@@ -2814,6 +3067,8 @@ None
 
 |Property|Value|
 |---|---|
+|language|english|
+|language|spanish|
 |gender|male|
 |gender|female|
 
@@ -2828,7 +3083,13 @@ None
 {
   "name": "Jane Doe",
   "birthDate": "1990-01-01",
-  "phoneNumber": "5512345678"
+  "phoneNumber": "5512345678",
+  "language": "spanish",
+  "notificationPreferences": {
+    "routines": true,
+    "exercises": true,
+    "system": true
+  }
 }
 
 ```
@@ -2838,8 +3099,133 @@ None
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |name|string|false|none|Full name|
-|birthDate|string(date-time)|false|none|Birth date in ISO format|
+|birthDate|string(date-time)|false|none|Birth date in ISO format (user must be 18+)|
 |phoneNumber|string|false|none|10-digit phone number|
+|language|string|false|none|Language preference - Valid values: english, spanish|
+|notificationPreferences|[NotificationPreferencesDto](#schemanotificationpreferencesdto)|false|none|Notification preferences|
+
+#### Enumerated Values
+
+|Property|Value|
+|---|---|
+|language|english|
+|language|spanish|
+
+<h2 id="tocS_MeasurementRequest">MeasurementRequest</h2>
+<!-- backwards compatibility -->
+<a id="schemameasurementrequest"></a>
+<a id="schema_MeasurementRequest"></a>
+<a id="tocSmeasurementrequest"></a>
+<a id="tocsmeasurementrequest"></a>
+
+```json
+{
+  "weight": 75.5,
+  "height": 180,
+  "left_arm": 0,
+  "right_arm": 0,
+  "left_forearm": 0,
+  "right_forearm": 0,
+  "clavicular_width": 0,
+  "neck_diameter": 0,
+  "chest_size": 0,
+  "back_width": 0,
+  "hip_diameter": 0,
+  "left_leg": 0,
+  "right_leg": 0,
+  "left_calve": 0,
+  "right_calve": 0,
+  "checkTime": "WEEKLY"
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|weight|number|true|none|User weight in kg|
+|height|number|true|none|User height in cm|
+|left_arm|number|false|none|Left arm measurement in cm|
+|right_arm|number|false|none|Right arm measurement in cm|
+|left_forearm|number|false|none|Left forearm measurement in cm|
+|right_forearm|number|false|none|Right forearm measurement in cm|
+|clavicular_width|number|false|none|Clavicular width in cm|
+|neck_diameter|number|false|none|Neck diameter in cm|
+|chest_size|number|false|none|Chest size in cm|
+|back_width|number|false|none|Back width in cm|
+|hip_diameter|number|false|none|Hip diameter in cm|
+|left_leg|number|false|none|Left leg measurement in cm|
+|right_leg|number|false|none|Right leg measurement in cm|
+|left_calve|number|false|none|Left calve measurement in cm|
+|right_calve|number|false|none|Right calve measurement in cm|
+|checkTime|string|true|none|Check time - Valid values: WEEKLY, MONTHLY, YEARLY|
+
+#### Enumerated Values
+
+|Property|Value|
+|---|---|
+|checkTime|WEEKLY|
+|checkTime|MONTHLY|
+|checkTime|YEARLY|
+
+<h2 id="tocS_MeasurementUpdate">MeasurementUpdate</h2>
+<!-- backwards compatibility -->
+<a id="schemameasurementupdate"></a>
+<a id="schema_MeasurementUpdate"></a>
+<a id="tocSmeasurementupdate"></a>
+<a id="tocsmeasurementupdate"></a>
+
+```json
+{
+  "weight": 75.5,
+  "height": 180,
+  "left_arm": 0,
+  "right_arm": 0,
+  "left_forearm": 0,
+  "right_forearm": 0,
+  "clavicular_width": 0,
+  "neck_diameter": 0,
+  "chest_size": 0,
+  "back_width": 0,
+  "hip_diameter": 0,
+  "left_leg": 0,
+  "right_leg": 0,
+  "left_calve": 0,
+  "right_calve": 0,
+  "checkTime": "WEEKLY"
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|weight|number|false|none|User weight in kg|
+|height|number|false|none|User height in cm|
+|left_arm|number|false|none|Left arm measurement in cm|
+|right_arm|number|false|none|Right arm measurement in cm|
+|left_forearm|number|false|none|Left forearm measurement in cm|
+|right_forearm|number|false|none|Right forearm measurement in cm|
+|clavicular_width|number|false|none|Clavicular width in cm|
+|neck_diameter|number|false|none|Neck diameter in cm|
+|chest_size|number|false|none|Chest size in cm|
+|back_width|number|false|none|Back width in cm|
+|hip_diameter|number|false|none|Hip diameter in cm|
+|left_leg|number|false|none|Left leg measurement in cm|
+|right_leg|number|false|none|Right leg measurement in cm|
+|left_calve|number|false|none|Left calve measurement in cm|
+|right_calve|number|false|none|Right calve measurement in cm|
+|checkTime|string|false|none|Check time - Valid values: WEEKLY, MONTHLY, YEARLY|
+
+#### Enumerated Values
+
+|Property|Value|
+|---|---|
+|checkTime|WEEKLY|
+|checkTime|MONTHLY|
+|checkTime|YEARLY|
 
 <h2 id="tocS_Split">Split</h2>
 <!-- backwards compatibility -->
@@ -3136,120 +3522,4 @@ None
 |equipment|resistance_band|
 |equipment|cable|
 |equipment|other|
-
-<h2 id="tocS_MeasurementRequest">MeasurementRequest</h2>
-<!-- backwards compatibility -->
-<a id="schemameasurementrequest"></a>
-<a id="schema_MeasurementRequest"></a>
-<a id="tocSmeasurementrequest"></a>
-<a id="tocsmeasurementrequest"></a>
-
-```json
-{
-  "weight": 75.5,
-  "height": 180,
-  "left_arm": 0,
-  "right_arm": 0,
-  "left_forearm": 0,
-  "right_forearm": 0,
-  "clavicular_width": 0,
-  "neck_diameter": 0,
-  "chest_size": 0,
-  "back_width": 0,
-  "hip_diameter": 0,
-  "left_leg": 0,
-  "right_leg": 0,
-  "left_calve": 0,
-  "right_calve": 0,
-  "checkTime": "WEEKLY"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|weight|number|true|none|User weight in kg|
-|height|number|true|none|User height in cm|
-|left_arm|number|false|none|Left arm measurement in cm|
-|right_arm|number|false|none|Right arm measurement in cm|
-|left_forearm|number|false|none|Left forearm measurement in cm|
-|right_forearm|number|false|none|Right forearm measurement in cm|
-|clavicular_width|number|false|none|Clavicular width in cm|
-|neck_diameter|number|false|none|Neck diameter in cm|
-|chest_size|number|false|none|Chest size in cm|
-|back_width|number|false|none|Back width in cm|
-|hip_diameter|number|false|none|Hip diameter in cm|
-|left_leg|number|false|none|Left leg measurement in cm|
-|right_leg|number|false|none|Right leg measurement in cm|
-|left_calve|number|false|none|Left calve measurement in cm|
-|right_calve|number|false|none|Right calve measurement in cm|
-|checkTime|string|true|none|Check time - Valid values: WEEKLY, MONTHLY, YEARLY|
-
-#### Enumerated Values
-
-|Property|Value|
-|---|---|
-|checkTime|WEEKLY|
-|checkTime|MONTHLY|
-|checkTime|YEARLY|
-
-<h2 id="tocS_MeasurementUpdate">MeasurementUpdate</h2>
-<!-- backwards compatibility -->
-<a id="schemameasurementupdate"></a>
-<a id="schema_MeasurementUpdate"></a>
-<a id="tocSmeasurementupdate"></a>
-<a id="tocsmeasurementupdate"></a>
-
-```json
-{
-  "weight": 75.5,
-  "height": 180,
-  "left_arm": 0,
-  "right_arm": 0,
-  "left_forearm": 0,
-  "right_forearm": 0,
-  "clavicular_width": 0,
-  "neck_diameter": 0,
-  "chest_size": 0,
-  "back_width": 0,
-  "hip_diameter": 0,
-  "left_leg": 0,
-  "right_leg": 0,
-  "left_calve": 0,
-  "right_calve": 0,
-  "checkTime": "WEEKLY"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|weight|number|false|none|User weight in kg|
-|height|number|false|none|User height in cm|
-|left_arm|number|false|none|Left arm measurement in cm|
-|right_arm|number|false|none|Right arm measurement in cm|
-|left_forearm|number|false|none|Left forearm measurement in cm|
-|right_forearm|number|false|none|Right forearm measurement in cm|
-|clavicular_width|number|false|none|Clavicular width in cm|
-|neck_diameter|number|false|none|Neck diameter in cm|
-|chest_size|number|false|none|Chest size in cm|
-|back_width|number|false|none|Back width in cm|
-|hip_diameter|number|false|none|Hip diameter in cm|
-|left_leg|number|false|none|Left leg measurement in cm|
-|right_leg|number|false|none|Right leg measurement in cm|
-|left_calve|number|false|none|Left calve measurement in cm|
-|right_calve|number|false|none|Right calve measurement in cm|
-|checkTime|string|false|none|Check time - Valid values: WEEKLY, MONTHLY, YEARLY|
-
-#### Enumerated Values
-
-|Property|Value|
-|---|---|
-|checkTime|WEEKLY|
-|checkTime|MONTHLY|
-|checkTime|YEARLY|
 

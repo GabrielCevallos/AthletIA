@@ -103,7 +103,7 @@
         },
         "summary": "Sign in with email and password",
         "tags": [
-          "auth"
+          "Auth"
         ]
       }
     },
@@ -157,7 +157,7 @@
         },
         "summary": "Register a new account",
         "tags": [
-          "auth"
+          "Auth"
         ]
       }
     },
@@ -210,7 +210,7 @@
         },
         "summary": "Verify email using token",
         "tags": [
-          "auth"
+          "Auth"
         ]
       }
     },
@@ -268,7 +268,7 @@
         },
         "summary": "Resend email verification link",
         "tags": [
-          "auth"
+          "Auth"
         ]
       }
     },
@@ -313,7 +313,7 @@
         },
         "summary": "Get status for resend verification (allowed / wait time)",
         "tags": [
-          "auth"
+          "Auth"
         ]
       }
     },
@@ -373,7 +373,7 @@
         },
         "summary": "Change account password",
         "tags": [
-          "auth"
+          "Auth"
         ]
       }
     },
@@ -452,7 +452,7 @@
         },
         "summary": "Refresh tokens using a refresh token",
         "tags": [
-          "auth"
+          "Auth"
         ]
       }
     },
@@ -505,7 +505,7 @@
         },
         "summary": "Logout and clear refresh token",
         "tags": [
-          "auth"
+          "Auth"
         ]
       }
     },
@@ -548,7 +548,7 @@
         },
         "summary": "Google Mobile Login",
         "tags": [
-          "auth"
+          "Auth"
         ]
       }
     },
@@ -563,7 +563,7 @@
         },
         "summary": "Start Google OAuth flow",
         "tags": [
-          "auth"
+          "Auth"
         ]
       }
     },
@@ -578,7 +578,7 @@
         },
         "summary": "Google OAuth callback",
         "tags": [
-          "auth"
+          "Auth"
         ]
       }
     },
@@ -636,7 +636,7 @@
         },
         "summary": "Get authenticated user",
         "tags": [
-          "auth"
+          "Auth"
         ]
       }
     },
@@ -702,7 +702,7 @@
         },
         "summary": "List users with pagination",
         "tags": [
-          "Accounts"
+          "Users"
         ]
       }
     },
@@ -754,7 +754,7 @@
         },
         "summary": "Get user by ID",
         "tags": [
-          "Accounts"
+          "Users"
         ]
       }
     },
@@ -797,7 +797,7 @@
         },
         "summary": "Suspend user by ID",
         "tags": [
-          "Accounts"
+          "Users"
         ]
       }
     },
@@ -876,7 +876,7 @@
         },
         "summary": "Assign role to user",
         "tags": [
-          "Accounts"
+          "Users"
         ]
       }
     },
@@ -910,7 +910,7 @@
         },
         "summary": "Request moderator role",
         "tags": [
-          "Accounts"
+          "Users"
         ]
       }
     },
@@ -951,7 +951,8 @@
                     "message": [
                       "name must be longer than or equal to 3 characters",
                       "phoneNumber must match phone format",
-                      "gender must be one of: male, female, other",
+                      "gender must be one of: male, female",
+                      "language must be one of: english, spanish",
                       "fitGoals must contain at least 1 elements"
                     ],
                     "error": "Bad Request",
@@ -973,7 +974,7 @@
         },
         "summary": "Update own profile",
         "tags": [
-          "profiles"
+          "Profiles"
         ]
       }
     },
@@ -1008,10 +1009,19 @@
                       "fitGoals": [
                         "lose_weight"
                       ],
+                      "language": "spanish",
                       "email": "user@example.com",
                       "createdAt": "2024-01-01T12:00:00Z",
                       "updatedAt": "2024-01-01T12:00:00Z",
-                      "age": 34
+                      "age": 34,
+                      "currentStreak": 1,
+                      "maxStreak": 1,
+                      "lastWeight": 75.5,
+                      "notificationPreferences": {
+                        "routines": true,
+                        "exercises": true,
+                        "system": true
+                      }
                     }
                   }
                 }
@@ -1027,7 +1037,8 @@
                     "message": [
                       "name must be longer than or equal to 3 characters",
                       "phoneNumber must match phone format",
-                      "gender must be one of: male, female, other",
+                      "gender must be one of: male, female",
+                      "language must be one of: english, spanish",
                       "fitGoals must contain at least 1 elements",
                       "Profile already exists for this account"
                     ],
@@ -1047,7 +1058,7 @@
         },
         "summary": "Complete profile setup",
         "tags": [
-          "profiles"
+          "Profiles"
         ]
       }
     },
@@ -1082,10 +1093,19 @@
                       "fitGoals": [
                         "lose_weight"
                       ],
+                      "language": "english",
                       "email": "user@example.com",
                       "createdAt": "2024-01-01T12:00:00Z",
                       "updatedAt": "2024-01-02T12:00:00Z",
-                      "age": 34
+                      "age": 34,
+                      "currentStreak": 5,
+                      "maxStreak": 10,
+                      "lastWeight": 75.5,
+                      "notificationPreferences": {
+                        "routines": true,
+                        "exercises": true,
+                        "system": true
+                      }
                     }
                   }
                 }
@@ -1104,7 +1124,7 @@
         },
         "summary": "Get profile by account ID",
         "tags": [
-          "profiles"
+          "Profiles"
         ]
       }
     },
@@ -1130,10 +1150,19 @@
                         "lose_weight",
                         "build_muscle"
                       ],
+                      "language": "english",
                       "email": "user@example.com",
                       "createdAt": "2024-01-01T12:00:00Z",
                       "updatedAt": "2024-01-02T12:00:00Z",
-                      "age": 34
+                      "age": 34,
+                      "currentStreak": 5,
+                      "maxStreak": 10,
+                      "lastWeight": 75.5,
+                      "notificationPreferences": {
+                        "routines": true,
+                        "exercises": true,
+                        "system": true
+                      }
                     }
                   }
                 }
@@ -1152,7 +1181,384 @@
         },
         "summary": "Get current user profile",
         "tags": [
-          "profiles"
+          "Profiles"
+        ]
+      }
+    },
+    "/measurements": {
+      "get": {
+        "description": "Get all measurements. Only accessible by administrators.",
+        "operationId": "MeasurementsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Measurements retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Measurements retrieved successfully",
+                    "data": [
+                      {
+                        "id": "123e4567-e89b-12d3-a456-426614174000",
+                        "weight": 75.5,
+                        "height": 180,
+                        "imc": 23.3,
+                        "left_arm": 35,
+                        "right_arm": 35,
+                        "left_forearm": 28,
+                        "right_forearm": 28,
+                        "clavicular_width": 38,
+                        "neck_diameter": 38,
+                        "chest_size": 98,
+                        "back_width": 42,
+                        "hip_diameter": 98,
+                        "left_leg": 60,
+                        "right_leg": 60,
+                        "left_calve": 38,
+                        "right_calve": 38,
+                        "checkTime": "WEEKLY",
+                        "createdAt": "2024-01-01T10:00:00Z",
+                        "updatedAt": "2024-01-01T10:00:00Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List measurements (admin use)",
+        "tags": [
+          "Measurements"
+        ]
+      }
+    },
+    "/measurements/me": {
+      "get": {
+        "description": "Retrieve the authenticated user's current measurement.",
+        "operationId": "MeasurementsController_getMyMeasurement",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Measurement retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Measurement retrieved successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "weight": 75.5,
+                      "height": 180,
+                      "imc": 23.3,
+                      "left_arm": 35,
+                      "right_arm": 35,
+                      "left_forearm": 28,
+                      "right_forearm": 28,
+                      "clavicular_width": 38,
+                      "neck_diameter": 38,
+                      "chest_size": 98,
+                      "back_width": 42,
+                      "hip_diameter": 98,
+                      "left_leg": 60,
+                      "right_leg": 60,
+                      "left_calve": 38,
+                      "right_calve": 38,
+                      "checkTime": "morning",
+                      "createdAt": "2024-01-01T10:00:00Z",
+                      "updatedAt": "2024-01-01T10:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "404": {
+            "description": "Measurement not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get my measurement",
+        "tags": [
+          "Measurements"
+        ]
+      },
+      "post": {
+        "description": "Create a new measurement or update existing one for authenticated user.",
+        "operationId": "MeasurementsController_createMyMeasurement",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeasurementRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Measurement created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Measurement created successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "weight": 75.5,
+                      "height": 180,
+                      "imc": 23.3,
+                      "left_arm": 35,
+                      "right_arm": 35,
+                      "left_forearm": 28,
+                      "right_forearm": 28,
+                      "clavicular_width": 38,
+                      "neck_diameter": 38,
+                      "chest_size": 98,
+                      "back_width": 42,
+                      "hip_diameter": 98,
+                      "left_leg": 60,
+                      "right_leg": 60,
+                      "left_calve": 38,
+                      "right_calve": 38,
+                      "checkTime": "morning",
+                      "createdAt": "2024-01-01T10:00:00Z",
+                      "updatedAt": "2024-01-01T10:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error. Invalid or missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "weight must be a positive number",
+                      "height must be a positive number",
+                      "left_arm must be a positive number",
+                      "checkTime must be one of: DAILY, WEEKLY, MONTHLY"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create or update measurement",
+        "tags": [
+          "Measurements"
+        ]
+      },
+      "patch": {
+        "description": "Update the authenticated user's measurement.",
+        "operationId": "MeasurementsController_editMyMeasurement",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeasurementUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Measurement updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Measurement updated successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "weight": 76,
+                      "height": 180,
+                      "imc": 23.5,
+                      "left_arm": 35.5,
+                      "right_arm": 35.5,
+                      "left_forearm": 28.5,
+                      "right_forearm": 28.5,
+                      "clavicular_width": 38,
+                      "neck_diameter": 38,
+                      "chest_size": 99,
+                      "back_width": 42,
+                      "hip_diameter": 99,
+                      "left_leg": 60.5,
+                      "right_leg": 60.5,
+                      "left_calve": 38.5,
+                      "right_calve": 38.5,
+                      "checkTime": "morning",
+                      "createdAt": "2024-01-01T10:00:00Z",
+                      "updatedAt": "2024-01-02T11:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error. Invalid field values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": [
+                      "weight must be a positive number",
+                      "checkTime must be one of: DAILY, WEEKLY, MONTHLY"
+                    ],
+                    "error": "Bad Request",
+                    "statusCode": 400
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "404": {
+            "description": "Measurement not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update measurement",
+        "tags": [
+          "Measurements"
+        ]
+      }
+    },
+    "/measurements/{id}": {
+      "get": {
+        "operationId": "MeasurementsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Measurement retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Measurement retrieved successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "weight": 75.5,
+                      "height": 180,
+                      "imc": 23.3,
+                      "left_arm": 35,
+                      "right_arm": 35,
+                      "left_forearm": 28,
+                      "right_forearm": 28,
+                      "clavicular_width": 38,
+                      "neck_diameter": 38,
+                      "chest_size": 98,
+                      "back_width": 42,
+                      "hip_diameter": 98,
+                      "left_leg": 60,
+                      "right_leg": 60,
+                      "left_calve": 38,
+                      "right_calve": 38,
+                      "checkTime": "morning",
+                      "createdAt": "2024-01-01T10:00:00Z",
+                      "updatedAt": "2024-01-01T10:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Measurement not found"
+          }
+        },
+        "summary": "Get a measurement by id (admin use)",
+        "tags": [
+          "Measurements"
+        ]
+      },
+      "delete": {
+        "description": "Delete the authenticated user's measurement.",
+        "operationId": "MeasurementsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Measurement deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - No valid authentication token"
+          },
+          "404": {
+            "description": "Measurement not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete measurement",
+        "tags": [
+          "Measurements"
         ]
       }
     },
@@ -1237,7 +1643,7 @@
         ]
       },
       "get": {
-        "description": "Get a paginated list of all splits. Accessible by all authenticated users.",
+        "description": "Get a paginated list of all splits. Accessible by all authenticated users. This action updates the user daily streak.",
         "operationId": "SplitsController_findAll",
         "parameters": [
           {
@@ -1267,37 +1673,30 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Splits retrieved successfully"
-                    },
+                  "example": {
+                    "success": true,
+                    "message": "Splits retrieved successfully",
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "items": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/Split"
-                          }
-                        },
-                        "total": {
-                          "type": "number",
-                          "example": 20
-                        },
-                        "limit": {
-                          "type": "number",
-                          "example": 10
-                        },
-                        "offset": {
-                          "type": "number",
-                          "example": 0
+                      "items": [
+                        {
+                          "id": "123e4567-e89b-12d3-a456-426614174000",
+                          "name": "Upper/Lower",
+                          "description": "4-day weekly program split into upper and lower.",
+                          "trainingDays": [
+                            "Monday",
+                            "Tuesday",
+                            "Thursday",
+                            "Friday"
+                          ],
+                          "official": false,
+                          "createdAt": "2024-01-01T12:00:00Z",
+                          "updatedAt": "2024-01-01T12:00:00Z",
+                          "routines": []
                         }
-                      }
+                      ],
+                      "total": 20,
+                      "limit": 10,
+                      "offset": 0
                     }
                   }
                 }
@@ -1595,7 +1994,7 @@
         ]
       },
       "get": {
-        "description": "Get a paginated list of all routines. Accessible by all authenticated users.",
+        "description": "Get a paginated list of all routines. Accessible by all authenticated users. This action updates the user daily streak.",
         "operationId": "RoutinesController_findAll",
         "parameters": [
           {
@@ -1864,6 +2263,179 @@
         "summary": "Delete routine",
         "tags": [
           "Routines"
+        ]
+      }
+    },
+    "/Notifications": {
+      "get": {
+        "operationId": "NotificationsController_getUserNotifications",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notifications retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Notifications retrieved successfully",
+                    "data": {
+                      "items": [
+                        {
+                          "id": "123e4567-e89b-12d3-a456-426614174000",
+                          "title": "Rutina completada",
+                          "message": "Has completado tu rutina de fuerza.",
+                          "type": "success",
+                          "isRead": false,
+                          "createdAt": "2024-02-03T12:00:00Z",
+                          "userId": "123e4567-e89b-12d3-a456-426614174001"
+                        }
+                      ],
+                      "total": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user notifications",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/Notifications/unread-count": {
+      "get": {
+        "operationId": "NotificationsController_getUnreadCount",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Count retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Count retrieved successfully",
+                    "data": {
+                      "count": 5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get unread notifications count",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/Notifications/{id}/read": {
+      "patch": {
+        "operationId": "NotificationsController_markAsRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Marked as read successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Notification marked as read",
+                    "data": {
+                      "success": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Notification not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark notification as read",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/Notifications/read-all": {
+      "patch": {
+        "operationId": "NotificationsController_markAllAsRead",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All marked as read successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "All notifications marked as read",
+                    "data": {
+                      "success": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark all notifications as read",
+        "tags": [
+          "Notifications"
         ]
       }
     },
@@ -2288,383 +2860,6 @@
         ]
       }
     },
-    "/measurements": {
-      "get": {
-        "description": "Get all measurements. Only accessible by administrators.",
-        "operationId": "MeasurementsController_findAll",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Measurements retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "success": true,
-                    "message": "Measurements retrieved successfully",
-                    "data": [
-                      {
-                        "id": "123e4567-e89b-12d3-a456-426614174000",
-                        "weight": 75.5,
-                        "height": 180,
-                        "imc": 23.3,
-                        "left_arm": 35,
-                        "right_arm": 35,
-                        "left_forearm": 28,
-                        "right_forearm": 28,
-                        "clavicular_width": 38,
-                        "neck_diameter": 38,
-                        "chest_size": 98,
-                        "back_width": 42,
-                        "hip_diameter": 98,
-                        "left_leg": 60,
-                        "right_leg": 60,
-                        "left_calve": 38,
-                        "right_calve": 38,
-                        "checkTime": "WEEKLY",
-                        "createdAt": "2024-01-01T10:00:00Z",
-                        "updatedAt": "2024-01-01T10:00:00Z"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - No valid authentication token"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List measurements (admin use)",
-        "tags": [
-          "Measurements"
-        ]
-      }
-    },
-    "/measurements/me": {
-      "get": {
-        "description": "Retrieve the authenticated user's current measurement.",
-        "operationId": "MeasurementsController_getMyMeasurement",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Measurement retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "success": true,
-                    "message": "Measurement retrieved successfully",
-                    "data": {
-                      "id": "123e4567-e89b-12d3-a456-426614174000",
-                      "weight": 75.5,
-                      "height": 180,
-                      "imc": 23.3,
-                      "left_arm": 35,
-                      "right_arm": 35,
-                      "left_forearm": 28,
-                      "right_forearm": 28,
-                      "clavicular_width": 38,
-                      "neck_diameter": 38,
-                      "chest_size": 98,
-                      "back_width": 42,
-                      "hip_diameter": 98,
-                      "left_leg": 60,
-                      "right_leg": 60,
-                      "left_calve": 38,
-                      "right_calve": 38,
-                      "checkTime": "morning",
-                      "createdAt": "2024-01-01T10:00:00Z",
-                      "updatedAt": "2024-01-01T10:00:00Z"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - No valid authentication token"
-          },
-          "404": {
-            "description": "Measurement not found"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get my measurement",
-        "tags": [
-          "Measurements"
-        ]
-      },
-      "post": {
-        "description": "Create a new measurement or update existing one for authenticated user.",
-        "operationId": "MeasurementsController_createMyMeasurement",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MeasurementRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Measurement created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "success": true,
-                    "message": "Measurement created successfully",
-                    "data": {
-                      "id": "123e4567-e89b-12d3-a456-426614174000",
-                      "weight": 75.5,
-                      "height": 180,
-                      "imc": 23.3,
-                      "left_arm": 35,
-                      "right_arm": 35,
-                      "left_forearm": 28,
-                      "right_forearm": 28,
-                      "clavicular_width": 38,
-                      "neck_diameter": 38,
-                      "chest_size": 98,
-                      "back_width": 42,
-                      "hip_diameter": 98,
-                      "left_leg": 60,
-                      "right_leg": 60,
-                      "left_calve": 38,
-                      "right_calve": 38,
-                      "checkTime": "morning",
-                      "createdAt": "2024-01-01T10:00:00Z",
-                      "updatedAt": "2024-01-01T10:00:00Z"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - Validation error. Invalid or missing required fields",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "message": [
-                      "weight must be a positive number",
-                      "height must be a positive number",
-                      "left_arm must be a positive number",
-                      "checkTime must be one of: DAILY, WEEKLY, MONTHLY"
-                    ],
-                    "error": "Bad Request",
-                    "statusCode": 400
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - No valid authentication token"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create or update measurement",
-        "tags": [
-          "Measurements"
-        ]
-      },
-      "patch": {
-        "description": "Update the authenticated user's measurement.",
-        "operationId": "MeasurementsController_editMyMeasurement",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MeasurementUpdate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Measurement updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "success": true,
-                    "message": "Measurement updated successfully",
-                    "data": {
-                      "id": "123e4567-e89b-12d3-a456-426614174000",
-                      "weight": 76,
-                      "height": 180,
-                      "imc": 23.5,
-                      "left_arm": 35.5,
-                      "right_arm": 35.5,
-                      "left_forearm": 28.5,
-                      "right_forearm": 28.5,
-                      "clavicular_width": 38,
-                      "neck_diameter": 38,
-                      "chest_size": 99,
-                      "back_width": 42,
-                      "hip_diameter": 99,
-                      "left_leg": 60.5,
-                      "right_leg": 60.5,
-                      "left_calve": 38.5,
-                      "right_calve": 38.5,
-                      "checkTime": "morning",
-                      "createdAt": "2024-01-01T10:00:00Z",
-                      "updatedAt": "2024-01-02T11:30:00Z"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - Validation error. Invalid field values",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "message": [
-                      "weight must be a positive number",
-                      "checkTime must be one of: DAILY, WEEKLY, MONTHLY"
-                    ],
-                    "error": "Bad Request",
-                    "statusCode": 400
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - No valid authentication token"
-          },
-          "404": {
-            "description": "Measurement not found"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update measurement",
-        "tags": [
-          "Measurements"
-        ]
-      }
-    },
-    "/measurements/{id}": {
-      "get": {
-        "operationId": "MeasurementsController_findOne",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Measurement retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "success": true,
-                    "message": "Measurement retrieved successfully",
-                    "data": {
-                      "id": "123e4567-e89b-12d3-a456-426614174000",
-                      "weight": 75.5,
-                      "height": 180,
-                      "imc": 23.3,
-                      "left_arm": 35,
-                      "right_arm": 35,
-                      "left_forearm": 28,
-                      "right_forearm": 28,
-                      "clavicular_width": 38,
-                      "neck_diameter": 38,
-                      "chest_size": 98,
-                      "back_width": 42,
-                      "hip_diameter": 98,
-                      "left_leg": 60,
-                      "right_leg": 60,
-                      "left_calve": 38,
-                      "right_calve": 38,
-                      "checkTime": "morning",
-                      "createdAt": "2024-01-01T10:00:00Z",
-                      "updatedAt": "2024-01-01T10:00:00Z"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Measurement not found"
-          }
-        },
-        "summary": "Get a measurement by id (admin use)",
-        "tags": [
-          "Measurements"
-        ]
-      },
-      "delete": {
-        "description": "Delete the authenticated user's measurement.",
-        "operationId": "MeasurementsController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Measurement deleted successfully"
-          },
-          "401": {
-            "description": "Unauthorized - No valid authentication token"
-          },
-          "404": {
-            "description": "Measurement not found"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete measurement",
-        "tags": [
-          "Measurements"
-        ]
-      }
-    },
     "/ai/generate-exercise": {
       "post": {
         "operationId": "AiController_generateExerciseDescription",
@@ -2723,13 +2918,22 @@
           "birthDate": {
             "format": "date-time",
             "type": "string",
-            "description": "Birth date in ISO format",
+            "description": "Birth date in ISO format (user must be 18+)",
             "example": "1990-01-01"
           },
           "phoneNumber": {
             "type": "string",
             "description": "10-digit phone number",
             "example": "5512345678"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language preference - Valid values: english, spanish",
+            "enum": [
+              "english",
+              "spanish"
+            ],
+            "example": "spanish"
           },
           "gender": {
             "type": "string",
@@ -2771,6 +2975,7 @@
           "name",
           "birthDate",
           "phoneNumber",
+          "language",
           "gender",
           "fitGoals"
         ]
@@ -2920,6 +3125,26 @@
           "password"
         ]
       },
+      "NotificationPreferencesDto": {
+        "type": "object",
+        "properties": {
+          "routines": {
+            "type": "boolean",
+            "description": "Receive routine notifications",
+            "example": true
+          },
+          "exercises": {
+            "type": "boolean",
+            "description": "Receive exercise notifications",
+            "example": true
+          },
+          "system": {
+            "type": "boolean",
+            "description": "Receive system notifications",
+            "example": true
+          }
+        }
+      },
       "Profile": {
         "type": "object",
         "properties": {
@@ -2938,6 +3163,15 @@
             "type": "string",
             "description": "10-digit phone number",
             "example": "5512345678"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language preference - Valid values: english, spanish",
+            "enum": [
+              "english",
+              "spanish"
+            ],
+            "example": "spanish"
           },
           "gender": {
             "type": "string",
@@ -2974,10 +3208,33 @@
               ]
             }
           },
+          "currentStreak": {
+            "type": "number",
+            "description": "Current streak of consecutive days",
+            "example": 5
+          },
+          "maxStreak": {
+            "type": "number",
+            "description": "Maximum streak achieved",
+            "example": 10
+          },
           "email": {
             "type": "string",
             "description": "Associated email",
             "example": "user@example.com"
+          },
+          "notificationPreferences": {
+            "description": "Notification preferences",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NotificationPreferencesDto"
+              }
+            ]
+          },
+          "lastWeight": {
+            "type": "number",
+            "description": "Last recorded weight in kg",
+            "example": 75.5
           },
           "createdAt": {
             "format": "date-time",
@@ -3001,8 +3258,11 @@
           "name",
           "birthDate",
           "phoneNumber",
+          "language",
           "gender",
           "fitGoals",
+          "currentStreak",
+          "maxStreak",
           "email",
           "createdAt",
           "updatedAt",
@@ -3020,13 +3280,189 @@
           "birthDate": {
             "format": "date-time",
             "type": "string",
-            "description": "Birth date in ISO format",
+            "description": "Birth date in ISO format (user must be 18+)",
             "example": "1990-01-01"
           },
           "phoneNumber": {
             "type": "string",
             "description": "10-digit phone number",
             "example": "5512345678"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language preference - Valid values: english, spanish",
+            "enum": [
+              "english",
+              "spanish"
+            ],
+            "example": "spanish"
+          },
+          "notificationPreferences": {
+            "description": "Notification preferences",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NotificationPreferencesDto"
+              }
+            ]
+          }
+        }
+      },
+      "MeasurementRequest": {
+        "type": "object",
+        "properties": {
+          "weight": {
+            "type": "number",
+            "description": "User weight in kg",
+            "example": 75.5
+          },
+          "height": {
+            "type": "number",
+            "description": "User height in cm",
+            "example": 180
+          },
+          "left_arm": {
+            "type": "number",
+            "description": "Left arm measurement in cm"
+          },
+          "right_arm": {
+            "type": "number",
+            "description": "Right arm measurement in cm"
+          },
+          "left_forearm": {
+            "type": "number",
+            "description": "Left forearm measurement in cm"
+          },
+          "right_forearm": {
+            "type": "number",
+            "description": "Right forearm measurement in cm"
+          },
+          "clavicular_width": {
+            "type": "number",
+            "description": "Clavicular width in cm"
+          },
+          "neck_diameter": {
+            "type": "number",
+            "description": "Neck diameter in cm"
+          },
+          "chest_size": {
+            "type": "number",
+            "description": "Chest size in cm"
+          },
+          "back_width": {
+            "type": "number",
+            "description": "Back width in cm"
+          },
+          "hip_diameter": {
+            "type": "number",
+            "description": "Hip diameter in cm"
+          },
+          "left_leg": {
+            "type": "number",
+            "description": "Left leg measurement in cm"
+          },
+          "right_leg": {
+            "type": "number",
+            "description": "Right leg measurement in cm"
+          },
+          "left_calve": {
+            "type": "number",
+            "description": "Left calve measurement in cm"
+          },
+          "right_calve": {
+            "type": "number",
+            "description": "Right calve measurement in cm"
+          },
+          "checkTime": {
+            "type": "string",
+            "description": "Check time - Valid values: WEEKLY, MONTHLY, YEARLY",
+            "enum": [
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ],
+            "example": "WEEKLY"
+          }
+        },
+        "required": [
+          "weight",
+          "height",
+          "checkTime"
+        ]
+      },
+      "MeasurementUpdate": {
+        "type": "object",
+        "properties": {
+          "weight": {
+            "type": "number",
+            "description": "User weight in kg",
+            "example": 75.5
+          },
+          "height": {
+            "type": "number",
+            "description": "User height in cm",
+            "example": 180
+          },
+          "left_arm": {
+            "type": "number",
+            "description": "Left arm measurement in cm"
+          },
+          "right_arm": {
+            "type": "number",
+            "description": "Right arm measurement in cm"
+          },
+          "left_forearm": {
+            "type": "number",
+            "description": "Left forearm measurement in cm"
+          },
+          "right_forearm": {
+            "type": "number",
+            "description": "Right forearm measurement in cm"
+          },
+          "clavicular_width": {
+            "type": "number",
+            "description": "Clavicular width in cm"
+          },
+          "neck_diameter": {
+            "type": "number",
+            "description": "Neck diameter in cm"
+          },
+          "chest_size": {
+            "type": "number",
+            "description": "Chest size in cm"
+          },
+          "back_width": {
+            "type": "number",
+            "description": "Back width in cm"
+          },
+          "hip_diameter": {
+            "type": "number",
+            "description": "Hip diameter in cm"
+          },
+          "left_leg": {
+            "type": "number",
+            "description": "Left leg measurement in cm"
+          },
+          "right_leg": {
+            "type": "number",
+            "description": "Right leg measurement in cm"
+          },
+          "left_calve": {
+            "type": "number",
+            "description": "Left calve measurement in cm"
+          },
+          "right_calve": {
+            "type": "number",
+            "description": "Right calve measurement in cm"
+          },
+          "checkTime": {
+            "type": "string",
+            "description": "Check time - Valid values: WEEKLY, MONTHLY, YEARLY",
+            "enum": [
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ],
+            "example": "WEEKLY"
           }
         }
       },
@@ -3568,165 +4004,6 @@
                 "Resistencia"
               ]
             }
-          }
-        }
-      },
-      "MeasurementRequest": {
-        "type": "object",
-        "properties": {
-          "weight": {
-            "type": "number",
-            "description": "User weight in kg",
-            "example": 75.5
-          },
-          "height": {
-            "type": "number",
-            "description": "User height in cm",
-            "example": 180
-          },
-          "left_arm": {
-            "type": "number",
-            "description": "Left arm measurement in cm"
-          },
-          "right_arm": {
-            "type": "number",
-            "description": "Right arm measurement in cm"
-          },
-          "left_forearm": {
-            "type": "number",
-            "description": "Left forearm measurement in cm"
-          },
-          "right_forearm": {
-            "type": "number",
-            "description": "Right forearm measurement in cm"
-          },
-          "clavicular_width": {
-            "type": "number",
-            "description": "Clavicular width in cm"
-          },
-          "neck_diameter": {
-            "type": "number",
-            "description": "Neck diameter in cm"
-          },
-          "chest_size": {
-            "type": "number",
-            "description": "Chest size in cm"
-          },
-          "back_width": {
-            "type": "number",
-            "description": "Back width in cm"
-          },
-          "hip_diameter": {
-            "type": "number",
-            "description": "Hip diameter in cm"
-          },
-          "left_leg": {
-            "type": "number",
-            "description": "Left leg measurement in cm"
-          },
-          "right_leg": {
-            "type": "number",
-            "description": "Right leg measurement in cm"
-          },
-          "left_calve": {
-            "type": "number",
-            "description": "Left calve measurement in cm"
-          },
-          "right_calve": {
-            "type": "number",
-            "description": "Right calve measurement in cm"
-          },
-          "checkTime": {
-            "type": "string",
-            "description": "Check time - Valid values: WEEKLY, MONTHLY, YEARLY",
-            "enum": [
-              "WEEKLY",
-              "MONTHLY",
-              "YEARLY"
-            ],
-            "example": "WEEKLY"
-          }
-        },
-        "required": [
-          "weight",
-          "height",
-          "checkTime"
-        ]
-      },
-      "MeasurementUpdate": {
-        "type": "object",
-        "properties": {
-          "weight": {
-            "type": "number",
-            "description": "User weight in kg",
-            "example": 75.5
-          },
-          "height": {
-            "type": "number",
-            "description": "User height in cm",
-            "example": 180
-          },
-          "left_arm": {
-            "type": "number",
-            "description": "Left arm measurement in cm"
-          },
-          "right_arm": {
-            "type": "number",
-            "description": "Right arm measurement in cm"
-          },
-          "left_forearm": {
-            "type": "number",
-            "description": "Left forearm measurement in cm"
-          },
-          "right_forearm": {
-            "type": "number",
-            "description": "Right forearm measurement in cm"
-          },
-          "clavicular_width": {
-            "type": "number",
-            "description": "Clavicular width in cm"
-          },
-          "neck_diameter": {
-            "type": "number",
-            "description": "Neck diameter in cm"
-          },
-          "chest_size": {
-            "type": "number",
-            "description": "Chest size in cm"
-          },
-          "back_width": {
-            "type": "number",
-            "description": "Back width in cm"
-          },
-          "hip_diameter": {
-            "type": "number",
-            "description": "Hip diameter in cm"
-          },
-          "left_leg": {
-            "type": "number",
-            "description": "Left leg measurement in cm"
-          },
-          "right_leg": {
-            "type": "number",
-            "description": "Right leg measurement in cm"
-          },
-          "left_calve": {
-            "type": "number",
-            "description": "Left calve measurement in cm"
-          },
-          "right_calve": {
-            "type": "number",
-            "description": "Right calve measurement in cm"
-          },
-          "checkTime": {
-            "type": "string",
-            "description": "Check time - Valid values: WEEKLY, MONTHLY, YEARLY",
-            "enum": [
-              "WEEKLY",
-              "MONTHLY",
-              "YEARLY"
-            ],
-            "example": "WEEKLY"
           }
         }
       }

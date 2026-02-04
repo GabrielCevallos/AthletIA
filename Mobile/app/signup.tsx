@@ -21,10 +21,12 @@ import { DumbbellIcon } from '@/components/ui/dumbbell-icon';
 import { FormInput } from '@/components/ui/form-input';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Config } from '@/constants';
+import { useTranslation } from 'react-i18next';
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function SignupScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -99,7 +101,7 @@ export default function SignupScreen() {
       const result = await response.json();
 
       if (!result.success) {
-        Alert.alert('Error', result.message || 'Error al crear la cuenta');
+        Alert.alert(t('signup.errorTitle'), result.message || t('signup.errorGeneric'));
         return;
       }
 
@@ -107,7 +109,7 @@ export default function SignupScreen() {
       router.push('/verification-email-sent');
     } catch (error) {
       console.error('Signup error:', error);
-      Alert.alert('Error', 'No se pudo crear la cuenta. Intenta más tarde.');
+      Alert.alert(t('signup.errorTitle'), t('signup.errorGeneric'));
     } finally {
       setLoading(false);
     }
@@ -127,7 +129,7 @@ export default function SignupScreen() {
       const result = await response.json();
 
       if (!result.success) {
-        Alert.alert('Error', result.message || 'Error con Google Sign Up');
+        Alert.alert(t('signup.errorTitle'), result.message || t('signup.errorGeneric'));
         return;
       }
 
@@ -135,7 +137,7 @@ export default function SignupScreen() {
       router.push('/verification-email-sent');
     } catch (error) {
       console.error('Google signup error:', error);
-      Alert.alert('Error', 'No se pudo registrar con Google. Intenta más tarde.');
+      Alert.alert(t('signup.errorTitle'), t('signup.errorGoogle'));
     } finally {
       setLoading(false);
     }
@@ -159,11 +161,11 @@ export default function SignupScreen() {
   const getPasswordStrengthLabel = () => {
     switch (passwordStrength) {
       case 'weak':
-        return 'Débil';
+        return t('signup.passwordStrength.weak');
       case 'medium':
-        return 'Media';
+        return t('signup.passwordStrength.medium');
       case 'strong':
-        return 'Fuerte';
+        return t('signup.passwordStrength.strong');
       default:
         return '';
     }
@@ -186,19 +188,19 @@ export default function SignupScreen() {
                     <DumbbellIcon size={32} />
                     <Text style={styles.logo}>ATHLET<Text style={styles.logoAccent}>IA</Text></Text>
                   </View>
-                  <Text style={styles.subtitle}>¡Comienza tu transformación hoy!</Text>
+                  <Text style={styles.subtitle}>{t('login.subtitle')}</Text>
                 </View>
 
                 <View style={styles.card}>
                   <View style={styles.cardHeader}>
-                    <Text style={styles.title}>Crear Cuenta</Text>
-                    <Text style={styles.caption}>Crea una cuenta nueva</Text>
+                    <Text style={styles.title}>{t('signup.title')}</Text>
+                    <Text style={styles.caption}>{t('signup.caption')}</Text>
                   </View>
 
                   <View style={styles.form}>
                     <FormInput
-                      label="Email"
-                      placeholder="tu@email.com"
+                      label={t('signup.emailLabel')} 
+                      placeholder={t('login.emailPlaceholder')}
                       keyboardType="email-address"
                       autoCapitalize="none"
                       value={email}
@@ -208,8 +210,8 @@ export default function SignupScreen() {
 
                     <View>
                       <FormInput
-                        label="Contraseña"
-                        placeholder="••••••••"
+                        label={t('signup.passwordLabel')}
+                        placeholder={t('login.passwordPlaceholder')}
                         secureTextEntry
                         value={password}
                         onChangeText={handlePasswordChange}
@@ -245,24 +247,24 @@ export default function SignupScreen() {
                         </View>
                       )}
                       <Text style={styles.passwordHint}>
-                        Mínimo 8 caracteres. Incluye mayúsculas y números para mayor seguridad.
+                        {t('signup.passwordHint')}
                       </Text>
                     </View>
 
                     <View>
                       <FormInput
-                        label="Confirmar Contraseña"
-                        placeholder="••••••••"
+                        label={t('signup.confirmPasswordLabel')}
+                        placeholder={t('login.passwordPlaceholder')}
                         secureTextEntry
                         value={confirmPassword}
                         onChangeText={setConfirmPassword}
                         editable={!loading}
                       />
                       {confirmPassword.length > 0 && password !== confirmPassword && (
-                        <Text style={styles.errorText}>Las contraseñas no coinciden</Text>
+                        <Text style={styles.errorText}>{t('signup.passwordsDoNotMatch')}</Text>
                       )}
                       {confirmPassword.length > 0 && password === confirmPassword && (
-                        <Text style={styles.successText}>✓ Las contraseñas coinciden</Text>
+                        <Text style={styles.successText}>{t('signup.passwordsMatch')}</Text>
                       )}
                     </View>
 
@@ -272,12 +274,12 @@ export default function SignupScreen() {
                       disabled={loading}>
                       <View style={[styles.checkbox, termsAccepted && styles.checkboxChecked]} />
                       <Text style={styles.termsText}>
-                        Acepto los <Text style={styles.link}>términos y condiciones</Text> de servicio
+                        {t('signup.termsPrefix')}<Text style={styles.link}>{t('signup.termsLink')}</Text>{t('signup.termsSuffix')}
                       </Text>
                     </Pressable>
 
                     <PrimaryButton
-                      label="CREAR CUENTA"
+                      label={t('signup.createAccountButton')}
                       onPress={handleSignup}
                       loading={loading}
                       disabled={!email.trim() || !isPasswordValid() || !termsAccepted || loading}
@@ -285,7 +287,7 @@ export default function SignupScreen() {
 
                     <View style={styles.dividerRow}>
                       <View style={styles.divider} />
-                      <Text style={styles.dividerText}>o regístrate con</Text>
+                      <Text style={styles.dividerText}>{t('signup.orRegisterWith')}</Text>
                       <View style={styles.divider} />
                     </View>
 
@@ -300,15 +302,15 @@ export default function SignupScreen() {
                           resizeMode="contain"
                         />
                       </View>
-                      <Text style={styles.googleLabel}>Google</Text>
+                      <Text style={styles.googleLabel}>{t('signup.google')}</Text>
                     </Pressable>
                   </View>
                 </View>
 
                 <View style={styles.footer}>
-                  <Text style={styles.footerText}>¿Ya tienes cuenta?</Text>
+                  <Text style={styles.footerText}>{t('signup.alreadyHaveAccount')}</Text>
                   <Pressable onPress={() => router.push('/login')} disabled={loading}>
-                    <Text style={styles.footerLink}>Inicia sesión</Text>
+                    <Text style={styles.footerLink}>{t('signup.loginLink')}</Text>
                   </Pressable>
                 </View>
               </View>

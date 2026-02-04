@@ -1,13 +1,13 @@
 import { useAuth } from '@/context/auth-context';
 import { handleApiError } from '@/services/api-error-handler';
 import {
-  deleteRoutine as apiDeleteRoutine,
-  fetchRoutineById,
-  fetchRoutines,
-  type Routine,
-  type RoutineGoal,
-  type RoutineListResponse,
-  type RoutinesApiError,
+    deleteRoutine as apiDeleteRoutine,
+    fetchRoutineById,
+    fetchRoutines,
+    type Routine,
+    type RoutineGoal,
+    type RoutineListResponse,
+    type RoutinesApiError,
 } from '@/services/routines-api';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -51,7 +51,15 @@ export function useRoutines(): UseRoutinesReturn {
         const result = await fetchRoutines({ token: user.token, ...params });
         console.log('🔍 [use-routines] Resultado de fetchRoutines:', result);
         console.log('🔍 [use-routines] Items recibidos:', result.items?.length || 0);
-        setRoutines(result.items || []);
+        
+        const items = result.items || [];
+        // Deduplicate routines based on ID
+        const uniqueItems = Array.from(new Map(items.map((item) => [item.id, item])).values());
+        if (items.length !== uniqueItems.length) {
+          console.warn(`[use-routines] Found ${items.length - uniqueItems.length} duplicate routines`);
+        }
+
+        setRoutines(uniqueItems);
         setPagination({
           total: result.total,
           limit: result.limit,

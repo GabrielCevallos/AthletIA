@@ -1,18 +1,19 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Google from 'expo-auth-session/providers/google';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
 import {
-    Image,
-    ImageBackground,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableWithoutFeedback,
-    View,
+  Image,
+  ImageBackground,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 
 import { DumbbellIcon } from '@/components/ui/dumbbell-icon';
@@ -20,17 +21,25 @@ import { FormInput } from '@/components/ui/form-input';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Config } from '@/constants';
 import { useAuth } from '@/context/auth-context';
+import { useTranslation } from 'react-i18next';
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
+  const { t, i18n } = useTranslation();
   const { signIn, signInWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en-US' ? 'es-419' : 'en-US';
+    i18n.changeLanguage(newLang);
+    AsyncStorage.setItem('language', newLang);
+  };
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const errorTimeoutRef = useRef<number | null>(null);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     // Debes obtener estos IDs en Google Cloud Console
@@ -111,20 +120,20 @@ export default function LoginScreen() {
                   <DumbbellIcon size={32} />
                   <Text style={styles.logo}>ATHLET<Text style={styles.logoAccent}>IA</Text></Text>
                 </View>
-                <Text style={styles.subtitle}>¡Comienza tu transformación hoy!</Text>
+                <Text style={styles.subtitle}>{t('login.subtitle')}</Text>
               </View>
 
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
-                  <Text style={styles.title}>Bienvenido</Text>
-                  <Text style={styles.caption}>Inicia sesión en tu cuenta</Text>
+                  <Text style={styles.title}>{t('login.welcome')}</Text>
+                  <Text style={styles.caption}>{t('login.signInCaption')}</Text>
                 </View>
 
                 {errorMessage ? (
                   <View style={styles.errorContainer}>
                     <Text style={styles.errorIcon}>⚠️</Text>
                     <View style={styles.errorContent}>
-                      <Text style={styles.errorTitle}>Error de autenticación</Text>
+                      <Text style={styles.errorTitle}>{t('errors.authError')}</Text>
                       <Text style={styles.errorMessage}>{errorMessage}</Text>
                     </View>
                     <Pressable onPress={clearError} style={styles.errorCloseButton}>
@@ -135,8 +144,8 @@ export default function LoginScreen() {
 
                 <View style={styles.form}>
                   <FormInput
-                    label="Email o usuario"
-                    placeholder="tu@email.com"
+                    label={t('login.emailLabel')} 
+                    placeholder={t('login.emailPlaceholder')}
                     iconName="mail"
                     autoCapitalize="none"
                     keyboardType="email-address"
@@ -144,8 +153,8 @@ export default function LoginScreen() {
                     onChangeText={setEmail}
                   />
                   <FormInput
-                    label="Contraseña"
-                    placeholder="••••••••"
+                    label={t('login.passwordLabel')}
+                    placeholder={t('login.passwordPlaceholder')}
                     iconName="lock"
                     secureTextEntry
                     value={password}
@@ -155,15 +164,15 @@ export default function LoginScreen() {
                   <View style={styles.rowBetween}>
                     <Pressable style={styles.rememberRow} onPress={() => setRememberMe((prev) => !prev)}>
                       <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]} />
-                      <Text style={styles.rememberText}>Recuérdame</Text>
+                      <Text style={styles.rememberText}>{t('login.rememberMe')}</Text>
                     </Pressable>
                     <Pressable>
-                      <Text style={styles.link}>Olvidé mi contraseña</Text>
+                      <Text style={styles.link}>{t('login.forgotPassword')}</Text>
                     </Pressable>
                   </View>
 
                   <PrimaryButton
-                    label="ENTRAR"
+                    label={t('login.loginButton')}
                     onPress={handleLogin}
                     loading={loading}
                     disabled={!email.trim() || !password.trim()}
@@ -171,7 +180,7 @@ export default function LoginScreen() {
 
                   <View style={styles.dividerRow}>
                     <View style={styles.divider} />
-                    <Text style={styles.dividerText}>o continúa con</Text>
+                    <Text style={styles.dividerText}>{t('login.orContinueWith')}</Text>
                     <View style={styles.divider} />
                   </View>
 
@@ -187,17 +196,23 @@ export default function LoginScreen() {
                         resizeMode="contain"
                       />
                     </View>
-                    <Text style={styles.googleLabel}>Google</Text>
+                    <Text style={styles.googleLabel}>{t('login.google')}</Text>
                   </Pressable>
                 </View>
               </View>
 
               <View style={styles.footer}>
-                <Text style={styles.footerText}>¿No tienes cuenta?</Text>
+                <Text style={styles.footerText}>{t('login.noAccount')}</Text>
                 <Pressable onPress={() => router.push('/signup' as any)} disabled={loading}>
-                  <Text style={styles.footerLink}>Regístrate aquí</Text>
+                  <Text style={styles.footerLink}>{t('login.signUp')}</Text>
                 </Pressable>
               </View>
+
+              <Pressable onPress={toggleLanguage} style={{ alignSelf: 'center', marginTop: 20, padding: 10 }}>
+                <Text style={{ color: '#fff', opacity: 0.6, fontSize: 12 }}>
+                  {i18n.language === 'en-US' ? 'Cambiar a Español 🇲🇽' : 'Switch to English 🇺🇸'}
+                </Text>
+              </Pressable>
             </View>
           </View>
         </ImageBackground>

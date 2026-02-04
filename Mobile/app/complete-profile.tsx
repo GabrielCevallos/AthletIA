@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import {
     Alert,
     Keyboard,
@@ -26,41 +27,43 @@ import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/
 import { useAuth } from '@/context/auth-context';
 import { GlobalStyles } from '@/styles/global';
 
-const profileSchema = z.object({
-  fullName: z.string().min(2, 'Ingresa tu nombre'),
-  birthDate: z.string().min(4, 'Ingresa tu fecha de nacimiento'),
-  phone: z.string().min(8, 'Ingresa tu teléfono'),
-  gender: z.enum(['male', 'female']),
-  weightKg: z
-    .string()
-    .refine((val) => Number(val) > 0, { message: 'Ingresa un peso válido' }),
-  heightCm: z
-    .string()
-    .refine((val) => Number(val) > 0, { message: 'Ingresa una altura válida' }),
-  goals: z.array(z.string()).min(1, 'Selecciona al menos un objetivo'),
-});
-
-type FormValues = z.infer<typeof profileSchema>;
-
-const genderOptions = [
-  { label: 'Masculino', value: 'male' },
-  { label: 'Femenino', value: 'female' },
-];
-
-const goalOptions = [
-  { label: 'Bajar de peso', value: 'weight_loss' },
-  { label: 'Ganar músculo', value: 'muscle_gain' },
-  { label: 'Mantener peso', value: 'weight_maintenance' },
-  { label: 'Resistencia', value: 'endurance' },
-  { label: 'Flexibilidad', value: 'flexibility' },
-  { label: 'Fitness general', value: 'general_fitness' },
-  { label: 'Rehabilitación', value: 'rehabilitation' },
-  { label: 'Postura', value: 'improved_posture' },
-];
+// Schema definition moved inside component for translation
+type FormValues = {
+  fullName: string;
+  birthDate: string;
+  phone: string;
+  gender: 'male' | 'female';
+  goals: string[];
+};
 
 export default function CompleteProfileScreen() {
+  const { t } = useTranslation();
   const { setProfileCompleted, user } = useAuth();
   const [genderSheetOpen, setGenderSheetOpen] = useState(false);
+
+  const profileSchema = useMemo(() => z.object({
+    fullName: z.string().min(2, t('completeProfile.validation.fullName')),
+    birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('completeProfile.validation.birthDate')),
+    phone: z.string().regex(/^\d{10}$/, t('completeProfile.validation.phone')),
+    gender: z.enum(['male', 'female']),
+    goals: z.array(z.string()).min(1, t('completeProfile.validation.goals')),
+  }), [t]);
+
+  const genderOptions = useMemo(() => [
+    { label: t('completeProfile.genderOptions.male'), value: 'male' },
+    { label: t('completeProfile.genderOptions.female'), value: 'female' },
+  ], [t]);
+  
+  const goalOptions = useMemo(() => [
+    { label: t('completeProfile.goalOptions.weight_loss'), value: 'weight_loss' },
+    { label: t('completeProfile.goalOptions.muscle_gain'), value: 'muscle_gain' },
+    { label: t('completeProfile.goalOptions.weight_maintenance'), value: 'weight_maintenance' },
+    { label: t('completeProfile.goalOptions.endurance'), value: 'endurance' },
+    { label: t('completeProfile.goalOptions.flexibility'), value: 'flexibility' },
+    { label: t('completeProfile.goalOptions.general_fitness'), value: 'general_fitness' },
+    { label: t('completeProfile.goalOptions.rehabilitation'), value: 'rehabilitation' },
+    { label: t('completeProfile.goalOptions.improved_posture'), value: 'improved_posture' },
+  ], [t]);
 
   const {
     control,
@@ -75,8 +78,6 @@ export default function CompleteProfileScreen() {
       birthDate: '',
       phone: '',
       gender: undefined as unknown as FormValues['gender'],
-      weightKg: '',
-      heightCm: '',
       goals: [],
     },
   });
@@ -90,19 +91,9 @@ export default function CompleteProfileScreen() {
     setValue('goals', next, { shouldValidate: true });
   };
 
-  const normalizeBirthDate = (value: string) => {
-    const trimmed = value.trim();
-    const match = trimmed.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if (match) {
-      const [, mm, dd, yyyy] = match;
-      return `${yyyy}-${mm}-${dd}`;
-    }
-    return trimmed;
-  };
-
   const onSubmit = async (data: FormValues) => {
     if (!user?.token) {
-      Alert.alert('Error', 'Tu sesión expiró. Inicia sesión nuevamente.');
+      Alert.alert(t('signup.errorTitle'), t('completeProfile.errors.sessionExpired'));
       router.replace('/login');
       return;
     }
@@ -116,8 +107,8 @@ export default function CompleteProfileScreen() {
         },
         body: JSON.stringify({
           name: data.fullName.trim(),
-          birthDate: normalizeBirthDate(data.birthDate),
-          phoneNumber: data.phone.trim(),
+          birthDate: data.birthDate.trim(),
+          phoneNumber: data.phone.replace(/\D/g, ''),
           gender: data.gender,
           fitGoals: data.goals,
         }),
@@ -126,14 +117,14 @@ export default function CompleteProfileScreen() {
       const result = await response.json();
 
       if (!result?.success) {
-        Alert.alert('Error', result?.message || 'No se pudo completar el perfil');
+        Alert.alert(t('signup.errorTitle'), result?.message || t('completeProfile.errors.profileIncomplete'));
         return;
       }
 
       await setProfileCompleted();
     } catch (error) {
       console.error('Complete profile failed', error);
-      Alert.alert('Error', 'No se pudo completar el perfil. Intenta más tarde.');
+      Alert.alert(t('signup.errorTitle'), t('completeProfile.errors.profileFailed'));
     }
   };
 
@@ -151,9 +142,9 @@ export default function CompleteProfileScreen() {
                   <DumbbellIcon size={28} />
                   <Text style={styles.brand}>AthletIA</Text>
                 </View>
-                <Text style={styles.heading}>Completar Perfil</Text>
+                <Text style={styles.heading}>{t('completeProfile.title')}</Text>
                 <Text style={styles.subheading}>
-                  Ayúdanos a personalizar tu experiencia de entrenamiento.
+                  {t('completeProfile.subtitle')}
                 </Text>
               </View>
             </View>
@@ -164,8 +155,8 @@ export default function CompleteProfileScreen() {
                 name="fullName"
                 render={({ field: { onChange, value } }) => (
                   <FormInput
-                    label="Nombre Completo"
-                    placeholder="Ej. Juan Pérez"
+                    label={t('completeProfile.fullNameLabel')}
+                    placeholder={t('completeProfile.fullNamePlaceholder')}
                     iconName="person"
                     value={value}
                     onChangeText={onChange}
@@ -178,8 +169,8 @@ export default function CompleteProfileScreen() {
                 name="birthDate"
                 render={({ field: { onChange, value } }) => (
                   <FormInput
-                    label="Fecha de Nacimiento"
-                    placeholder="mm/dd/yyyy"
+                    label={t('completeProfile.birthDateLabel')}
+                    placeholder={t('completeProfile.birthDatePlaceholder')}
                     iconName="calendar-today"
                     keyboardType="numbers-and-punctuation"
                     value={value}
@@ -193,8 +184,8 @@ export default function CompleteProfileScreen() {
                 name="phone"
                 render={({ field: { onChange, value } }) => (
                   <FormInput
-                    label="Teléfono"
-                    placeholder="55 1234 5678"
+                    label={t('completeProfile.phoneLabel')}
+                    placeholder="5512345678"
                     iconName="smartphone"
                     keyboardType="phone-pad"
                     value={value}
@@ -208,58 +199,23 @@ export default function CompleteProfileScreen() {
                 name="gender"
                 render={({ field: { value } }) => (
                   <SelectField
-                    label="Género"
-                    placeholder="Selecciona..."
+                    label={t('completeProfile.genderLabel')}
+                    placeholder={t('completeProfile.genderPlaceholder')}
                     iconName="wc"
                     value={genderOptions.find((g) => g.value === value)?.label}
                     onPress={() => setGenderSheetOpen(true)}
                   />
                 )}
               />
-
-              <View style={styles.row}>
-                <View style={styles.rowItem}>
-                  <Controller
-                    control={control}
-                    name="weightKg"
-                    render={({ field: { onChange, value } }) => (
-                      <FormInput
-                        label="Peso (kg)"
-                        placeholder="70"
-                        iconName="fitness-center"
-                        keyboardType="numeric"
-                        value={value}
-                        onChangeText={onChange}
-                      />
-                    )}
-                  />
-                </View>
-                <View style={styles.rowItem}>
-                  <Controller
-                    control={control}
-                    name="heightCm"
-                    render={({ field: { onChange, value } }) => (
-                      <FormInput
-                        label="Altura (cm)"
-                        placeholder="175"
-                        iconName="height"
-                        keyboardType="numeric"
-                        value={value}
-                        onChangeText={onChange}
-                      />
-                    )}
-                  />
-                </View>
-              </View>
             </View>
 
             <View style={styles.sectionHeader}>
               <View style={styles.sectionTitleRow}>
                 <Text style={styles.sectionIcon}>🏆</Text>
-                <Text style={styles.sectionTitle}>Objetivos Fitness</Text>
+                <Text style={styles.sectionTitle}>{t('completeProfile.goalsTitle')}</Text>
               </View>
               <Text style={styles.sectionSubtitle}>
-                Selecciona uno o más objetivos para adaptar tus rutinas.
+              {t('completeProfile.goalsSubtitle')}
               </Text>
             </View>
 
@@ -281,7 +237,7 @@ export default function CompleteProfileScreen() {
             </View>
 
             <PrimaryButton
-              label="Completar Registro"
+              label={t('completeProfile.submitButton')}
               onPress={handleSubmit(onSubmit)}
               loading={isSubmitting}
               style={styles.submitButton}

@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAccessibility } from '../context/AccessibilityContext'
 
 export default function AccessibilityButton() {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const {
     textSize,
@@ -26,10 +28,10 @@ export default function AccessibilityButton() {
   } = useAccessibility()
 
   const readingSpeeds = [
-    { label: 'Lenta', value: 0.8 },
-    { label: 'Normal', value: 1.0 },
-    { label: 'Rápida', value: 1.2 },
-    { label: 'Muy Rápida', value: 1.4 },
+    { label: t('accessibility.speed.slow'), value: 0.8 },
+    { label: t('accessibility.speed.normal'), value: 1.0 },
+    { label: t('accessibility.speed.fast'), value: 1.2 },
+    { label: t('accessibility.speed.very_fast'), value: 1.4 },
   ]
 
   return (
@@ -38,7 +40,7 @@ export default function AccessibilityButton() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-4 sm:right-6 z-50 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-primary/50 transition-all flex items-center justify-center"
-        aria-label="Abrir menú de accesibilidad"
+        aria-label={t('accessibility.open_menu')}
         aria-expanded={isOpen}
       >
         <span className="material-symbols-outlined text-xl sm:text-2xl">accessibility</span>
@@ -58,12 +60,12 @@ export default function AccessibilityButton() {
           <div className="fixed bottom-20 sm:bottom-24 right-2 sm:right-6 z-50 w-[calc(100vw-1rem)] sm:w-80 md:w-96 max-h-[70vh] sm:max-h-[75vh] md:max-h-[80vh] bg-white dark:bg-[#1a2831] rounded-xl shadow-2xl border border-gray-200 dark:border-[#325567] flex flex-col overflow-hidden">
             <div className="sticky top-0 bg-white dark:bg-[#1a2831] border-b border-gray-200 dark:border-[#325567] p-4 flex justify-between items-center">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                Accesibilidad
+                {t('accessibility.title')}
               </h2>
               <button
                 onClick={() => setIsOpen(false)}
                 className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300"
-                aria-label="Cerrar menú de accesibilidad"
+                aria-label={t('accessibility.close_menu')}
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -73,14 +75,14 @@ export default function AccessibilityButton() {
               {/* Tamaño de texto */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-                  Tamaño de Texto ({textSize}%)
+                  {t('accessibility.text_size')} ({textSize}%)
                 </label>
                 <div className="flex gap-2">
                   <button
                     onClick={decreaseTextSize}
                     disabled={textSize <= 100}
                     className="flex-1 px-4 py-2 rounded-lg bg-gray-100 dark:bg-[#233c48] text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-[#2d4a5a] disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
-                    aria-label="Disminuir tamaño de texto"
+                    aria-label={t('accessibility.decrease_text_size')}
                   >
                     <span className="material-symbols-outlined text-xl">text_decrease</span>
                     <span className="ml-1">A-</span>
@@ -89,7 +91,7 @@ export default function AccessibilityButton() {
                     onClick={increaseTextSize}
                     disabled={textSize >= 140}
                     className="flex-1 px-4 py-2 rounded-lg bg-gray-100 dark:bg-[#233c48] text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-[#2d4a5a] disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
-                    aria-label="Aumentar tamaño de texto"
+                    aria-label={t('accessibility.increase_text_size')}
                   >
                     <span className="material-symbols-outlined text-xl">text_increase</span>
                     <span className="ml-1">A+</span>
@@ -100,23 +102,23 @@ export default function AccessibilityButton() {
               {/* Opciones de contraste */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-                  Contraste y Color
+                  {t('accessibility.contrast_color')}
                 </label>
                 <div className="space-y-2">
                   <ToggleOption
-                    label="Escala de Grises"
+                    label={t('accessibility.grayscale')}
                     checked={grayscale}
                     onChange={toggleGrayscale}
                     icon="filter_b_and_w"
                   />
                   <ToggleOption
-                    label="Alto Contraste"
+                    label={t('accessibility.high_contrast')}
                     checked={highContrast}
                     onChange={toggleHighContrast}
                     icon="contrast"
                   />
                   <ToggleOption
-                    label="Contraste Negativo"
+                    label={t('accessibility.negative_contrast')}
                     checked={negativeContrast}
                     onChange={toggleNegativeContrast}
                     icon="invert_colors"
@@ -127,17 +129,17 @@ export default function AccessibilityButton() {
               {/* Opciones de lectura */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-                  Legibilidad
+                  {t('accessibility.readability')}
                 </label>
                 <div className="space-y-2">
                   <ToggleOption
-                    label="Fuente Legible"
+                    label={t('accessibility.readable_font')}
                     checked={readableFont}
                     onChange={toggleReadableFont}
                     icon="font_download"
                   />
                   <ToggleOption
-                    label="Enlaces Subrayados"
+                    label={t('accessibility.underline_links')}
                     checked={underlineLinks}
                     onChange={toggleUnderlineLinks}
                     icon="link"
@@ -148,7 +150,7 @@ export default function AccessibilityButton() {
               {/* Lector de pantalla */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-                  Lector de Pantalla
+                  {t('accessibility.screen_reader')}
                 </label>
                 <div className="space-y-2">
                   <div className="flex gap-2">
@@ -159,19 +161,19 @@ export default function AccessibilityButton() {
                           ? 'bg-red-500 hover:bg-red-600 text-white'
                           : 'bg-primary hover:bg-primary/90 text-white'
                       }`}
-                      aria-label={isReading ? 'Detener lectura' : 'Leer página'}
+                      aria-label={isReading ? t('accessibility.stop') : t('accessibility.read_page')}
                     >
                       <span className="material-symbols-outlined">
                         {isReading ? 'stop' : 'volume_up'}
                       </span>
-                      {isReading ? 'Detener' : 'Leer Página'}
+                      {isReading ? t('accessibility.stop') : t('accessibility.read_page')}
                     </button>
                   </div>
 
                   {/* Velocidad de lectura */}
                   <div className="space-y-1">
                     <label className="block text-xs text-gray-600 dark:text-gray-400">
-                      Velocidad de Lectura
+                      {t('accessibility.reading_speed')}
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       {readingSpeeds.map((speed) => (
@@ -183,7 +185,7 @@ export default function AccessibilityButton() {
                               ? 'bg-primary text-white'
                               : 'bg-gray-100 dark:bg-[#233c48] text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-[#2d4a5a]'
                           }`}
-                          aria-label={`Velocidad de lectura ${speed.label}`}
+                          aria-label={`${t('accessibility.reading_speed')} ${speed.label}`}
                           aria-pressed={readingSpeed === speed.value}
                         >
                           {speed.label}
@@ -198,10 +200,10 @@ export default function AccessibilityButton() {
               <button
                 onClick={resetSettings}
                 className="w-full px-4 py-2 rounded-lg bg-gray-100 dark:bg-[#233c48] text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-[#2d4a5a] font-medium text-sm flex items-center justify-center gap-2"
-                aria-label="Restablecer todas las configuraciones de accesibilidad"
+                aria-label={t('accessibility.reset_label')}
               >
                 <span className="material-symbols-outlined">restart_alt</span>
-                Restablecer Todo
+                {t('accessibility.reset')}
               </button>
             </div>
           </div>

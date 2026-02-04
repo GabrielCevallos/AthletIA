@@ -36,26 +36,6 @@ export type RoutineGoal =
   | 'athletic_performance'
   | 'lifestyle_enhancement';
 
-export const ROUTINE_GOAL_LABELS: Record<RoutineGoal, string> = {
-  weight_loss: 'Pérdida de peso',
-  muscle_gain: 'Ganancia muscular',
-  weight_maintenance: 'Mantenimiento de peso',
-  endurance: 'Resistencia',
-  flexibility: 'Flexibilidad',
-  general_fitness: 'Fitness general',
-  rehabilitation: 'Rehabilitación',
-  improved_posture: 'Mejora de postura',
-  balance_and_coordination: 'Balance y coordinación',
-  cardiovascular_health: 'Salud cardiovascular',
-  strength_training: 'Entrenamiento de fuerza',
-  athletic_performance: 'Rendimiento atlético',
-  lifestyle_enhancement: 'Mejora del estilo de vida',
-};
-
-export function translateRoutineGoal(goal: RoutineGoal): string {
-  return ROUTINE_GOAL_LABELS[goal] || goal;
-}
-
 export type RoutineExercise = {
   id: string;
   name: string;

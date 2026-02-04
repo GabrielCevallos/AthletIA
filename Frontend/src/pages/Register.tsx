@@ -3,25 +3,28 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import ThemeToggle from '../components/ThemeToggle'
 
-const schema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Mínimo 6 caracteres'),
+const createSchema = () => z.object({
+  email: z.string().email('login.validation.email_invalid'),
+  password: z.string().min(6, 'login.validation.password_min'),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Las contraseñas no coinciden",
+  message: "register.validation.passwords_mismatch",
   path: ["confirmPassword"],
 })
 
-type FormData = z.infer<typeof schema>
+type FormData = z.infer<ReturnType<typeof createSchema>>
 
 export default function Register() {
+  const { t } = useTranslation()
   const { register: registerUser } = useAuth()
   const navigate = useNavigate()
   const [serverError, setServerError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const schema = createSchema()
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({ resolver: zodResolver(schema) })
 
   const onSubmit = async (data: FormData) => {
@@ -36,7 +39,7 @@ export default function Register() {
     } catch (err: any) {
       let msg = err?.response?.data?.message
       if (Array.isArray(msg)) msg = msg.join(', ')
-      if (!msg) msg = 'Error al registrar la cuenta'
+      if (!msg) msg = t('register.validation.error_default')
       setServerError(msg)
     }
   }
@@ -104,7 +107,7 @@ export default function Register() {
             <h1 className="text-5xl font-black mb-4 leading-tight">
               <span className="block">AthletIA</span>
             </h1>
-            <p className="text-xl text-gray-300 mb-8 font-light">¡Comienza tu transformación hoy!</p>
+            <p className="text-xl text-gray-300 mb-8 font-light">{t('common.branding_subtitle')}</p>
             <div className="space-y-4 text-left">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
@@ -112,7 +115,7 @@ export default function Register() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" />
                   </svg>
                 </div>
-                <span className="text-gray-300">Rutinas personalizadas</span>
+                <span className="text-gray-300">{t('common.feature_routines')}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
@@ -120,7 +123,7 @@ export default function Register() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" />
                   </svg>
                 </div>
-                <span className="text-gray-300">Seguimiento de medidas</span>
+                <span className="text-gray-300">{t('common.feature_measurements')}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
@@ -128,7 +131,7 @@ export default function Register() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" />
                   </svg>
                 </div>
-                <span className="text-gray-300">Análisis de progreso</span>
+                <span className="text-gray-300">{t('common.feature_progress')}</span>
               </div>
             </div>
           </div>
@@ -139,9 +142,9 @@ export default function Register() {
           <div className="auth-container rounded-2xl shadow-2xl w-full max-w-lg p-10 lg:p-12">
             <div className="text-center mb-8">
               <h2 className="text-3xl lg:text-4xl font-black text-gray-900 dark:text-white mb-2">
-                Crear Cuenta
+                {t('register.title')}
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">Crea una cuenta nueva</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">{t('register.subtitle')}</p>
             </div>
 
             {serverError && (
@@ -160,7 +163,7 @@ export default function Register() {
               {/* Email Input */}
               <div className="relative">
                 <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Email
+                  {t('register.email_label')}
                 </label>
                 <div className="relative">
                   <input
@@ -181,7 +184,7 @@ export default function Register() {
                 {errors.email && (
                   <p id="email-error" className="mt-2 text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-1">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18.101 12.93a1 1 0 00-1.414-1.414L10 16.586 5.313 11.899a1 1 0 00-1.414 1.414l5.5 5.5a1 1 0 001.414 0l8.202-8.202z" clipRule="evenodd" /></svg>
-                    {errors.email.message}
+                    {t(errors.email.message!)}
                   </p>
                 )}
               </div>
@@ -189,7 +192,7 @@ export default function Register() {
               {/* Password Input */}
               <div className="relative">
                 <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Contraseña
+                  {t('login.password_label')}
                 </label>
                 <input
                   id="password"
@@ -203,7 +206,7 @@ export default function Register() {
                 {errors.password && (
                   <p id="password-error" className="mt-2 text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-1">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18.101 12.93a1 1 0 00-1.414-1.414L10 16.586 5.313 11.899a1 1 0 00-1.414 1.414l5.5 5.5a1 1 0 001.414 0l8.202-8.202z" clipRule="evenodd" /></svg>
-                    {errors.password.message}
+                    {t(errors.password.message!)}
                   </p>
                 )}
               </div>
@@ -211,7 +214,7 @@ export default function Register() {
               {/* Confirm Password Input */}
               <div className="relative">
                 <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Confirmar Contraseña
+                  {t('register.confirm_password_label')}
                 </label>
                 <input
                   id="confirmPassword"
@@ -225,7 +228,7 @@ export default function Register() {
                 {errors.confirmPassword && (
                   <p id="confirm-password-error" className="mt-2 text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-1">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18.101 12.93a1 1 0 00-1.414-1.414L10 16.586 5.313 11.899a1 1 0 00-1.414 1.414l5.5 5.5a1 1 0 001.414 0l8.202-8.202z" clipRule="evenodd" /></svg>
-                    {errors.confirmPassword.message}
+                    {t(errors.confirmPassword.message!)}
                   </p>
                 )}
               </div>
@@ -238,7 +241,7 @@ export default function Register() {
                   className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary mt-0.5"
                 />
                 <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition">
-                  Acepto los términos y condiciones de servicio
+                  {t('register.terms_conditions')}
                 </span>
               </label>
 
@@ -254,10 +257,10 @@ export default function Register() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
-                    Registrando...
+                    {t('register.submitting')}
                   </span>
                 ) : (
-                  'Crear Cuenta'
+                  t('register.submit_button')
                 )}
               </button>
             </form>
@@ -268,7 +271,7 @@ export default function Register() {
                 <div className="w-full border-t-2 border-gray-300 dark:border-gray-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 font-medium">o regístrate con</span>
+                <span className="px-4 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 font-medium">{t('register.or_register_with')}</span>
               </div>
             </div>
 
@@ -289,12 +292,12 @@ export default function Register() {
             {/* Sign In Link */}
             <div className="mt-8 text-center">
               <p className="text-gray-600 dark:text-gray-400 font-medium">
-                ¿Ya tienes cuenta?{' '}
+                {t('register.already_have_account')}{' '}
                 <Link
                   to="/login"
                   className="text-primary font-bold hover:text-primary/80 transition inline-flex items-center gap-1"
                 >
-                  Inicia sesión
+                  {t('register.login_link')}
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>

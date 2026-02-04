@@ -31,12 +31,16 @@ import { Role } from 'src/users/accounts/enum/role.enum';
 import { PaginationRequest } from '../../common/request/pagination.request.dto';
 import { PaginationResponse } from '../../common/interfaces/pagination-response.interface';
 import { ApiTags } from '@nestjs/swagger';
+import { ProfilesService } from 'src/users/profiles/profiles.service';
 
 @ApiTags('Routines')
 @Controller('workout/routines')
 @UseGuards(AuthGuard)
 export class RoutinesController {
-  constructor(private readonly routinesService: RoutinesService) {}
+  constructor(
+    private readonly routinesService: RoutinesService,
+    private readonly profilesService: ProfilesService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -59,8 +63,12 @@ export class RoutinesController {
   @ApiListRoutines()
   async findAll(
     @Query() pagination: PaginationRequest,
+    @Req() req: Request & { user?: any },
   ): Promise<ResponseBody<PaginationResponse<Routine>>> {
     const data = await this.routinesService.findAll(pagination);
+    if (req.user && req.user.sub) {
+      await this.profilesService.updateStreakByAccountId(req.user.sub);
+    }
     console.log("Routines retrieved:", data);
     return new ResponseBody(true, 'Routines retrieved successfully', data);
   }

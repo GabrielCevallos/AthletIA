@@ -1,21 +1,22 @@
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { useRoutines, type Routine } from '@/hooks/use-routines';
-import { translateRoutineGoal } from '@/services/routines-api';
 import { GlobalStyles } from '@/styles/global';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ActivityIndicator,
+    Alert,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from 'react-native';
 
 export default function RoutineDetailScreen() {
+  const { t, i18n } = useTranslation(['routines', 'common']);
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { fetchRoutineById, deleteRoutine, loading } = useRoutines();
@@ -35,8 +36,8 @@ export default function RoutineDetailScreen() {
     if (routineData) {
       setRoutine(routineData);
     } else {
-      Alert.alert('Error', 'No se pudo cargar la rutina', [
-        { text: 'OK', onPress: () => router.back() },
+      Alert.alert(t('common.error'), t('routines.detail.loadError'), [
+        { text: t('common.ok'), onPress: () => router.back() },
       ]);
     }
   };
@@ -45,19 +46,19 @@ export default function RoutineDetailScreen() {
     if (!routine) return;
 
     Alert.alert(
-      'Eliminar Rutina',
-      `¿Estás seguro de que deseas eliminar "${routine.name}"?`,
+      t('routines.detail.deleteTitle'),
+      t('routines.detail.deleteMessage', { name: routine.name }),
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Eliminar',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             const success = await deleteRoutine(routine.id);
             if (success) {
               router.back();
             } else {
-              Alert.alert('Error', 'No se pudo eliminar la rutina');
+              Alert.alert(t('common.error'), t('routines.detail.deleteError'));
             }
           },
         },
@@ -69,7 +70,7 @@ export default function RoutineDetailScreen() {
     return (
       <View style={styles.loadingScreen}>
         <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
-        <Text style={styles.loadingText}>Cargando rutina...</Text>
+        <Text style={styles.loadingText}>{t('routines.detail.loading')}</Text>
       </View>
     );
   }
@@ -78,8 +79,8 @@ export default function RoutineDetailScreen() {
     return (
       <View style={styles.errorScreen}>
         <Text style={styles.errorIcon}>❌</Text>
-        <Text style={styles.errorText}>Rutina no encontrada</Text>
-        <PrimaryButton label="Volver" onPress={() => router.back()} />
+        <Text style={styles.errorText}>{t('routines.detail.notFound')}</Text>
+        <PrimaryButton label={t('common.back')} onPress={() => router.back()} />
       </View>
     );
   }
@@ -91,7 +92,7 @@ export default function RoutineDetailScreen() {
         <Pressable style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backIcon}>←</Text>
         </Pressable>
-        <Text style={styles.title}>Detalle de Rutina</Text>
+        <Text style={styles.title}>{t('routines.detail.title')}</Text>
         <Pressable style={styles.deleteButton} onPress={handleDelete}>
           <Text style={styles.deleteIcon}>🗑️</Text>
         </Pressable>
@@ -113,14 +114,14 @@ export default function RoutineDetailScreen() {
           <View style={styles.badgeContainer}>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
-                {routine.official ? 'Oficial' : 'Personal'}
+                {routine.official ? t('routines.levels.official') : t('routines.levels.personal')}
               </Text>
             </View>
           </View>
 
           <View style={styles.metaSection}>
             <View style={styles.metaRow}>
-              <Text style={styles.metaLabel}>Ejercicios:</Text>
+              <Text style={styles.metaLabel}>{t('routines.detail.info.exercises')}</Text>
               <Text style={styles.metaValue}>
                 {routine.nExercises ?? routine.exercises?.length ?? 0}
               </Text>
@@ -131,11 +132,11 @@ export default function RoutineDetailScreen() {
         {/* Goals Section */}
         {routine.routineGoal && routine.routineGoal.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Objetivos</Text>
+            <Text style={styles.sectionTitle}>{t('routines.detail.goalsTitle')}</Text>
             <View style={styles.goalsContainer}>
               {routine.routineGoal.map((goal, index) => (
                 <View key={index} style={styles.goalChip}>
-                  <Text style={styles.goalChipText}>{translateRoutineGoal(goal)}</Text>
+                  <Text style={styles.goalChipText}>{t(`routines.goals.${goal}`)}</Text>
                 </View>
               ))}
             </View>
@@ -145,7 +146,7 @@ export default function RoutineDetailScreen() {
         {/* Exercises Section */}
         {routine.exercises && routine.exercises.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Ejercicios</Text>
+            <Text style={styles.sectionTitle}>{t('routines.exercises')}</Text>
             {routine.exercises.map((exercise, index) => (
               <View key={exercise.id} style={styles.exerciseCard}>
                 <View style={styles.exerciseNumber}>
@@ -168,17 +169,17 @@ export default function RoutineDetailScreen() {
         <View style={styles.metadataCard}>
           {routine.createdAt && (
             <View style={styles.metadataRow}>
-              <Text style={styles.metadataLabel}>Creado:</Text>
+              <Text style={styles.metadataLabel}>{t('routines.detail.info.created')}</Text>
               <Text style={styles.metadataValue}>
-                {new Date(routine.createdAt).toLocaleDateString('es-ES')}
+                {new Date(routine.createdAt).toLocaleDateString(i18n.language)}
               </Text>
             </View>
           )}
           {routine.updatedAt && (
             <View style={styles.metadataRow}>
-              <Text style={styles.metadataLabel}>Última actualización:</Text>
+              <Text style={styles.metadataLabel}>{t('routines.detail.info.updated')}</Text>
               <Text style={styles.metadataValue}>
-                {new Date(routine.updatedAt).toLocaleDateString('es-ES')}
+                {new Date(routine.updatedAt).toLocaleDateString(i18n.language)}
               </Text>
             </View>
           )}

@@ -14,7 +14,7 @@ async function generateOpenApiJson() {
   const config = new DocumentBuilder()
     .setTitle('AthletIA API')
     .setDescription('API documentation for AthletIA')
-    .setVersion(process.env.npm_package_version || '0.0.1')
+    .setVersion(process.env.npm_package_version || '0.1.1')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       'access-token',

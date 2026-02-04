@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DumbbellIcon } from '@/components/ui/dumbbell-icon';
@@ -15,6 +16,7 @@ type MeasurementData = {
 };
 
 export default function DashboardScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuth();
   const { splits, fetchSplits, loading: splitsLoading } = useSplits();
@@ -26,9 +28,9 @@ export default function DashboardScreen() {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return '¡Buenos días';
-    if (hour < 19) return '¡Buenas tardes';
-    return '¡Buenas noches';
+    if (hour < 12) return t('dashboard.greeting.morning');
+    if (hour < 19) return t('dashboard.greeting.afternoon');
+    return t('dashboard.greeting.night');
   };
 
   useEffect(() => {
@@ -93,7 +95,7 @@ export default function DashboardScreen() {
         <View style={styles.headerRow}>
           <View style={styles.brandRow}>
             <DumbbellIcon size={24} />
-            <Text style={styles.brandText}>AthletIA</Text>
+            <Text style={styles.brandText}>{t('dashboard.screenTitle')}</Text>
           </View>
         </View>
 
@@ -102,7 +104,7 @@ export default function DashboardScreen() {
           <Text style={styles.greetingText}>
             {getGreeting()}, <Text style={styles.greetingName}>{userName}</Text>! 💪
           </Text>
-          <Text style={styles.greetingSubtext}>¿Listo para entrenar hoy?</Text>
+          <Text style={styles.greetingSubtext}>{t('dashboard.greeting.subtitle')}</Text>
         </View>
 
         {/* Estadísticas reales */}
@@ -111,21 +113,21 @@ export default function DashboardScreen() {
             <View style={[styles.statIconWrapper, styles.statIconCheck]}>
               <Text style={styles.statIconText}>🏋️</Text>
             </View>
-            <Text style={styles.statLabel}>Mis Rutinas</Text>
+            <Text style={styles.statLabel}>{t('dashboard.stats.routines')}</Text>
             <Text style={styles.statValue}>{totalRoutines}</Text>
           </Pressable>
           <Pressable style={styles.statCard} onPress={() => router.push('/(tabs)/splits')}>
             <View style={[styles.statIconWrapper, styles.statIconFire]}>
               <Text style={styles.statIconText}>📋</Text>
             </View>
-            <Text style={styles.statLabel}>Splits Activos</Text>
+            <Text style={styles.statLabel}>{t('dashboard.stats.activeSplits')}</Text>
             <Text style={styles.statValue}>{activeSplits}</Text>
           </Pressable>
           <Pressable style={styles.statCard} onPress={() => router.push('/measurements')}>
             <View style={[styles.statIconWrapper, styles.statIconWeight]}>
               <Text style={styles.statIconText}>⚖️</Text>
             </View>
-            <Text style={styles.statLabel}>Último Peso</Text>
+            <Text style={styles.statLabel}>{t('dashboard.stats.lastWeight')}</Text>
             <Text style={styles.statValue}>{lastWeight ? `${lastWeight}kg` : '--'}</Text>
           </Pressable>
         </View>
@@ -134,26 +136,26 @@ export default function DashboardScreen() {
         <View style={styles.actionCard}>
           {activeSplits > 0 ? (
             <>
-              <Text style={styles.actionBadge}>ACCIÓN RÁPIDA</Text>
-              <Text style={styles.actionTitle}>Continuar entrenamiento</Text>
+              <Text style={styles.actionBadge}>{t('dashboard.actions.quickAction')}</Text>
+              <Text style={styles.actionTitle}>{t('dashboard.actions.continueTraining')}</Text>
               <Text style={styles.actionSubtext}>
-                Tienes {activeSplits} split{activeSplits > 1 ? 's' : ''} activo{activeSplits > 1 ? 's' : ''}
+                {t('dashboard.actions.activeSplits', { count: activeSplits })}
               </Text>
               <PrimaryButton
-                label="Ver mis Splits"
+                label={t('dashboard.actions.viewSplits')}
                 onPress={() => router.push('/(tabs)/splits')}
                 style={styles.actionButton}
               />
             </>
           ) : (
             <>
-              <Text style={styles.actionBadge}>COMIENZA AHORA</Text>
-              <Text style={styles.actionTitle}>Crea tu primer split</Text>
+              <Text style={styles.actionBadge}>{t('dashboard.actions.startNow')}</Text>
+              <Text style={styles.actionTitle}>{t('dashboard.actions.createTitle')}</Text>
               <Text style={styles.actionSubtext}>
-                Organiza tus rutinas y alcanza tus objetivos
+                {t('dashboard.actions.createSubtitle')}
               </Text>
               <PrimaryButton
-                label="Crear Split"
+                label={t('dashboard.actions.createButton')}
                 onPress={() => router.push('/create-split')}
                 style={styles.actionButton}
               />
@@ -163,23 +165,23 @@ export default function DashboardScreen() {
 
         {/* Accesos rápidos */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Accesos rápidos</Text>
+          <Text style={styles.sectionTitle}>{t('dashboard.quickAccess.title')}</Text>
           <View style={styles.quickAccessGrid}>
             <Pressable style={styles.quickAccessCard} onPress={() => router.push('/measurements')}>
               <Text style={styles.quickAccessIcon}>📊</Text>
-              <Text style={styles.quickAccessLabel}>Medidas</Text>
+              <Text style={styles.quickAccessLabel}>{t('dashboard.quickAccess.measurements')}</Text>
             </Pressable>
             <Pressable style={styles.quickAccessCard} onPress={() => router.push('/(tabs)/routines')}>
               <Text style={styles.quickAccessIcon}>🏋️</Text>
-              <Text style={styles.quickAccessLabel}>Rutinas</Text>
+              <Text style={styles.quickAccessLabel}>{t('dashboard.quickAccess.routines')}</Text>
             </Pressable>
             <Pressable style={styles.quickAccessCard} onPress={() => router.push('/(tabs)/splits')}>
               <Text style={styles.quickAccessIcon}>📋</Text>
-              <Text style={styles.quickAccessLabel}>Splits</Text>
+              <Text style={styles.quickAccessLabel}>{t('dashboard.quickAccess.splits')}</Text>
             </Pressable>
             <Pressable style={styles.quickAccessCard} onPress={() => router.push('/(tabs)/exercises')}>
               <Text style={styles.quickAccessIcon}>💪</Text>
-              <Text style={styles.quickAccessLabel}>Ejercicios</Text>
+              <Text style={styles.quickAccessLabel}>{t('dashboard.quickAccess.exercises')}</Text>
             </Pressable>
           </View>
         </View>

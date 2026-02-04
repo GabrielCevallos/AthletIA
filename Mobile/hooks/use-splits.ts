@@ -49,7 +49,14 @@ export function useSplits(): UseSplitsReturn {
           offset: params?.offset,
         });
 
-        setSplits(response.items);
+        const items = response.items || [];
+        // Deduplicate splits based on ID
+        const uniqueItems = Array.from(new Map(items.map((item) => [item.id, item])).values());
+        if (items.length !== uniqueItems.length) {
+          console.warn(`[use-splits] Found ${items.length - uniqueItems.length} duplicate splits`);
+        }
+
+        setSplits(uniqueItems);
         setTotal(response.total || 0);
       } catch (err) {
         await handleApiError(err);

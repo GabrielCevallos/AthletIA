@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface AccessibilitySettings {
   textSize: number // 100, 110, 120, 130, 140
@@ -38,6 +39,7 @@ const defaultSettings: AccessibilitySettings = {
 }
 
 export function AccessibilityProvider({ children }: { children: ReactNode }) {
+  const { i18n } = useTranslation()
   const [settings, setSettings] = useState<AccessibilitySettings>(() => {
     const saved = localStorage.getItem('accessibility-settings')
     return saved ? JSON.parse(saved) : defaultSettings
@@ -149,7 +151,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
 
       const newUtterance = new SpeechSynthesisUtterance(text)
       newUtterance.rate = settings.readingSpeed
-      newUtterance.lang = 'es-ES'
+      newUtterance.lang = i18n.language.startsWith('es') ? 'es-ES' : 'en-US'
       
       newUtterance.onend = () => {
         setIsReading(false)
@@ -183,7 +185,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
       window.speechSynthesis.cancel()
       const newUtterance = new SpeechSynthesisUtterance(utterance.text)
       newUtterance.rate = settings.readingSpeed
-      newUtterance.lang = 'es-ES'
+      newUtterance.lang = i18n.language.startsWith('es') ? 'es-ES' : 'en-US'
       newUtterance.onend = () => setIsReading(false)
       newUtterance.onerror = () => setIsReading(false)
       setUtterance(newUtterance)

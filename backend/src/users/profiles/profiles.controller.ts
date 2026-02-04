@@ -29,7 +29,7 @@ import { Role } from '../accounts/enum/role.enum';
 import { ApiExtraModels, ApiTags } from '@nestjs/swagger';
 
 @UseGuards(AuthGuard, RolesGuard)
-@ApiTags('profiles')
+@ApiTags('Profiles')
 @ApiExtraModels(Profile)
 @Controller('profiles')
 export class ProfilesController {

@@ -4,9 +4,9 @@ import { useSplits } from '@/hooks/use-splits';
 import { GlobalStyles } from '@/styles/global';
 import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-const DAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 const DAY_MAP: { [key: string]: number } = {
   'Monday': 0,
   'Tuesday': 1,
@@ -18,8 +18,12 @@ const DAY_MAP: { [key: string]: number } = {
 };
 
 export default function SplitsTabScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { splits, loading, refresh, deleteSplit } = useSplits();
+  
+  // Obtener los días traducidos como array
+  const DAYS = t('splits.daysShort', { returnObjects: true }) as string[];
 
   const onRefresh = useCallback(() => {
     refresh();
@@ -27,19 +31,19 @@ export default function SplitsTabScreen() {
 
   const handleDeleteSplit = (splitId: string, splitName: string) => {
     Alert.alert(
-      'Eliminar Split',
-      `¿Estás seguro de que deseas eliminar "${splitName}"?`,
+      t('splits.delete.title'),
+      t('splits.delete.message', { name: splitName }),
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Eliminar',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             const success = await deleteSplit(splitId);
             if (success) {
-              Alert.alert('Éxito', 'Split eliminado exitosamente');
+              Alert.alert(t('common.success'), t('splits.delete.success'));
             } else {
-              Alert.alert('Error', 'No se pudo eliminar el split');
+              Alert.alert(t('common.error'), t('splits.delete.error'));
             }
           },
         },
@@ -56,8 +60,8 @@ export default function SplitsTabScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Mis Splits</Text>
-          <Text style={styles.subtitle}>Gestiona tus planes de entrenamiento</Text>
+          <Text style={styles.title}>{t('splits.title')}</Text>
+          <Text style={styles.subtitle}>{t('splits.subtitle')}</Text>
         </View>
         <Pressable style={styles.notificationButton}>
           <Text style={styles.bellIcon}>🔔</Text>
@@ -75,18 +79,22 @@ export default function SplitsTabScreen() {
         {loading && splits.length === 0 ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
-            <Text style={styles.loadingText}>Cargando splits...</Text>
+            <Text style={styles.loadingText}>{t('splits.loading')}</Text>
           </View>
         ) : splits.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>📋</Text>
-            <Text style={styles.emptyTitle}>No tienes splits</Text>
-            <Text style={styles.emptyText}>Crea tu primer plan de entrenamiento</Text>
+            <Text style={styles.emptyTitle}>{t('splits.empty.title')}</Text>
+            <Text style={styles.emptyText}>{t('splits.empty.subtitle')}</Text>
           </View>
         ) : (
           splits.map((split) => {
             const activeDays = split.trainingDays.map(day => DAY_MAP[day] || 0);
-            const frequency = `${split.trainingDays.length} ${split.trainingDays.length === 1 ? 'día' : 'días'} / semana`;
+            const frequency = `${split.trainingDays.length} ${
+              split.trainingDays.length === 1 
+                ? t('splits.frequency.day') 
+                : t('splits.frequency.days')
+            } / ${t('splits.frequency.week')}`;
             
             return (
               <Pressable 
@@ -128,13 +136,13 @@ export default function SplitsTabScreen() {
                     style={styles.viewButton}
                     onPress={() => handleViewDetails(split.id)}
                   >
-                    <Text style={styles.viewButtonText}>Ver Detalles</Text>
+                    <Text style={styles.viewButtonText}>{t('splits.actions.viewDetails')}</Text>
                   </Pressable>
                   <Pressable 
                     style={styles.deleteButton}
                     onPress={() => handleDeleteSplit(split.id, split.name)}
                   >
-                    <Text style={styles.deleteButtonText}>Eliminar</Text>
+                    <Text style={styles.deleteButtonText}>{t('splits.actions.delete')}</Text>
                   </Pressable>
                 </View>
               </Pressable>
@@ -148,7 +156,7 @@ export default function SplitsTabScreen() {
           onPress={() => router.push('/create-split')}
         >
           <IconSymbol size={32} name="plus" color={Colors.primary.DEFAULT} />
-          <Text style={styles.addText}>Crear Nuevo Split</Text>
+          <Text style={styles.addText}>{t('splits.actions.create')}</Text>
         </Pressable>
       </ScrollView>
     </View>
