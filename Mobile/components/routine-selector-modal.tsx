@@ -1,7 +1,7 @@
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
 import { useRoutines, type Routine } from '@/hooks/use-routines';
-import { translateRoutineGoal } from '@/services/routines-api';
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ActivityIndicator,
     FlatList,
@@ -28,6 +28,7 @@ export function RoutineSelectorModal({
   selectedRoutineIds = [],
   maxSelection,
 }: RoutineSelectorModalProps) {
+  const { t } = useTranslation();
   const { routines, loading, error } = useRoutines();
   const [searchText, setSearchText] = useState('');
   const [localSelected, setLocalSelected] = useState<Set<string>>(new Set(selectedRoutineIds));
@@ -42,10 +43,10 @@ export function RoutineSelectorModal({
         routine.name.toLowerCase().includes(lowerSearch) ||
         routine.description?.toLowerCase().includes(lowerSearch) ||
         routine.routineGoal?.some(goal => 
-          translateRoutineGoal(goal).toLowerCase().includes(lowerSearch)
+          t(`routines.goals.${goal}`).toLowerCase().includes(lowerSearch)
         )
     );
-  }, [routines, searchText]);
+  }, [routines, searchText, t]);
 
   const toggleRoutine = useCallback(
     (routineId: string) => {
@@ -81,7 +82,7 @@ export function RoutineSelectorModal({
   const renderRoutineItem = useCallback(
     ({ item }: { item: Routine }) => {
       const isSelected = localSelected.has(item.id);
-      const goals = item.routineGoal?.map(translateRoutineGoal).join(' · ') || 'Sin objetivo';
+      const goals = item.routineGoal?.map(goal => t(`routines.goals.${goal}`)).join(' · ') || t('routines.defaultGoal');
       const exerciseCount = item.nExercises ?? item.exercises?.length ?? 0;
 
       return (
@@ -109,7 +110,7 @@ export function RoutineSelectorModal({
 
             <View style={styles.routineMeta}>
               <Text style={styles.metaText}>📊 {goals}</Text>
-              <Text style={styles.metaText}>💪 {exerciseCount} ejercicios</Text>
+              <Text style={styles.metaText}>💪 {exerciseCount} {t('routines.exercises').toLowerCase()}</Text>
             </View>
           </View>
 
@@ -119,7 +120,7 @@ export function RoutineSelectorModal({
         </Pressable>
       );
     },
-    [localSelected, toggleRoutine]
+    [localSelected, toggleRoutine, t]
   );
 
   return (

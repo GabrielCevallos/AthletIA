@@ -4,7 +4,8 @@ import { useSplits, type Split } from '@/hooks/use-splits';
 import type { TrainingDay } from '@/services/splits-api';
 import { GlobalStyles } from '@/styles/global';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ActivityIndicator,
     Alert,
@@ -16,20 +17,24 @@ import {
     View,
 } from 'react-native';
 
-const DAYS_OF_WEEK = [
-  { id: 'Monday', label: 'L', full: 'Lunes' },
-  { id: 'Tuesday', label: 'M', full: 'Martes' },
-  { id: 'Wednesday', label: 'X', full: 'Miércoles' },
-  { id: 'Thursday', label: 'J', full: 'Jueves' },
-  { id: 'Friday', label: 'V', full: 'Viernes' },
-  { id: 'Saturday', label: 'S', full: 'Sábado' },
-  { id: 'Sunday', label: 'D', full: 'Domingo' },
-] as const;
-
 export default function SplitDetailScreen() {
+  const { t } = useTranslation(['splits', 'common']);
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { fetchSplitById, updateSplit, loading } = useSplits();
+
+  const daysShort = t('splits.daysShort', { returnObjects: true }) as string[];
+  const daysLong = t('splits.daysLong', { returnObjects: true }) as string[];
+
+  const daysOfWeek = useMemo(() => [
+    { id: 'Monday', label: daysShort[0], full: daysLong[0] },
+    { id: 'Tuesday', label: daysShort[1], full: daysLong[1] },
+    { id: 'Wednesday', label: daysShort[2], full: daysLong[2] },
+    { id: 'Thursday', label: daysShort[3], full: daysLong[3] },
+    { id: 'Friday', label: daysShort[4], full: daysLong[4] },
+    { id: 'Saturday', label: daysShort[5], full: daysLong[5] },
+    { id: 'Sunday', label: daysShort[6], full: daysLong[6] },
+  ], [daysShort, daysLong]);
 
   const [split, setSplit] = useState<Split | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -53,8 +58,8 @@ export default function SplitDetailScreen() {
       setDescription(splitData.description);
       setSelectedDays(splitData.trainingDays);
     } else {
-      Alert.alert('Error', 'No se pudo cargar el split', [
-        { text: 'OK', onPress: () => router.back() },
+      Alert.alert(t('common.error'), t('splits.detail.loadError'), [
+        { text: t('common.ok'), onPress: () => router.back() },
       ]);
     }
   };
@@ -67,7 +72,7 @@ export default function SplitDetailScreen() {
 
   const handleSave = async () => {
     if (!split || !name.trim() || selectedDays.length === 0) {
-      Alert.alert('Error', 'Por favor completa el nombre y selecciona al menos un día de entrenamiento.');
+      Alert.alert(t('common.error'), t('splits.detail.validationError'));
       return;
     }
 
@@ -80,9 +85,9 @@ export default function SplitDetailScreen() {
     if (result) {
       setSplit(result);
       setIsEditing(false);
-      Alert.alert('Éxito', 'Split actualizado exitosamente');
+      Alert.alert(t('common.success'), t('splits.detail.updateSuccess'));
     } else {
-      Alert.alert('Error', 'No se pudo actualizar el split');
+      Alert.alert(t('common.error'), t('splits.detail.updateError'));
     }
   };
 
@@ -99,7 +104,7 @@ export default function SplitDetailScreen() {
     return (
       <View style={styles.loadingScreen}>
         <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
-        <Text style={styles.loadingText}>Cargando split...</Text>
+        <Text style={styles.loadingText}>{t('splits.detail.loading')}</Text>
       </View>
     );
   }
@@ -108,8 +113,8 @@ export default function SplitDetailScreen() {
     return (
       <View style={styles.errorScreen}>
         <Text style={styles.errorIcon}>❌</Text>
-        <Text style={styles.errorText}>Split no encontrado</Text>
-        <PrimaryButton label="Volver" onPress={() => router.back()} />
+        <Text style={styles.errorText}>{t('splits.detail.notFound')}</Text>
+        <PrimaryButton label={t('common.back')} onPress={() => router.back()} />
       </View>
     );
   }
@@ -121,7 +126,7 @@ export default function SplitDetailScreen() {
         <Pressable style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backIcon}>←</Text>
         </Pressable>
-        <Text style={styles.title}>Detalle del Split</Text>
+        <Text style={styles.title}>{t('splits.detail.title')}</Text>
         {!isEditing && (
           <Pressable style={styles.editButton} onPress={() => setIsEditing(true)}>
             <Text style={styles.editIcon}>✏️</Text>
@@ -140,11 +145,11 @@ export default function SplitDetailScreen() {
             {/* Name Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                Nombre <Text style={styles.required}>*</Text>
+                {t('splits.detail.labels.name')} <Text style={styles.required}>*</Text>
               </Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ej: Push/Pull/Legs"
+                placeholder={t('splits.detail.placeholders.name')}
                 placeholderTextColor={Colors.text.muted}
                 value={name}
                 onChangeText={setName}
@@ -153,10 +158,10 @@ export default function SplitDetailScreen() {
 
             {/* Description Input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Descripción</Text>
+              <Text style={styles.label}>{t('splits.detail.labels.description')}</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
-                placeholder="Describe tu split..."
+                placeholder={t('splits.detail.placeholders.description')}
                 placeholderTextColor={Colors.text.muted}
                 value={description}
                 onChangeText={setDescription}
@@ -168,10 +173,10 @@ export default function SplitDetailScreen() {
             {/* Days Selection */}
             <View style={styles.daysSection}>
               <Text style={styles.label}>
-                Días de entrenamiento <Text style={styles.required}>*</Text>
+                {t('splits.detail.labels.days')} <Text style={styles.required}>*</Text>
               </Text>
               <View style={styles.daysGrid}>
-                {DAYS_OF_WEEK.map((day) => (
+                {daysOfWeek.map((day) => (
                   <Pressable
                     key={day.id}
                     style={[
@@ -197,11 +202,11 @@ export default function SplitDetailScreen() {
             <View style={styles.actions}>
               <View style={styles.buttonRow}>
                 <Pressable style={styles.cancelButton} onPress={handleCancel}>
-                  <Text style={styles.cancelButtonText}>Cancelar</Text>
+                  <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
                 </Pressable>
                 <View style={{ flex: 1 }}>
                   <PrimaryButton
-                    label={loading ? 'Guardando...' : 'Guardar'}
+                    label={loading ? t('common.loading') : t('common.save')}
                     onPress={handleSave}
                     disabled={!name || selectedDays.length === 0 || loading}
                   />
@@ -218,18 +223,18 @@ export default function SplitDetailScreen() {
                 <Text style={styles.splitDescription}>{split.description}</Text>
               )}
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Días de entrenamiento:</Text>
+                <Text style={styles.metaLabel}>{t('splits.detail.labels.days')}:</Text>
                 <Text style={styles.metaValue}>
-                  {split.trainingDays.length} {split.trainingDays.length === 1 ? 'día' : 'días'} / semana
+                  {split.trainingDays.length} {split.trainingDays.length === 1 ? t('splits.frequency.day') : t('splits.frequency.days')} / {t('splits.frequency.week')}
                 </Text>
               </View>
             </View>
 
             {/* Days Display */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Días de Entrenamiento</Text>
+              <Text style={styles.sectionTitle}>{t('splits.detail.labels.days')}</Text>
               <View style={styles.daysDisplayGrid}>
-                {DAYS_OF_WEEK.map((day) => {
+                {daysOfWeek.map((day) => {
                   const isActive = split.trainingDays.includes(day.id as TrainingDay);
                   return (
                     <View key={day.id} style={styles.dayDisplayCard}>
@@ -258,7 +263,7 @@ export default function SplitDetailScreen() {
             {/* Routines Section */}
             {split.routines && split.routines.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Rutinas Asignadas</Text>
+                <Text style={styles.sectionTitle}>{t('routines.title')}</Text>
                 {split.routines.map((routine) => (
                   <View key={routine.id} style={styles.routineCard}>
                     <Text style={styles.routineName}>{routine.name}</Text>
@@ -271,17 +276,17 @@ export default function SplitDetailScreen() {
             <View style={styles.metadataCard}>
               {split.createdAt && (
                 <View style={styles.metadataRow}>
-                  <Text style={styles.metadataLabel}>Creado:</Text>
+                  <Text style={styles.metadataLabel}>{t('routines.detail.info.created')}</Text>
                   <Text style={styles.metadataValue}>
-                    {new Date(split.createdAt).toLocaleDateString('es-ES')}
+                    {new Date(split.createdAt).toLocaleDateString(i18n.language)}
                   </Text>
                 </View>
               )}
               {split.updatedAt && (
                 <View style={styles.metadataRow}>
-                  <Text style={styles.metadataLabel}>Última actualización:</Text>
+                  <Text style={styles.metadataLabel}>{t('routines.detail.info.updated')}</Text>
                   <Text style={styles.metadataValue}>
-                    {new Date(split.updatedAt).toLocaleDateString('es-ES')}
+                    {new Date(split.updatedAt).toLocaleDateString(i18n.language)}
                   </Text>
                 </View>
               )}

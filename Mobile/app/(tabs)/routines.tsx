@@ -1,13 +1,14 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { useRoutines } from '@/hooks/use-routines';
-import { translateRoutineGoal } from '@/services/routines-api';
 import { GlobalStyles } from '@/styles/global';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function RoutinesScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { routines, loading, error } = useRoutines();
 
@@ -27,21 +28,21 @@ export default function RoutinesScreen() {
         id: routine.id,
         name: routine.name,
         type: routine.routineGoal?.length 
-          ? routine.routineGoal.map(translateRoutineGoal).join(' · ') 
-          : 'Objetivo general',
+          ? routine.routineGoal.map(goal => t(`routines.goals.${goal}`)).join(' · ') 
+          : t('routines.defaultGoal'),
         duration: '—',
-        level: routine.official ? 'Oficial' : 'Personal',
+        level: routine.official ? t('routines.levels.official') : t('routines.levels.personal'),
         exercises: routine.nExercises ?? routine.exercises?.length ?? 0,
         active: routine.official,
       })),
-    [routines]
+    [routines, t]
   );
 
   return (
     <View style={styles.screen}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Mis Rutinas</Text>
+        <Text style={styles.title}>{t('routines.title')}</Text>
         <View style={styles.headerButtons}>
           <Pressable style={styles.headerButton}>
             <Text style={styles.buttonIcon}>🔍</Text>
@@ -58,10 +59,10 @@ export default function RoutinesScreen() {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {loading && <Text style={styles.statusText}>Cargando rutinas...</Text>}
+        {loading && <Text style={styles.statusText}>{t('routines.loading')}</Text>}
         {!loading && error && <Text style={styles.errorText}>{error}</Text>}
         {!loading && !error && routinesUi.length === 0 && (
-          <Text style={styles.statusText}>Aún no tienes rutinas.</Text>
+          <Text style={styles.statusText}>{t('routines.empty')}</Text>
         )}
 
         {routinesUi.map((routine) => (
@@ -78,7 +79,7 @@ export default function RoutinesScreen() {
               {routine.active && (
                 <View style={styles.activeBadge}>
                   <View style={styles.activeDot} />
-                  <Text style={styles.activeBadgeText}>ACTIVA</Text>
+                  <Text style={styles.activeBadgeText}>{t('routines.active')}</Text>
                 </View>
               )}
             </View>
@@ -94,7 +95,7 @@ export default function RoutinesScreen() {
               </View>
               <View style={styles.metaItem}>
                 <Text style={styles.metaIcon}>💪</Text>
-                <Text style={styles.metaText}>{routine.exercises} Ejercicios</Text>
+                <Text style={styles.metaText}>{routine.exercises} {t('routines.exercises')}</Text>
               </View>
             </View>
           </Pressable>
@@ -106,7 +107,7 @@ export default function RoutinesScreen() {
           onPress={() => router.push('/routine-builder')}
         >
           <IconSymbol size={32} name="plus" color={Colors.primary.DEFAULT} />
-          <Text style={styles.addText}>Nueva Rutina</Text>
+          <Text style={styles.addText}>{t('routines.newRoutine')}</Text>
         </Pressable>
       </ScrollView>
     </View>

@@ -6,7 +6,9 @@ import { ActivityIndicator, View } from 'react-native';
 import 'react-native-reanimated';
 
 import { AuthProvider, useAuth } from '@/context/auth-context';
+import { NotificationProvider } from '@/context/notification-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import '../i18n';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -82,7 +84,9 @@ function RootNavigation() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootNavigation />
+      <NotificationProvider>
+        <RootNavigation />
+      </NotificationProvider>
     </AuthProvider>
   );
 }

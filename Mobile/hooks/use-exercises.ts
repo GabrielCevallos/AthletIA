@@ -103,7 +103,14 @@ export function useExercises(muscleTarget?: string): UseExercisesReturn {
 
       // Normalizar datos de la API
       const normalized = items.map(normalizeExercise);
-      setExercises(normalized);
+
+      // Deduplicate exercises based on ID
+      const uniqueNormalized = Array.from(new Map(normalized.map((item: any) => [item.id, item])).values());
+      if (normalized.length !== uniqueNormalized.length) {
+        console.warn(`[use-exercises] Found ${normalized.length - uniqueNormalized.length} duplicate exercises`);
+      }
+
+      setExercises(uniqueNormalized);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar ejercicios';
       setError(errorMessage);

@@ -5,6 +5,7 @@ import { useExercises } from '@/hooks/use-exercises';
 import { GlobalStyles } from '@/styles/global';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Image,
@@ -36,6 +37,7 @@ const MUSCLE_TARGETS = [
 ];
 
 export default function ExercisesScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const muscleTargetsScrollRef = useRef<ScrollView>(null);
@@ -74,8 +76,15 @@ export default function ExercisesScreen() {
 
   // Función auxiliar para traducir muscle target del backend al español
   const getMuscleTargetLabel = (muscleTargetId?: string): string => {
+    // Try to find the muscle target in the list first
     const target = MUSCLE_TARGETS.find((t) => t.id === muscleTargetId);
-    return target?.label || 'General';
+    // If not found, use the id itself
+    const targetKey = target ? target.id : (muscleTargetId || 'general');
+    
+    // Use translation key, fallback to label or id
+    return t(`exercises.muscleTargets.${targetKey}`, { 
+      defaultValue: target?.label || muscleTargetId || 'General' 
+    });
   };
 
   // Filtrar búsqueda localmente
@@ -123,12 +132,12 @@ export default function ExercisesScreen() {
 
   const handleCreateExercise = async () => {
     if (!user?.token) {
-      setCreateError('Usuario no autenticado');
+      setCreateError(t('exercises.create.errorAuth'));
       return;
     }
 
     if (!createForm.name.trim() || !createForm.description.trim() || !createForm.video.trim()) {
-      setCreateError('Completa nombre, descripción y video');
+      setCreateError(t('exercises.create.errorFields'));
       return;
     }
 
@@ -141,7 +150,7 @@ export default function ExercisesScreen() {
     const maxRestTime = toNumber(createForm.maxRestTime);
 
     if ([minSets, maxSets, minReps, maxReps, minRestTime, maxRestTime].some((v) => Number.isNaN(v))) {
-      setCreateError('Revisa los campos numéricos');
+      setCreateError(t('exercises.create.errorNumbers'));
       return;
     }
 
@@ -149,10 +158,17 @@ export default function ExercisesScreen() {
       .split(',')
       .map((item) => item.trim())
       .filter(Boolean);
+      
     const exerciseType = createForm.exerciseType
       .split(',')
       .map((item) => item.trim())
       .filter(Boolean);
+
+    if (muscleTarget.length === 0 || exerciseType.length === 0) {
+      setCreateError(t('exercises.create.errorTargetType'));
+      return;
+    }
+
     const instructions = createForm.instructions
       .split('\n')
       .map((item) => item.trim())
@@ -199,12 +215,12 @@ export default function ExercisesScreen() {
       }
 
       if (response.status === 401) {
-        setCreateError(result?.message || 'Sesión expirada. Por favor, inicia sesión nuevamente.');
+        setCreateError(result?.message || t('completeProfile.errors.sessionExpired'));
         return;
       }
 
       if (response.status === 403) {
-        setCreateError(result?.message || 'No tienes permisos para crear ejercicios.');
+        setCreateError(result?.message || t('exercises.create.errorPermissions'));
         return;
       }
 
@@ -213,11 +229,11 @@ export default function ExercisesScreen() {
         return;
       }
 
-      setCreateSuccess('Ejercicio creado correctamente');
+      setCreateSuccess(t('exercises.create.success'));
       resetCreateForm();
       void refetch();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al crear ejercicio';
+      const errorMessage = err instanceof Error ? err.message : t('exercises.create.errorGeneric');
       setCreateError(errorMessage);
     } finally {
       setCreateLoading(false);
@@ -229,7 +245,7 @@ export default function ExercisesScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Text style={styles.title}>Biblioteca de Ejercicios</Text>
+          <Text style={styles.title}>{t('exercises.title')}</Text>
           {user?.role === 'admin' && (
             <Pressable
               style={styles.addExerciseButton}
@@ -239,7 +255,7 @@ export default function ExercisesScreen() {
                 setIsCreateModalVisible(true);
               }}
             >
-              <Text style={styles.addExerciseButtonText}>+ Nuevo</Text>
+              <Text style={styles.addExerciseButtonText}>{t('exercises.newButton')}</Text>
             </Pressable>
           )}
         </View>
@@ -249,7 +265,7 @@ export default function ExercisesScreen() {
           <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
             style={styles.searchInput}
-            placeholder="Buscar ejercicios..."
+            placeholder={t('exercises.searchPlaceholder')}
             placeholderTextColor={Colors.text.muted}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -263,7 +279,7 @@ export default function ExercisesScreen() {
           <Text style={styles.errorIcon}>⚠️</Text>
           <Text style={styles.errorText}>{error}</Text>
           <Pressable onPress={() => void refetch()}>
-            <Text style={styles.retryText}>Reintentar</Text>
+            <Text style={styles.retryText}>{t('exercises.retry')}</Text>
           </Pressable>
         </View>
       )}
@@ -295,7 +311,7 @@ export default function ExercisesScreen() {
                 selectedMuscleTarget === target.id && styles.categoryTextActive,
               ]}
             >
-              {target.label}
+              {t(`exercises.muscleTargets.${target.id}`)}
             </Text>
           </Pressable>
         ))}
@@ -305,7 +321,7 @@ export default function ExercisesScreen() {
       {loading && exercises.length === 0 ? (
         <View style={[styles.content, { justifyContent: 'center' }]}>
           <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
-          <Text style={styles.loadingText}>Cargando ejercicios...</Text>
+          <Text style={styles.loadingText}>{t('exercises.loading')}</Text>
         </View>
       ) : (
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -343,9 +359,9 @@ export default function ExercisesScreen() {
           ) : (
             <View style={styles.emptyState}>
               <Text style={styles.emptyIcon}>🏋️</Text>
-              <Text style={styles.emptyTitle}>Sin ejercicios</Text>
+              <Text style={styles.emptyTitle}>{t('exercises.empty.title')}</Text>
               <Text style={styles.emptyText}>
-                No hay ejercicios disponibles en esta categoría.
+                {t('exercises.empty.text')}
               </Text>
             </View>
           )}
@@ -361,7 +377,7 @@ export default function ExercisesScreen() {
         <View style={styles.modalBackdrop}>
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Nuevo ejercicio</Text>
+              <Text style={styles.modalTitle}>{t('exercises.create.title')}</Text>
               <Pressable onPress={() => setIsCreateModalVisible(false)}>
                 <Text style={styles.modalClose}>✕</Text>
               </Pressable>
@@ -371,7 +387,7 @@ export default function ExercisesScreen() {
               {createError && <Text style={styles.modalError}>{createError}</Text>}
               {createSuccess && <Text style={styles.modalSuccess}>{createSuccess}</Text>}
 
-              <Text style={styles.modalLabel}>Nombre</Text>
+              <Text style={styles.modalLabel}>{t('exercises.create.labels.name')}</Text>
               <TextInput
                 style={styles.modalInput}
                 value={createForm.name}
@@ -380,17 +396,17 @@ export default function ExercisesScreen() {
                 placeholderTextColor={Colors.text.muted}
               />
 
-              <Text style={styles.modalLabel}>Descripción</Text>
+              <Text style={styles.modalLabel}>{t('exercises.create.labels.description')}</Text>
               <TextInput
                 style={[styles.modalInput, styles.modalInputMultiline]}
                 value={createForm.description}
                 onChangeText={(value) => setCreateForm((prev) => ({ ...prev, description: value }))}
-                placeholder="Descripción del ejercicio"
+                placeholder={t('exercises.create.placeholders.description')}
                 placeholderTextColor={Colors.text.muted}
                 multiline
               />
 
-              <Text style={styles.modalLabel}>Equipo (barbell, dumbbell, ...)</Text>
+              <Text style={styles.modalLabel}>{t('exercises.create.labels.equipment')}</Text>
               <TextInput
                 style={styles.modalInput}
                 value={createForm.equipment}
@@ -399,7 +415,7 @@ export default function ExercisesScreen() {
                 placeholderTextColor={Colors.text.muted}
               />
 
-              <Text style={styles.modalLabel}>Video (URL)</Text>
+              <Text style={styles.modalLabel}>{t('exercises.create.labels.video')}</Text>
               <TextInput
                 style={styles.modalInput}
                 value={createForm.video}
@@ -410,7 +426,7 @@ export default function ExercisesScreen() {
 
               <View style={styles.modalRow}>
                 <View style={styles.modalColumn}>
-                  <Text style={styles.modalLabel}>Min Sets</Text>
+                  <Text style={styles.modalLabel}>{t('exercises.create.labels.minSets')}</Text>
                   <TextInput
                     style={styles.modalInput}
                     value={createForm.minSets}
@@ -419,7 +435,7 @@ export default function ExercisesScreen() {
                   />
                 </View>
                 <View style={styles.modalColumn}>
-                  <Text style={styles.modalLabel}>Max Sets</Text>
+                  <Text style={styles.modalLabel}>{t('exercises.create.labels.maxSets')}</Text>
                   <TextInput
                     style={styles.modalInput}
                     value={createForm.maxSets}
@@ -431,7 +447,7 @@ export default function ExercisesScreen() {
 
               <View style={styles.modalRow}>
                 <View style={styles.modalColumn}>
-                  <Text style={styles.modalLabel}>Min Reps</Text>
+                  <Text style={styles.modalLabel}>{t('exercises.create.labels.minReps')}</Text>
                   <TextInput
                     style={styles.modalInput}
                     value={createForm.minReps}
@@ -440,7 +456,7 @@ export default function ExercisesScreen() {
                   />
                 </View>
                 <View style={styles.modalColumn}>
-                  <Text style={styles.modalLabel}>Max Reps</Text>
+                  <Text style={styles.modalLabel}>{t('exercises.create.labels.maxReps')}</Text>
                   <TextInput
                     style={styles.modalInput}
                     value={createForm.maxReps}
@@ -452,7 +468,7 @@ export default function ExercisesScreen() {
 
               <View style={styles.modalRow}>
                 <View style={styles.modalColumn}>
-                  <Text style={styles.modalLabel}>Min Rest (s)</Text>
+                  <Text style={styles.modalLabel}>{t('exercises.create.labels.minRest')}</Text>
                   <TextInput
                     style={styles.modalInput}
                     value={createForm.minRestTime}
@@ -461,7 +477,7 @@ export default function ExercisesScreen() {
                   />
                 </View>
                 <View style={styles.modalColumn}>
-                  <Text style={styles.modalLabel}>Max Rest (s)</Text>
+                  <Text style={styles.modalLabel}>{t('exercises.create.labels.maxRest')}</Text>
                   <TextInput
                     style={styles.modalInput}
                     value={createForm.maxRestTime}
@@ -471,7 +487,7 @@ export default function ExercisesScreen() {
                 </View>
               </View>
 
-              <Text style={styles.modalLabel}>muscleTarget (comma separados)</Text>
+              <Text style={styles.modalLabel}>{t('exercises.create.labels.muscleTarget')}</Text>
               <TextInput
                 style={styles.modalInput}
                 value={createForm.muscleTarget}
@@ -480,7 +496,7 @@ export default function ExercisesScreen() {
                 placeholderTextColor={Colors.text.muted}
               />
 
-              <Text style={styles.modalLabel}>exerciseType (comma separados)</Text>
+              <Text style={styles.modalLabel}>{t('exercises.create.labels.exerciseType')}</Text>
               <TextInput
                 style={styles.modalInput}
                 value={createForm.exerciseType}
@@ -489,12 +505,12 @@ export default function ExercisesScreen() {
                 placeholderTextColor={Colors.text.muted}
               />
 
-              <Text style={styles.modalLabel}>Instrucciones (una por línea)</Text>
+              <Text style={styles.modalLabel}>{t('exercises.create.labels.instructions')}</Text>
               <TextInput
                 style={[styles.modalInput, styles.modalInputMultiline]}
                 value={createForm.instructions}
                 onChangeText={(value) => setCreateForm((prev) => ({ ...prev, instructions: value }))}
-                placeholder="Paso 1\nPaso 2"
+                placeholder={t('exercises.create.placeholders.instructions')}
                 placeholderTextColor={Colors.text.muted}
                 multiline
               />
@@ -510,7 +526,7 @@ export default function ExercisesScreen() {
                   setIsCreateModalVisible(false);
                 }}
               >
-                <Text style={styles.modalButtonTextSecondary}>Cancelar</Text>
+                <Text style={styles.modalButtonTextSecondary}>{t('exercises.create.buttons.cancel')}</Text>
               </Pressable>
               <Pressable
                 style={[styles.modalButton, styles.modalButtonPrimary]}
@@ -520,7 +536,7 @@ export default function ExercisesScreen() {
                 {createLoading ? (
                   <ActivityIndicator color="#ffffff" />
                 ) : (
-                  <Text style={styles.modalButtonTextPrimary}>Crear</Text>
+                  <Text style={styles.modalButtonTextPrimary}>{t('exercises.create.buttons.create')}</Text>
                 )}
               </Pressable>
             </View>

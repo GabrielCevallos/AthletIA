@@ -1,0 +1,388 @@
+{
+  "login": {
+    "welcome": "Bienvenido",
+    "subtitle": "¡Comienza tu transformación hoy!",
+    "signInCaption": "Inicia sesión en tu cuenta",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "tu@email.com",
+    "passwordLabel": "Contraseña",
+    "passwordPlaceholder": "••••••••",
+    "rememberMe": "Recuérdame",
+    "forgotPassword": "Olvidé mi contraseña",
+    "loginButton": "ENTRAR",
+    "orContinueWith": "o continúa con",
+    "google": "Google",
+    "noAccount": "¿No tienes cuenta?",
+    "signUp": "Regístrate aquí"
+  },
+  "errors": {
+    "authError": "Error de autenticación"
+  },
+  "signup": {
+    "title": "Crear Cuenta",
+    "caption": "Crea una cuenta nueva",
+    "emailLabel": "Email",
+    "passwordLabel": "Contraseña",
+    "confirmPasswordLabel": "Confirmar Contraseña",
+    "passwordHint": "Mínimo 8 caracteres. Incluye mayúsculas y números para mayor seguridad.",
+    "passwordStrength": {
+      "weak": "Débil",
+      "medium": "Media",
+      "strong": "Fuerte"
+    },
+    "passwordsDoNotMatch": "Las contraseñas no coinciden",
+    "passwordsMatch": "✓ Las contraseñas coinciden",
+    "termsPrefix": "Acepto los ",
+    "termsLink": "términos y condiciones",
+    "termsSuffix": " de servicio",
+    "createAccountButton": "CREAR CUENTA",
+    "orRegisterWith": "o regístrate con",
+    "google": "Google",
+    "alreadyHaveAccount": "¿Ya tienes cuenta?",
+    "loginLink": "Inicia sesión",
+    "errorTitle": "Error",
+    "errorGeneric": "Error al crear la cuenta",
+    "errorGoogle": "No se pudo registrar con Google. Intenta más tarde."
+  },
+  "completeProfile": {
+    "title": "Completar Perfil",
+    "subtitle": "Ayúdanos a personalizar tu experiencia de entrenamiento.",
+    "fullNameLabel": "Nombre Completo",
+    "fullNamePlaceholder": "Ej. Juan Pérez",
+    "birthDateLabel": "Fecha de Nacimiento",
+    "birthDatePlaceholder": "YYYY-MM-DD",
+    "phoneLabel": "Teléfono",
+    "genderLabel": "Género",
+    "genderPlaceholder": "Selecciona...",
+    "goalsTitle": "Objetivos Fitness",
+    "goalsSubtitle": "Selecciona uno o más objetivos para adaptar tus rutinas.",
+    "submitButton": "Completar Registro",
+    "validation": {
+      "fullName": "Ingresa tu nombre",
+      "birthDate": "Formato debe ser YYYY-MM-DD",
+      "phone": "Debe ser un número de 10 dígitos",
+      "goals": "Selecciona al menos un objetivo"
+    },
+    "genderOptions": {
+      "male": "Masculino",
+      "female": "Femenino"
+    },
+    "goalOptions": {
+      "weight_loss": "Bajar de peso",
+      "muscle_gain": "Ganar músculo",
+      "weight_maintenance": "Mantener peso",
+      "endurance": "Resistencia",
+      "flexibility": "Flexibilidad",
+      "general_fitness": "Fitness general",
+      "rehabilitation": "Rehabilitación",
+      "improved_posture": "Postura"
+    },
+    "errors": {
+      "sessionExpired": "Tu sesión expiró. Inicia sesión nuevamente.",
+      "profileIncomplete": "No se pudo completar el perfil",
+      "profileFailed": "No se pudo completar el perfil. Intenta más tarde."
+    }
+  },
+  "dashboard": {
+    "greeting": {
+      "morning": "Buenos días",
+      "afternoon": "Buenas tardes",
+      "night": "Buenas noches",
+      "subtitle": "¿Listo para entrenar hoy?"
+    },
+    "stats": {
+      "routines": "Mis Rutinas",
+      "activeSplits": "Splits Activos",
+      "lastWeight": "Último Peso"
+    },
+    "actions": {
+      "quickAction": "ACCIÓN RÁPIDA",
+      "continueTraining": "Continuar entrenamiento",
+      "activeSplits_one": "Tienes {{count}} split activo",
+      "activeSplits_other": "Tienes {{count}} splits activos",
+      "viewSplits": "Ver mis Splits",
+      "startNow": "COMIENZA AHORA",
+      "createTitle": "Crea tu primer split",
+      "createSubtitle": "Organiza tus rutinas y alcanza tus objetivos",
+      "createButton": "Crear Split"
+    },
+    "quickAccess": {
+      "title": "Accesos rápidos",
+      "measurements": "Medidas",
+      "routines": "Rutinas",
+      "splits": "Splits",
+      "exercises": "Ejercicios"
+    },
+    "screenTitle": "AthletIA"
+  },
+  "tabs": {
+    "dashboard": "Inicio",
+    "exercises": "Ejercicios",
+    "routines": "Rutinas",
+    "splits": "Splits",
+    "profile": "Perfil"
+  },
+  "profile": {
+    "title": "Perfil",
+    "editProfile": "Editar Perfil",
+    "logout": "Cerrar Sesión",
+    "streakDays": "Racha Días",
+    "currentWeight": "Peso Actual",
+    "settings": "Configuración",
+    "personalInfo": "Información Personal",
+    "fitnessGoals": "Objetivos Fitness",
+    "measurementsProgress": "Medidas y Progreso",
+    "notifications": "Notificaciones",
+    "helpSupport": "Ayuda y Soporte",
+    "noPhone": "No registrado",
+    "unspecified": "No especificado",
+    "noGoals": "Sin objetivos definidos",
+    "ageUnknown": "Edad desconocida",
+    "years": "años",
+    "language": "Idioma"
+  },
+  "exercises": {
+    "title": "Biblioteca de Ejercicios",
+    "newButton": "+ Nuevo",
+    "searchPlaceholder": "Buscar ejercicios...",
+    "loading": "Cargando ejercicios...",
+    "retry": "Reintentar",
+    "empty": {
+      "title": "Sin ejercicios",
+      "text": "No hay ejercicios disponibles en esta categoría."
+    },
+    "muscleTargets": {
+      "chest": "Pecho",
+      "core": "Core",
+      "trapezius": "Trapecio",
+      "lats": "Dorsales",
+      "deltoids": "Deltoides",
+      "triceps": "Tríceps",
+      "biceps": "Bíceps",
+      "forearms": "Antebrazos",
+      "quads": "Cuádriceps",
+      "hamstrings": "Isquiotibiales",
+      "glutes": "Glúteos",
+      "adductors": "Aductores",
+      "calves": "Pantorrillas",
+      "neck": "Cuello",
+      "general": "General"
+    },
+    "create": {
+      "title": "Nuevo ejercicio",
+      "labels": {
+        "name": "Nombre",
+        "description": "Descripción",
+        "equipment": "Equipo (barbell, dumbbell, ...)",
+        "video": "Video (URL)",
+        "minSets": "Min Sets",
+        "maxSets": "Max Sets",
+        "minReps": "Min Reps",
+        "maxReps": "Max Reps",
+        "minRest": "Min Descanso (s)",
+        "maxRest": "Max Descanso (s)",
+        "muscleTarget": "Muscle Target (separados por coma)",
+        "exerciseType": "Exercise Type (separados por coma)",
+        "instructions": "Instrucciones (una por línea)"
+      },
+      "placeholders": {
+        "description": "Descripción del ejercicio",
+        "instructions": "Paso 1\\nPaso 2"
+      },
+      "buttons": {
+        "cancel": "Cancelar",
+        "create": "Crear"
+      },
+      "errorAuth": "Usuario no autenticado",
+      "errorFields": "Completa nombre, descripción y video",
+      "errorNumbers": "Revisa los campos numéricos",
+      "errorTargetType": "Agrega al menos un muscleTarget y un exerciseType",
+      "success": "Ejercicio creado correctamente",
+      "errorPermissions": "No tienes permisos para crear ejercicios.",
+      "errorGeneric": "Error al crear ejercicio"
+    },
+    "detail": {
+        "description": "Descripción",
+        "muscleGroups": "Músculos Trabajados",
+        "equipment": "Equipo Necesario",
+        "instructions": "Instrucciones Paso a Paso",
+        "variants": "Variantes Disponibles",
+        "addToRoutine": "Agregar a Rutina",
+        "loadError": "No se pudo cargar el ejercicio",
+        "notFound": "Ejercicio no encontrado",
+        "step": "Paso"
+    }
+  },
+  "routines": {
+    "title": "Mis Rutinas",
+    "loading": "Cargando rutinas...",
+    "empty": "Aún no tienes rutinas.",
+    "active": "ACTIVA",
+    "exercises": "Ejercicios",
+    "newRoutine": "Nueva Rutina",
+    "defaultGoal": "Objetivo general",
+    "levels": {
+      "official": "Oficial",
+      "personal": "Personal"
+    },
+    "goals": {
+      "weight_loss": "Pérdida de peso",
+      "muscle_gain": "Ganancia muscular",
+      "weight_maintenance": "Mantenimiento de peso",
+      "endurance": "Resistencia",
+      "flexibility": "Flexibilidad",
+      "general_fitness": "Fitness general",
+      "rehabilitation": "Rehabilitación",
+      "improved_posture": "Mejora de postura",
+      "balance_and_coordination": "Balance y coordinación",
+      "cardiovascular_health": "Salud cardiovascular",
+      "strength_training": "Entrenamiento de fuerza",
+      "athletic_performance": "Rendimiento atlético",
+      "lifestyle_enhancement": "Mejora del estilo de vida"
+    },
+    "detail": {
+        "title": "Detalle de Rutina",
+        "loading": "Cargando rutina...",
+        "notFound": "Rutina no encontrada",
+        "loadError": "No se pudo cargar la rutina",
+        "deleteTitle": "Eliminar Rutina",
+        "deleteMessage": "¿Estás seguro de que deseas eliminar \"{{name}}\"?",
+        "deleteError": "No se pudo eliminar la rutina",
+        "info": {
+            "exercises": "Ejercicios:",
+            "created": "Creado:",
+            "updated": "Última actualización:"
+        },
+        "goalsTitle": "Objetivos"
+    }
+  },
+  "splits": {
+    "title": "Mis Splits",
+    "subtitle": "Gestiona tus planes de entrenamiento",
+    "loading": "Cargando splits...",
+    "empty": {
+      "title": "No tienes splits",
+      "subtitle": "Crea tu primer plan de entrenamiento"
+    },
+    "delete": {
+      "title": "Eliminar Split",
+      "message": "¿Estás seguro de que deseas eliminar \"{{name}}\"?",
+      "success": "Split eliminado exitosamente",
+      "error": "No se pudo eliminar el split"
+    },
+    "actions": {
+      "viewDetails": "Ver Detalles",
+      "delete": "Eliminar",
+      "create": "Crear Nuevo Split"
+    },
+    "frequency": {
+      "day": "día",
+      "days": "días",
+      "week": "semana"
+    },
+    "daysShort": ["L", "M", "X", "J", "V", "S", "D"],
+    "daysLong": ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+    "detail": {
+        "title": "Detalle del Split",
+        "loading": "Cargando split...",
+        "notFound": "Split no encontrado",
+        "loadError": "No se pudo cargar el split",
+        "updateSuccess": "Split actualizado exitosamente",
+        "updateError": "No se pudo actualizar el split",
+        "validationError": "Por favor completa el nombre y selecciona al menos un día de entrenamiento.",
+        "labels": {
+            "name": "Nombre",
+            "description": "Descripción",
+            "days": "Días de entrenamiento"
+        },
+        "placeholders": {
+            "name": "Ej: Push/Pull/Legs",
+            "description": "Describe tu split..."
+        }
+    }
+  },
+  "measurements": {
+    "title": "Medidas",
+    "subtitle": {
+      "update": "Actualiza y sigue tu progreso",
+      "create": "Registra tus medidas iniciales"
+    },
+    "summary": {
+      "title": "Resumen",
+      "lastUpdate": "Última actualización",
+      "bmi": "IMC"
+    },
+    "empty": {
+      "title": "Sin datos disponibles",
+      "text": "Aún no hay medidas registradas para tu cuenta.",
+      "button": "Registrar Medidas"
+    },
+    "frequency": {
+      "title": "Frecuencia de control *",
+      "hint": "Selecciona cada cuánto deseas revisar tus medidas.",
+      "options": {
+        "weekly": "Semanal",
+        "monthly": "Mensual",
+        "yearly": "Anual"
+      }
+    },
+    "sections": {
+      "composition": "Composición (Requeridos)",
+      "upperBody": "Tren superior (Opcional)",
+      "lowerBody": "Tren inferior (Opcional)"
+    },
+    "fields": {
+      "weight": "Peso",
+      "height": "Estatura",
+      "left_arm": "Brazo izquierdo",
+      "right_arm": "Brazo derecho",
+      "left_forearm": "Antebrazo izquierdo",
+      "right_forearm": "Antebrazo derecho",
+      "clavicular_width": "Ancho clavicular",
+      "neck_diameter": "Diámetro cuello",
+      "chest_size": "Pecho",
+      "back_width": "Ancho espalda",
+      "hip_diameter": "Cadera",
+      "left_leg": "Pierna izquierda",
+      "right_leg": "Pierna derecha",
+      "left_calve": "Pantorrilla izquierda",
+      "right_calve": "Pantorrilla derecha"
+    },
+    "placeholders": {
+      "value": "Ingresa un valor",
+      "example": "Ej: {{value}} {{unit}}"
+    },
+    "actions": {
+      "save": "Guardar Cambios",
+      "create": "Crear Medidas",
+      "cancel": "Cancelar"
+    },
+    "errors": {
+      "session": "No hay sesión activa",
+      "expired": "Sesión expirada",
+      "load": "No se pudieron cargar las medidas",
+      "required": "Peso, estatura y frecuencia de control son obligatorios",
+      "invalidWeight": "El peso debe ser un número válido mayor a 0",
+      "invalidHeight": "La estatura debe ser un número válido mayor a 0",
+      "validation": "Error de validación",
+      "notFound": "No se encontraron medidas para actualizar. Por favor, recarga la pantalla.",
+      "save": "No se pudieron guardar las medidas"
+    },
+    "success": {
+      "title": "Éxito",
+      "created": "Medidas creadas exitosamente",
+      "updated": "Medidas actualizadas exitosamente"
+    }
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "success": "Éxito",
+    "error": "Error",
+    "confirm": "Confirmar",
+    "back": "Volver",
+    "ok": "OK",
+    "save": "Guardar",
+    "loading": "Cargando..."
+  }
+}

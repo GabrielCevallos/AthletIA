@@ -7,14 +7,15 @@ import { handleApiError } from '@/services/api-error-handler';
 import { GlobalStyles } from '@/styles/global';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 
 type Measurement = {
@@ -66,56 +67,21 @@ type FieldConfig = {
   required?: boolean;
 };
 
-const CHECK_TIME_OPTIONS = [
-  { value: 'WEEKLY', label: 'Semanal' },
-  { value: 'MONTHLY', label: 'Mensual' },
-  { value: 'YEARLY', label: 'Anual' },
-];
-
-const FIELD_SECTIONS: { title: string; fields: FieldConfig[] }[] = [
-  {
-    title: 'Composición (Requeridos)',
-    fields: [
-      { key: 'weight', label: 'Peso', unit: 'kg', required: true },
-      { key: 'height', label: 'Estatura', unit: 'cm', required: true },
-    ],
-  },
-  {
-    title: 'Tren superior (Opcional)',
-    fields: [
-      { key: 'left_arm', label: 'Brazo izquierdo', unit: 'cm' },
-      { key: 'right_arm', label: 'Brazo derecho', unit: 'cm' },
-      { key: 'left_forearm', label: 'Antebrazo izquierdo', unit: 'cm' },
-      { key: 'right_forearm', label: 'Antebrazo derecho', unit: 'cm' },
-      { key: 'clavicular_width', label: 'Ancho clavicular', unit: 'cm' },
-      { key: 'neck_diameter', label: 'Diámetro cuello', unit: 'cm' },
-      { key: 'chest_size', label: 'Pecho', unit: 'cm' },
-      { key: 'back_width', label: 'Ancho espalda', unit: 'cm' },
-    ],
-  },
-  {
-    title: 'Tren inferior (Opcional)',
-    fields: [
-      { key: 'hip_diameter', label: 'Cadera', unit: 'cm' },
-      { key: 'left_leg', label: 'Pierna izquierda', unit: 'cm' },
-      { key: 'right_leg', label: 'Pierna derecha', unit: 'cm' },
-      { key: 'left_calve', label: 'Pantorrilla izquierda', unit: 'cm' },
-      { key: 'right_calve', label: 'Pantorrilla derecha', unit: 'cm' },
-    ],
-  },
-];
+// Removed CHECK_TIME_OPTIONS generic declaration to use inside hook
+// Removed FIELD_SECTIONS generic declaration
 
 const normalizeCheckTime = (value?: string) => {
   if (!value) return undefined;
   const normalized = value.toUpperCase();
-  return CHECK_TIME_OPTIONS.some((option) => option.value === normalized) ? normalized : undefined;
+  // Simple validation for the 3 known values
+  return ['WEEKLY', 'MONTHLY', 'YEARLY'].includes(normalized) ? normalized : undefined;
 };
 
 const formatDate = (value?: string) => {
   if (!value) return '--';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('es-ES');
+  return date.toLocaleDateString(); // Removed hardcoded locale
 };
 
 const formatValue = (value: number | string | undefined | null, unit?: string) => {
@@ -166,6 +132,7 @@ const measurementToFormData = (measurement: Measurement | null): MeasurementForm
 };
 
 export default function MeasurementsScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuth();
 
@@ -176,17 +143,58 @@ export default function MeasurementsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
+  // Dynamic Options
+  const CHECK_TIME_OPTIONS = useMemo(() => [
+    { value: 'WEEKLY', label: t('measurements.frequency.options.weekly') },
+    { value: 'MONTHLY', label: t('measurements.frequency.options.monthly') },
+    { value: 'YEARLY', label: t('measurements.frequency.options.yearly') },
+  ], [t]);
+
+  const FIELD_SECTIONS: { title: string; fields: FieldConfig[] }[] = useMemo(() => [
+    {
+      title: t('measurements.sections.composition'),
+      fields: [
+        { key: 'weight', label: t('measurements.fields.weight'), unit: 'kg', required: true },
+        { key: 'height', label: t('measurements.fields.height'), unit: 'cm', required: true },
+      ],
+    },
+    {
+      title: t('measurements.sections.upperBody'),
+      fields: [
+        { key: 'left_arm', label: t('measurements.fields.left_arm'), unit: 'cm' },
+        { key: 'right_arm', label: t('measurements.fields.right_arm'), unit: 'cm' },
+        { key: 'left_forearm', label: t('measurements.fields.left_forearm'), unit: 'cm' },
+        { key: 'right_forearm', label: t('measurements.fields.right_forearm'), unit: 'cm' },
+        { key: 'clavicular_width', label: t('measurements.fields.clavicular_width'), unit: 'cm' },
+        { key: 'neck_diameter', label: t('measurements.fields.neck_diameter'), unit: 'cm' },
+        { key: 'chest_size', label: t('measurements.fields.chest_size'), unit: 'cm' },
+        { key: 'back_width', label: t('measurements.fields.back_width'), unit: 'cm' },
+      ],
+    },
+    {
+      title: t('measurements.sections.lowerBody'),
+      fields: [
+        { key: 'hip_diameter', label: t('measurements.fields.hip_diameter'), unit: 'cm' },
+        { key: 'left_leg', label: t('measurements.fields.left_leg'), unit: 'cm' },
+        { key: 'right_leg', label: t('measurements.fields.right_leg'), unit: 'cm' },
+        { key: 'left_calve', label: t('measurements.fields.left_calve'), unit: 'cm' },
+        { key: 'right_calve', label: t('measurements.fields.right_calve'), unit: 'cm' },
+      ],
+    },
+  ], [t]);
+
+
   const summaryRows = useMemo(
     () => [
-      { label: 'Última actualización', value: formatDate(measurement?.updatedAt) },
-      { label: 'IMC', value: formatValue(measurement?.imc) },
+      { label: t('measurements.summary.lastUpdate'), value: formatDate(measurement?.updatedAt) },
+      { label: t('measurements.summary.bmi'), value: formatValue(measurement?.imc) },
     ],
-    [measurement]
+    [measurement, t]
   );
 
   const loadMeasurement = async () => {
     if (!user?.token) {
-      setError('No hay sesión activa');
+      setError(t('measurements.errors.session'));
       setLoading(false);
       return;
     }
@@ -202,7 +210,7 @@ export default function MeasurementsScreen() {
       });
 
       if (response.status === 401) {
-        const sessionError = new Error('Sesión expirada');
+        const sessionError = new Error(t('measurements.errors.expired'));
         (sessionError as any).statusCode = 401;
         throw sessionError;
       }
@@ -217,7 +225,7 @@ export default function MeasurementsScreen() {
       }
 
       if (!response.ok || !result?.success) {
-        throw new Error(result?.message || 'No se pudieron cargar las medidas');
+        throw new Error(result?.message || t('measurements.errors.load'));
       }
 
       setMeasurement(result.data);
@@ -225,7 +233,7 @@ export default function MeasurementsScreen() {
       setIsEditing(false);
     } catch (err) {
       await handleApiError(err);
-      setError(err instanceof Error ? err.message : 'No se pudieron cargar las medidas');
+      setError(err instanceof Error ? err.message : t('measurements.errors.load'));
       console.error('Error fetching measurements:', err);
     } finally {
       setLoading(false);
@@ -238,18 +246,18 @@ export default function MeasurementsScreen() {
 
   const validateForm = (): string | null => {
     if (!formData.weight || !formData.height || !formData.checkTime) {
-      return 'Peso, estatura y frecuencia de control son obligatorios';
+      return t('measurements.errors.required');
     }
 
     const weight = parseFloat(formData.weight);
     const height = parseFloat(formData.height);
 
     if (isNaN(weight) || weight <= 0) {
-      return 'El peso debe ser un número válido mayor a 0';
+      return t('measurements.errors.invalidWeight');
     }
 
     if (isNaN(height) || height <= 0) {
-      return 'La estatura debe ser un número válido mayor a 0';
+      return t('measurements.errors.invalidHeight');
     }
 
     return null;
@@ -260,7 +268,7 @@ export default function MeasurementsScreen() {
 
     const validationError = validateForm();
     if (validationError) {
-      Alert.alert('Error de validación', validationError);
+      Alert.alert(t('measurements.errors.validation'), validationError);
       return;
     }
 
@@ -312,7 +320,7 @@ export default function MeasurementsScreen() {
       });
 
       if (response.status === 401) {
-        const sessionError = new Error('Sesión expirada');
+        const sessionError = new Error(t('measurements.errors.expired'));
         (sessionError as any).statusCode = 401;
         throw sessionError;
       }
@@ -321,24 +329,24 @@ export default function MeasurementsScreen() {
 
       if (response.status === 404 && !isCreating) {
         Alert.alert(
-          'Error',
-          'No se encontraron medidas para actualizar. Por favor, recarga la pantalla.',
+          t('common.error'),
+          t('measurements.errors.notFound'),
           [{ text: 'OK', onPress: () => void loadMeasurement() }]
         );
         return;
       }
 
       if (!response.ok || !result?.success) {
-        throw new Error(result?.message || 'No se pudieron guardar las medidas');
+        throw new Error(result?.message || t('measurements.errors.save'));
       }
 
       setMeasurement(result.data);
       setFormData(measurementToFormData(result.data));
       setIsEditing(false);
-      Alert.alert('Éxito', isCreating ? 'Medidas creadas exitosamente' : 'Medidas actualizadas exitosamente');
+      Alert.alert(t('measurements.success.title'), isCreating ? t('measurements.success.created') : t('measurements.success.updated'));
     } catch (err) {
       await handleApiError(err);
-      setError(err instanceof Error ? err.message : 'No se pudieron guardar las medidas');
+      setError(err instanceof Error ? err.message : t('measurements.errors.save'));
       console.error('Error saving measurements:', err);
     } finally {
       setSaving(false);
@@ -379,9 +387,9 @@ export default function MeasurementsScreen() {
           <Text style={styles.backIcon}>‹</Text>
         </Pressable>
         <View style={styles.headerTitles}>
-          <Text style={styles.headerTitle}>Medidas</Text>
+          <Text style={styles.headerTitle}>{t('measurements.title')}</Text>
           <Text style={styles.headerSubtitle}>
-            {measurement ? 'Actualiza y sigue tu progreso' : 'Registra tus medidas iniciales'}
+            {measurement ? t('measurements.subtitle.update') : t('measurements.subtitle.create')}
           </Text>
         </View>
         {measurement && !isEditing && (
@@ -404,10 +412,10 @@ export default function MeasurementsScreen() {
 
         {!measurement && !isEditing ? (
           <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>Sin datos disponibles</Text>
-            <Text style={styles.emptyText}>Aún no hay medidas registradas para tu cuenta.</Text>
+            <Text style={styles.emptyTitle}>{t('measurements.empty.title')}</Text>
+            <Text style={styles.emptyText}>{t('measurements.empty.text')}</Text>
             <PrimaryButton
-              label="Registrar Medidas"
+              label={t('measurements.empty.button')}
               onPress={() => setIsEditing(true)}
               style={styles.emptyButton}
             />
@@ -416,7 +424,7 @@ export default function MeasurementsScreen() {
           <>
             {measurement && !isEditing && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Resumen</Text>
+                <Text style={styles.sectionTitle}>{t('measurements.summary.title')}</Text>
                 <View style={styles.summaryCard}>
                   {summaryRows.map((row) => (
                     <View key={row.label} style={styles.summaryRow}>
@@ -429,9 +437,9 @@ export default function MeasurementsScreen() {
             )}
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Frecuencia de control *</Text>
+              <Text style={styles.sectionTitle}>{t('measurements.frequency.title')}</Text>
               <Text style={styles.sectionHint}>
-                Selecciona cada cuánto deseas revisar tus medidas.
+                {t('measurements.frequency.hint')}
               </Text>
               <View style={styles.optionGroup}>
                 {CHECK_TIME_OPTIONS.map((option) => {
@@ -465,7 +473,7 @@ export default function MeasurementsScreen() {
                       value={formData[field.key]}
                       onChangeText={(value) => handleInputChange(field.key, value)}
                       keyboardType="numeric"
-                      placeholder={field.unit ? `Ej: 70 ${field.unit}` : 'Ingresa un valor'}
+                      placeholder={field.unit ? t('measurements.placeholders.example', { value: 70, unit: field.unit }) : t('measurements.placeholders.value')}
                       editable={isEditing}
                     />
                   ))}
@@ -476,10 +484,10 @@ export default function MeasurementsScreen() {
             {isEditing && (
               <View style={styles.actionButtons}>
                 <Pressable style={styles.cancelButton} onPress={handleCancel} disabled={saving}>
-                  <Text style={styles.cancelButtonText}>Cancelar</Text>
+                  <Text style={styles.cancelButtonText}>{t('measurements.actions.cancel')}</Text>
                 </Pressable>
                 <PrimaryButton
-                  label={measurement ? 'Guardar Cambios' : 'Crear Medidas'}
+                  label={measurement ? t('measurements.actions.save') : t('measurements.actions.create')}
                   onPress={handleSave}
                   loading={saving}
                   style={styles.saveButtonFlex}
@@ -551,8 +559,8 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(239, 68, 68, 0.4)',
   },
   errorText: {
-    color: Colors.error.DEFAULT,
     ...Typography.styles.body,
+    color: Colors.error.DEFAULT,
   },
   emptyCard: {
     backgroundColor: Colors.surface.DEFAULT,

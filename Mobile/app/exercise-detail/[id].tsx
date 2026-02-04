@@ -4,6 +4,7 @@ import type { Exercise } from '@/hooks/use-exercises';
 import { useExercises } from '@/hooks/use-exercises';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ActivityIndicator,
     Image,
@@ -14,25 +15,8 @@ import {
     View,
 } from 'react-native';
 
-// Mapeo de muscle targets para traducción
-const MUSCLE_TARGET_LABELS: Record<string, string> = {
-  'chest': 'Pecho',
-  'core': 'Core',
-  'trapezius': 'Trapecio',
-  'lats': 'Dorsales',
-  'deltoids': 'Deltoides',
-  'triceps': 'Tríceps',
-  'biceps': 'Bíceps',
-  'forearms': 'Antebrazos',
-  'quads': 'Cuádriceps',
-  'hamstrings': 'Isquiotibiales',
-  'glutes': 'Glúteos',
-  'adductors': 'Aductores',
-  'calves': 'Pantorrillas',
-  'neck': 'Cuello',
-};
-
 export default function ExerciseDetailScreen() {
+  const { t } = useTranslation(['exercises', 'common']);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
@@ -52,7 +36,7 @@ export default function ExerciseDetailScreen() {
       setLoading(true);
       const data = await getExerciseById(id);
       if (!data) {
-        setError('No se pudo cargar el ejercicio');
+        setError(t('exercises.detail.loadError'));
       }
       setExercise(data);
       setLoading(false);
@@ -72,9 +56,9 @@ export default function ExerciseDetailScreen() {
   if (error || !exercise) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>{error || 'Ejercicio no encontrado'}</Text>
+        <Text style={styles.errorText}>{error || t('exercises.detail.notFound')}</Text>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Volver</Text>
+          <Text style={styles.backButtonText}>{t('common.back')}</Text>
         </Pressable>
       </View>
     );
@@ -102,8 +86,8 @@ export default function ExerciseDetailScreen() {
             <Text style={styles.title}>{exercise.name}</Text>
             <Text style={styles.category}>
               {exercise.muscleTarget 
-                ? MUSCLE_TARGET_LABELS[exercise.muscleTarget] || exercise.muscleTarget 
-                : exercise.muscleGroups?.[0] || 'General'}
+                ? t(`exercises.muscleTargets.${exercise.muscleTarget}`, { defaultValue: exercise.muscleTarget }) 
+                : exercise.muscleGroups?.[0] || t('exercises.muscleTargets.general')}
             </Text>
           </View>
           <View style={[styles.badge, styles[`badge${exercise.difficulty}`]]}>
@@ -114,7 +98,7 @@ export default function ExerciseDetailScreen() {
         {/* Descripción */}
         {exercise.description && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Descripción</Text>
+            <Text style={styles.sectionTitle}>{t('exercises.detail.description')}</Text>
             <Text style={styles.description}>{exercise.description}</Text>
           </View>
         )}
@@ -122,7 +106,7 @@ export default function ExerciseDetailScreen() {
         {/* Músculos Trabajados */}
         {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Músculos Trabajados</Text>
+            <Text style={styles.sectionTitle}>{t('exercises.detail.muscleGroups')}</Text>
             <View style={styles.muscleGroupsContainer}>
               {exercise.muscleGroups.map((muscle) => (
                 <View key={muscle} style={styles.muscleTag}>
@@ -136,7 +120,7 @@ export default function ExerciseDetailScreen() {
         {/* Equipo Necesario */}
         {exercise.equipment && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Equipo Necesario</Text>
+            <Text style={styles.sectionTitle}>{t('exercises.detail.equipment')}</Text>
             <View style={styles.equipmentContainer}>
               {(Array.isArray(exercise.equipment) ? exercise.equipment : [exercise.equipment])
                 .filter(item => item)
@@ -153,7 +137,7 @@ export default function ExerciseDetailScreen() {
         {/* Instrucciones Paso a Paso */}
         {exercise.instructions && exercise.instructions.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Instrucciones Paso a Paso</Text>
+            <Text style={styles.sectionTitle}>{t('exercises.detail.instructions')}</Text>
             <View style={styles.instructionsContainer}>
               {exercise.instructions.map((instruction, idx) => (
                 <View key={idx} style={styles.instructionItem}>
@@ -170,7 +154,7 @@ export default function ExerciseDetailScreen() {
         {/* Variantes del Ejercicio */}
         {exercise.variants && exercise.variants.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Variantes Disponibles</Text>
+            <Text style={styles.sectionTitle}>{t('exercises.detail.variants')}</Text>
             <View style={styles.variantsContainer}>
               {exercise.variants.map((variant) => (
                 <Pressable
@@ -191,7 +175,7 @@ export default function ExerciseDetailScreen() {
 
         {/* Botón de Acción */}
         <Pressable style={styles.addButton}>
-          <Text style={styles.addButtonText}>+ Agregar a Rutina</Text>
+          <Text style={styles.addButtonText}>+ {t('exercises.detail.addToRoutine')}</Text>
         </Pressable>
       </View>
     </ScrollView>
