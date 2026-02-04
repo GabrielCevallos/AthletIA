@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { NavLink, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 export default function Sidebar() {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const { logout, name, role, accountId } = useAuth()
   const navigate = useNavigate()
@@ -62,38 +64,38 @@ export default function Sidebar() {
             <NavLink 
               to="/dashboard" 
               className={linkCls} 
-              aria-label="Ir al dashboard"
+              aria-label={t('sidebar.dashboard')}
               onClick={closeSidebar}
             >
               <span className="material-symbols-outlined text-gray-900 dark:text-white">dashboard</span>
-              <p className="text-gray-900 dark:text-white text-sm font-medium">Dashboard</p>
+              <p className="text-gray-900 dark:text-white text-sm font-medium">{t('sidebar.dashboard')}</p>
             </NavLink>
             <NavLink 
               to="/exercises" 
               className={linkCls} 
-              aria-label="Ir a ejercicios"
+              aria-label={t('sidebar.exercises')}
               onClick={closeSidebar}
             >
               <span className="material-symbols-outlined text-gray-900 dark:text-white">exercise</span>
-              <p className="text-gray-900 dark:text-white text-sm font-medium">Ejercicios</p>
+              <p className="text-gray-900 dark:text-white text-sm font-medium">{t('sidebar.exercises')}</p>
             </NavLink>
             <NavLink 
               to="/routines" 
               className={linkCls} 
-              aria-label="Ir a rutinas"
+              aria-label={t('sidebar.routines')}
               onClick={closeSidebar}
             >
               <span className="material-symbols-outlined text-gray-900 dark:text-white">event_note</span>
-              <p className="text-gray-900 dark:text-white text-sm font-medium">Rutinas</p>
+              <p className="text-gray-900 dark:text-white text-sm font-medium">{t('sidebar.routines')}</p>
             </NavLink>
             <NavLink 
               to="/users" 
               className={linkCls} 
-              aria-label="Ir a usuarios"
+              aria-label={t('sidebar.users')}
               onClick={closeSidebar}
             >
               <span className="material-symbols-outlined text-gray-900 dark:text-white">group</span>
-              <p className="text-gray-900 dark:text-white text-sm font-medium">Usuarios</p>
+              <p className="text-gray-900 dark:text-white text-sm font-medium">{t('sidebar.users')}</p>
             </NavLink>
           </nav>
         </div>
@@ -102,17 +104,17 @@ export default function Sidebar() {
           <Link 
             to={accountId ? `/users/${accountId}` : '#'}
             className="mb-4 px-3 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-[#233c48]/60 p-2 rounded-lg transition-colors group"
-            title="Ver mi perfil"
+            title={t('sidebar.view_profile')}
           >
             <div className="w-10 h-10 rounded-full bg-primary/20 dark:bg-primary/30 flex items-center justify-center text-primary dark:text-sky-200 shrink-0 group-hover:scale-105 transition-transform">
                <span className="font-bold">{(name || 'S').charAt(0).toUpperCase()}</span>
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">
-                {name || 'Sin nombre'}
+                {name || t('sidebar.no_name')}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 capitalize truncate">
-                {role || 'Usuario'}
+                {role || t('sidebar.role_user')}
               </p>
             </div>
           </Link>
@@ -120,10 +122,10 @@ export default function Sidebar() {
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-            aria-label="Cerrar sesión"
+            aria-label={t('sidebar.logout')}
           >
             <span className="material-symbols-outlined">logout</span>
-            <span className="text-sm font-medium">Cerrar sesión</span>
+            <span className="text-sm font-medium">{t('sidebar.logout')}</span>
           </button>
         </div>
       </aside>

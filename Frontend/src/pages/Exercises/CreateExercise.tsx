@@ -6,8 +6,22 @@ import { generateExerciseDescription } from '../../lib/api';
 import { upsertExercise, getExerciseById, getAllExercises, Exercise, StoredMedia, ValidationError, validateCompleteExercise } from '../../lib/exerciseStore';
 import { MuscleTarget, MuscleTargetLabels, Equipment, EquipmentLabels, ExerciseType, ExerciseTypeLabels } from '../../lib/enums';
 import Swal from 'sweetalert2';
+import { useTranslation } from 'react-i18next';
+
+// Utility for environments where crypto.randomUUID is not available (e.g. HTTP)
+const generateLocalUUID = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
 
 const CreateExercise: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
@@ -79,15 +93,15 @@ const CreateExercise: React.FC = () => {
     if (!name) {
       await Swal.fire({
         icon: 'info',
-        title: 'Nombre requerido',
-        text: 'Por favor ingrese al menos el nombre del ejercicio.',
-        confirmButtonText: 'Entendido',
+        title: t('exercises.create.alerts.fill_required'),
+        text: t('exercises.create.alerts.fill_required_msg'),
+        confirmButtonText: t('common.actions.understood'),
       });
       return;
     }
     setIsGenerating(true);
-    const muscleLabel = muscleTarget.length > 0 ? MuscleTargetLabels[muscleTarget[0]] : 'General';
-    const equipmentLabel = EquipmentLabels[equipment];
+    const muscleLabel = muscleTarget.length > 0 ? t(`enums.muscle.${muscleTarget[0]}`) : 'General';
+    const equipmentLabel = t(`enums.equipment.${equipment}`);
     const desc = await generateExerciseDescription(name, muscleLabel, equipmentLabel);
     setDescription(desc);
     setIsGenerating(false);
@@ -141,9 +155,9 @@ const CreateExercise: React.FC = () => {
     if (!name) {
       await Swal.fire({
         icon: 'info',
-        title: 'Falta el nombre',
-        text: 'Por favor completa el nombre del ejercicio.',
-        confirmButtonText: 'Entendido',
+        title: t('exercises.create.alerts.fill_required'),
+        text: t('exercises.create.alerts.fill_required_msg'),
+        confirmButtonText: t('common.actions.understood'),
       });
       return;
     }
@@ -180,10 +194,10 @@ const CreateExercise: React.FC = () => {
       const errorMessages = errors.map(e => `${e.field}: ${e.message}`).join('\n');
       await Swal.fire({
         icon: 'error',
-        title: 'Errores de validación',
-        text: 'Por favor corrige los siguientes errores:',
+        title: t('exercises.create.alerts.fill_required'),
+        text: t('exercises.create.alerts.fill_required_msg'),
         footer: errorMessages,
-        confirmButtonText: 'Entendido',
+        confirmButtonText: t('common.actions.understood'),
       });
       setValidationErrors(errors);
       return;
@@ -196,7 +210,7 @@ const CreateExercise: React.FC = () => {
 
       // Mostrar cargando (no usar await aquí para no bloquear)
       Swal.fire({
-        title: 'Guardando ejercicio...',
+        title: t('exercises.create.alerts.saving'),
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
@@ -211,7 +225,7 @@ const CreateExercise: React.FC = () => {
               const reader = new FileReader();
               reader.onloadend = () => {
                 resolve({
-                  id: crypto.randomUUID(),
+                  id: generateLocalUUID(),
                   name: file.name,
                   size: file.size,
                   type: file.type,
@@ -233,7 +247,7 @@ const CreateExercise: React.FC = () => {
       const payload: Exercise = {
         // IMPORTANTE: Para nuevos ejercicios, NO generar ID (dejar undefined)
         // El backend lo generará. Solo para ediciones usar ID existente.
-        id: (isEditing && id && !isSeedExercise) ? id : crypto.randomUUID(),
+        id: (isEditing && id && !isSeedExercise) ? id : generateLocalUUID(),
         name: name.trim(),
         muscleTarget,
         equipment,
@@ -285,12 +299,13 @@ const CreateExercise: React.FC = () => {
       // Cerrar el modal de carga antes de mostrar el de éxito
       Swal.close();
 
-      const action = isEditing ? (isSeedExercise ? 'duplicado' : 'actualizado') : 'creado';
       await Swal.fire({
         icon: 'success',
-        title: 'Ejercicio guardado',
-        text: `✅ Ejercicio "${saved.name}" ${action}.`,
-        confirmButtonText: 'Ver ejercicio',
+        title: t('exercises.create.alerts.success'),
+        text: isEditing && !isSeedExercise
+          ? t('exercises.create.alerts.updated')
+          : t('exercises.create.alerts.created'),
+        confirmButtonText: t('common.actions.understood'),
       });
       navigate(`/exercises/${saved.id}`);
     } catch (error: any) {
@@ -314,9 +329,9 @@ const CreateExercise: React.FC = () => {
       
       await Swal.fire({
         icon: 'error',
-        title: `Error al guardar (${status})`,
+        title: `${t('exercises.create.alerts.error')} (${status})`,
         html: `<p><strong>${errorMessage}</strong></p>${errorDetails ? `<small>${typeof errorDetails === 'string' ? errorDetails : JSON.stringify(errorDetails, null, 2)}</small>` : ''}`,
-        confirmButtonText: 'Entendido',
+        confirmButtonText: t('common.actions.understood'),
       });
     }
   };
@@ -331,12 +346,12 @@ const CreateExercise: React.FC = () => {
     // Si estamos en el paso 1 y hay datos, pedir confirmación
     if (name || muscleTarget.length > 0 || equipment !== Equipment.BODYWEIGHT || description || video || mediaFiles.length > 0) {
       const result = await Swal.fire({
-        title: '¿Descartar los cambios?',
-        text: 'Perderás la información no guardada.',
+        title: t('exercises.create.alerts.discard_title'),
+        text: t('exercises.create.alerts.discard_text'),
         icon: 'question',
         showCancelButton: true,
-        cancelButtonText: 'Seguir editando',
-        confirmButtonText: 'Descartar',
+        cancelButtonText: t('exercises.create.alerts.keep_editing'),
+        confirmButtonText: t('exercises.create.alerts.discard_confirm'),
         confirmButtonColor: '#ef4444',
       });
 
@@ -377,37 +392,37 @@ const CreateExercise: React.FC = () => {
           <button 
             onClick={goPrev}
             className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
-            aria-label="Volver"
+            aria-label={t('exercises.create.actions.back')}
           >
             <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
-            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 7: Vista Previa y Confirmación</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Revisa la información antes de publicar.</p>
+            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">{t('exercises.create.steps.step7_title')}</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">{t('exercises.create.steps.step7_desc')}</p>
           </div>
         </header>
 
         <section aria-labelledby="preview-heading" className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
-          <h2 id="preview-heading" className="text-gray-900 dark:text-white text-xl md:text-2xl font-bold mb-6">Información Completa del Ejercicio</h2>
+          <h2 id="preview-heading" className="text-gray-900 dark:text-white text-xl md:text-2xl font-bold mb-6">{t('exercises.create.steps.step7_title')}</h2>
           
           {/* Sección 1: Información Básica */}
           <div className="mb-8 pb-8 border-b border-gray-200 dark:border-white/10">
             <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4 flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm">1</div>
-              Información Básica
+              {t('exercises.create.form.basic_info')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Nombre</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">{t('exercises.create.form.name')}</p>
                 <p className="text-gray-900 dark:text-white text-lg font-bold">{name || '(No definido)'}</p>
               </div>
               <div>
-                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Equipo</p>
-                <p className="text-gray-900 dark:text-white text-lg font-bold">{EquipmentLabels[equipment]}</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">{t('exercises.create.form.equipment')}</p>
+                <p className="text-gray-900 dark:text-white text-lg font-bold">{t(`enums.equipment.${equipment}`)}</p>
               </div>
               {parentExerciseId && (
                 <div className="col-span-1 md:col-span-2">
-                  <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Variante de</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">{t('exercises.create.preview.variant_of')}</p>
                   <p className="text-gray-900 dark:text-white text-base">{availableExercises.find(e => e.id === parentExerciseId)?.name || parentExerciseId}</p>
                 </div>
               )}
@@ -418,34 +433,34 @@ const CreateExercise: React.FC = () => {
           <div className="mb-8 pb-8 border-b border-gray-200 dark:border-white/10">
             <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4 flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm">2</div>
-              Clasificación
+              {t('exercises.create.form.classification')}
             </h3>
             <div className="space-y-4">
               <div>
-                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Grupos Musculares ({muscleTarget.length})</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">{t('exercises.create.preview.muscle_groups')} ({muscleTarget.length})</p>
                 <div className="flex flex-wrap gap-2">
                   {muscleTarget.length > 0 ? (
                     muscleTarget.map(m => (
                       <span key={m} className="px-3 py-1.5 bg-primary/20 text-primary rounded-full text-sm font-semibold">
-                        {MuscleTargetLabels[m]}
+                        {t(`enums.muscle.${m}`)}
                       </span>
                     ))
                   ) : (
-                    <span className="text-gray-900 dark:text-white italic">No especificado</span>
+                    <span className="text-gray-900 dark:text-white italic">{t('exercises.create.form.no_specified')}</span>
                   )}
                 </div>
               </div>
               <div>
-                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Tipos de Ejercicio ({exerciseType.length})</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">{t('exercises.create.preview.exercise_types')} ({exerciseType.length})</p>
                 <div className="flex flex-wrap gap-2">
                   {exerciseType.length > 0 ? (
                     exerciseType.map(et => (
                       <span key={et} className="px-3 py-1.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
-                        {et}
+                        {t(`enums.exerciseType.${et}`)}
                       </span>
                     ))
                   ) : (
-                    <span className="text-gray-900 dark:text-white italic">No especificado</span>
+                    <span className="text-gray-900 dark:text-white italic">{t('exercises.create.form.no_specified')}</span>
                   )}
                 </div>
               </div>
@@ -457,7 +472,7 @@ const CreateExercise: React.FC = () => {
             <div className="mb-8 pb-8 border-b border-gray-200 dark:border-white/10">
               <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4 flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm">3</div>
-                Descripción
+                {t('exercises.create.form.description')}
               </h3>
               <p className="text-gray-900 dark:text-white text-base leading-relaxed bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">{description}</p>
             </div>
@@ -467,18 +482,18 @@ const CreateExercise: React.FC = () => {
           <div className="mb-8 pb-8 border-b border-gray-200 dark:border-white/10">
             <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4 flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm">4</div>
-              Contenido Multimedia
+              {t('exercises.create.steps.step4_title').replace(/Paso 4: |Step 4: /, '')}
             </h3>
             <div className="space-y-4">
               {video && (
                 <div>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">URL del Video</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">{t('exercises.create.form.video_url_title')}</p>
                   <p className="text-blue-600 dark:text-blue-400 text-sm break-all hover:underline cursor-pointer">{video}</p>
                 </div>
               )}
               {previewMedia.length > 0 && (
                 <div>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-3">Archivos Multimedia ({previewMedia.length})</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-3">{t('exercises.create.form.media_files_title')} ({previewMedia.length})</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {previewMedia.map((file) => (
                       <div key={file.key} className="bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden">
@@ -497,7 +512,7 @@ const CreateExercise: React.FC = () => {
                 </div>
               )}
               {!video && previewMedia.length === 0 && (
-                <p className="text-gray-600 dark:text-gray-300 italic text-sm">No se añadió contenido multimedia</p>
+                <p className="text-gray-600 dark:text-gray-300 italic text-sm">{t('exercises.create.form.multimedia_empty')}</p>
               )}
             </div>
           </div>
@@ -507,7 +522,7 @@ const CreateExercise: React.FC = () => {
             <div className="mb-8 pb-8 border-b border-gray-200 dark:border-white/10">
               <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4 flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm">5</div>
-                Beneficios
+                {t('exercises.create.steps.step5_title').replace(/Paso 5: |Step 5: /, '')}
               </h3>
               <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/10">
                 {benefitTitle && <p className="text-gray-900 dark:text-white font-bold mb-1">{benefitTitle}</p>}
@@ -516,7 +531,7 @@ const CreateExercise: React.FC = () => {
                   <div className="flex flex-wrap gap-2">
                     {benefitCategories.map((cat) => (
                       <span key={cat} className="px-2 py-1 text-xs rounded-full bg-primary/20 text-primary border border-primary/30 font-semibold">
-                        {cat}
+                        {t(`exercises.create.categories.${cat}`)}
                       </span>
                     ))}
                   </div>
@@ -529,23 +544,23 @@ const CreateExercise: React.FC = () => {
           <div className="mb-8 pb-8 border-b border-gray-200 dark:border-white/10">
             <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4 flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-sm">6</div>
-              Visibilidad
+              {t('exercises.create.steps.step6_title').replace(/Paso 6: |Step 6: /, '')}
             </h3>
             <div className="p-4 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10">
               {isPublic ? (
                 <div className="flex items-center gap-3">
                   <Eye size={20} className="text-primary" />
                   <div>
-                    <p className="text-gray-900 dark:text-white font-bold">Público</p>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm">Visible para todos los usuarios</p>
+                    <p className="text-gray-900 dark:text-white font-bold">{t('exercises.create.visibility.public')}</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">{t('exercises.create.visibility.public_desc')}</p>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
                   <EyeOff size={20} className="text-gray-400" />
                   <div>
-                    <p className="text-gray-900 dark:text-white font-bold">Privado</p>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm">Solo visible para administradores</p>
+                    <p className="text-gray-900 dark:text-white font-bold">{t('exercises.create.visibility.private')}</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">{t('exercises.create.visibility.private_desc')}</p>
                   </div>
                 </div>
               )}
@@ -557,13 +572,13 @@ const CreateExercise: React.FC = () => {
               onClick={handleCancel} 
               className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
             >
-              <ArrowLeft size={18} className="mr-2" /> Volver a Editar
+              <ArrowLeft size={18} className="mr-2" /> {t('exercises.create.actions.back')}
             </button>
             <button 
               onClick={handlePublish} 
               className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
             >
-              <Check size={18} className="mr-2" /> {isPublic ? 'Publicar Ejercicio' : 'Guardar Ejercicio'}
+              <Check size={18} className="mr-2" /> {isPublic ? t('exercises.create.actions.publish') : t('common.actions.save')}
             </button>
           </div>
         </section>
@@ -581,13 +596,13 @@ const CreateExercise: React.FC = () => {
           <button 
             onClick={goPrev}
             className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
-            aria-label="Volver"
+            aria-label={t('exercises.create.actions.back')}
           >
             <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
-            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 6: Visibilidad</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Elige si será público o privado.</p>
+            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">{t('exercises.create.steps.step6_title')}</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">{t('exercises.create.steps.step6_desc')}</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
@@ -603,9 +618,9 @@ const CreateExercise: React.FC = () => {
               <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Eye size={20} className="text-primary" />
-                    <p className="text-gray-900 dark:text-white font-bold">Público</p>
+                    <p className="text-gray-900 dark:text-white font-bold">{t('exercises.create.visibility.public')}</p>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">Visible para todos los usuarios de la aplicación móvil</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">{t('exercises.create.visibility.public_desc')}</p>
               </div>
             </label>
 
@@ -620,9 +635,9 @@ const CreateExercise: React.FC = () => {
               <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <EyeOff size={20} className="text-gray-400" />
-                    <p className="text-gray-900 dark:text-white font-bold">Privado</p>
+                    <p className="text-gray-900 dark:text-white font-bold">{t('exercises.create.visibility.private')}</p>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">Solo visible para administradores, no aparecerá en la app de usuarios</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">{t('exercises.create.visibility.private_desc')}</p>
               </div>
             </label>
           </div>
@@ -632,13 +647,13 @@ const CreateExercise: React.FC = () => {
               onClick={goPrev} 
               className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
             >
-              <ArrowLeft size={18} className="mr-2" /> Anterior
+              <ArrowLeft size={18} className="mr-2" /> {t('exercises.create.actions.back')}
             </button>
             <button 
               onClick={goNext} 
               className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
             >
-              Continuar <ArrowRight size={18} className="ml-2" />
+              {t('exercises.create.actions.continue')} <ArrowRight size={18} className="ml-2" />
             </button>
           </div>
         </section>
@@ -649,7 +664,7 @@ const CreateExercise: React.FC = () => {
 
   // Step 10: Benefits Editor
   if (step === 5) {
-    const availableCategories = ['Cardio', 'Salud General', 'Fuerza', 'Resistencia', 'Flexibilidad', 'Pérdida de Peso', 'Aumento de Masa'];
+    const availableCategories = ['cardio', 'general_health', 'strength', 'endurance', 'flexibility', 'weight_loss', 'mass_gain'];
     const toggleCategory = (cat: string) => {
       if (benefitCategories.includes(cat)) {
         setBenefitCategories(benefitCategories.filter(c => c !== cat));
@@ -661,27 +676,27 @@ const CreateExercise: React.FC = () => {
       <Layout>
         <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 md:gap-8">
         <header className="flex items-center gap-3 sm:gap-4 pt-12 sm:pt-0">
-          <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+          <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label={t('exercises.create.actions.back')}>
             <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
-            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 5: Beneficios del Ejercicio</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Define beneficios y categorías (Opcional).</p>
+            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">{t('exercises.create.steps.step5_title')}</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">{t('exercises.create.steps.step5_desc')}</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
           <div className="flex flex-col gap-6">
             <div>
-              <label className="text-gray-900 dark:text-white font-medium mb-2 block">Título del Beneficio</label>
+              <label className="text-gray-900 dark:text-white font-medium mb-2 block">{t('exercises.create.form.benefit_title')}</label>
               <input value={benefitTitle} onChange={(e) => setBenefitTitle(e.target.value)} className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="Ej: Mejora Cardiovascular" />
             </div>
             <div>
-              <label className="text-gray-900 dark:text-white font-medium mb-2 block">Descripción</label>
+              <label className="text-gray-900 dark:text-white font-medium mb-2 block">{t('exercises.create.form.benefit_desc')}</label>
               <textarea value={benefitDescription} onChange={(e) => setBenefitDescription(e.target.value)} className="w-full min-h-[120px] p-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="Describe cómo beneficia al usuario" />
             </div>
             <div>
-              <label className="text-gray-900 dark:text-white font-medium mb-2 block">Categorías</label>
-              <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">Selecciona las categorías que aplican:</p>
+              <label className="text-gray-900 dark:text-white font-medium mb-2 block">{t('exercises.create.form.categories')}</label>
+              <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">{t('exercises.create.form.categories_label')}</p>
               <div className="flex flex-wrap gap-2">
                 {availableCategories.map((cat) => (
                   <button
@@ -693,17 +708,17 @@ const CreateExercise: React.FC = () => {
                         : 'bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white border-2 border-gray-200 dark:border-white/10 hover:border-primary/50'
                     }`}
                   >
-                    {cat}
+                    {t(`exercises.create.categories.${cat}`)}
                   </button>
                 ))}
               </div>
               {benefitCategories.length > 0 && (
                 <div className="mt-4 p-3 bg-primary/10 rounded-lg">
-                  <p className="text-gray-900 dark:text-white font-medium text-sm mb-2">Categorías seleccionadas ({benefitCategories.length}):</p>
+                  <p className="text-gray-900 dark:text-white font-medium text-sm mb-2">{t('exercises.create.form.categories_selected')} ({benefitCategories.length}):</p>
                   <div className="flex flex-wrap gap-2">
                     {benefitCategories.map(cat => (
                       <span key={cat} className="px-2 py-1 bg-primary text-white rounded-full text-xs font-semibold">
-                        {cat}
+                        {t(`exercises.create.categories.${cat}`)}
                       </span>
                     ))}
                   </div>
@@ -712,8 +727,8 @@ const CreateExercise: React.FC = () => {
             </div>
           </div>
           <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
-            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
-            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
+            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> {t('exercises.create.actions.back')}</button>
+            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">{t('exercises.create.actions.continue')} <ArrowRight size={18} className="ml-2" /></button>
           </div>
         </section>
       </div>
@@ -879,13 +894,13 @@ const CreateExercise: React.FC = () => {
             <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
-            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 2: Grupos Musculares</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Selecciona uno o más grupos musculares que trabaja el ejercicio.</p>
+            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">{t('exercises.create.steps.step2_title')}</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">{t('exercises.create.steps.step2_desc')}</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {Object.entries(MuscleTargetLabels).map(([key, label]) => {
+            {Object.keys(MuscleTargetLabels).map((key) => {
               const isSelected = muscleTarget.includes(key as MuscleTarget);
               return (
                 <button
@@ -898,7 +913,7 @@ const CreateExercise: React.FC = () => {
                       : 'border-gray-300 dark:border-white/10 text-gray-900 dark:text-white hover:border-primary/50'
                   }`}
                 >
-                  {label}
+                  {t(`enums.muscle.${key}`)}
                 </button>
               );
             })}
@@ -906,17 +921,17 @@ const CreateExercise: React.FC = () => {
           
           {muscleTarget.length === 0 && (
             <div className="mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-              <p className="text-red-600 dark:text-red-400 font-semibold">⚠️ Debes seleccionar al menos un grupo muscular para continuar</p>
+              <p className="text-red-600 dark:text-red-400 font-semibold">{t('exercises.create.form.muscles_required')}</p>
             </div>
           )}
 
           {muscleTarget.length > 0 && (
             <div className="mt-6 p-4 bg-primary/10 rounded-xl">
-              <p className="text-gray-900 dark:text-white font-medium mb-2">Músculos seleccionados ({muscleTarget.length}):</p>
+              <p className="text-gray-900 dark:text-white font-medium mb-2">{t('exercises.create.form.muscles_selected')} ({muscleTarget.length}):</p>
               <div className="flex flex-wrap gap-2">
                 {muscleTarget.map(m => (
                   <span key={m} className="px-3 py-1 bg-primary text-white rounded-full text-sm font-semibold">
-                    {MuscleTargetLabels[m]}
+                    {t(`enums.muscle.${m}`)}
                   </span>
                 ))}
               </div>
@@ -930,9 +945,9 @@ const CreateExercise: React.FC = () => {
                 if (muscleTarget.length === 0) {
                   Swal.fire({
                     icon: 'warning',
-                    title: 'Grupo muscular requerido',
-                    text: 'Por favor selecciona al menos un grupo muscular para continuar.',
-                    confirmButtonText: 'Entendido',
+                    title: t('exercises.create.alerts.muscle_required_title'),
+                    text: t('exercises.create.alerts.muscle_required_msg'),
+                    confirmButtonText: t('common.actions.understood'),
                   });
                   return;
                 }
@@ -941,7 +956,7 @@ const CreateExercise: React.FC = () => {
               className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
               disabled={muscleTarget.length === 0}
             >
-              Continuar <ArrowRight size={18} className="ml-2" />
+              {t('exercises.create.actions.continue')} <ArrowRight size={18} className="ml-2" />
             </button>
           </div>
         </section>
@@ -953,41 +968,49 @@ const CreateExercise: React.FC = () => {
   // Step 3: Exercise Types
   if (step === 3) {
     const toggleExerciseType = (type: ExerciseType) => {
-      setExerciseType(prev => 
-        prev.includes(type) 
-          ? prev.filter(t => t !== type)
-          : [...prev, type]
-      );
+      setExerciseType(prev => {
+        const current = prev || [];
+        return current.includes(type) 
+          ? current.filter(t => t !== type)
+          : [...current, type];
+      });
     };
 
     return (
       <Layout>
         <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 md:gap-8">
         <header className="flex items-center gap-3 sm:gap-4 pt-12 sm:pt-0">
-          <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+          <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label={t('exercises.create.actions.back')}>
             <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
-            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 3: Tipos de Ejercicio</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Selecciona uno o más tipos de ejercicio (ej: Fuerza, Cardio, etc).</p>
+            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">{t('exercises.create.steps.step3_title')}</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">{t('exercises.create.steps.step3_desc')}</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {Object.entries(ExerciseTypeLabels).map(([key, label]) => {
-              const isSelected = exerciseType.includes(key as ExerciseType);
+            {Object.keys(ExerciseTypeLabels).map((key) => {
+              const typeKey = key as ExerciseType;
+              // Safe check for includes
+              const isSelected = Array.isArray(exerciseType) && exerciseType.includes(typeKey);
+              // Ensure we translate a string
+              const label = t(`enums.exerciseType.${typeKey}`);
+              // Fallback if translation fails or returns object
+              const displayLabel = typeof label === 'string' ? label : ExerciseTypeLabels[typeKey];
+
               return (
                 <button
                   key={key}
                   type="button"
-                  onClick={() => toggleExerciseType(key as ExerciseType)}
+                  onClick={() => toggleExerciseType(typeKey)}
                   className={`p-4 rounded-xl border-2 transition-all font-semibold text-sm ${
                     isSelected
                       ? 'border-primary bg-primary/10 text-primary'
                       : 'border-gray-300 dark:border-white/10 text-gray-900 dark:text-white hover:border-primary/50'
                   }`}
                 >
-                  {label}
+                  {displayLabel}
                 </button>
               );
             })}
@@ -995,17 +1018,17 @@ const CreateExercise: React.FC = () => {
           
           {exerciseType.length === 0 && (
             <div className="mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-              <p className="text-red-600 dark:text-red-400 font-semibold">⚠️ Debes seleccionar al menos un tipo de ejercicio para continuar</p>
+              <p className="text-red-600 dark:text-red-400 font-semibold">{t('exercises.create.form.types_required')}</p>
             </div>
           )}
 
           {exerciseType.length > 0 && (
             <div className="mt-6 p-4 bg-primary/10 rounded-xl">
-              <p className="text-gray-900 dark:text-white font-medium mb-2">Tipos seleccionados ({exerciseType.length}):</p>
+              <p className="text-gray-900 dark:text-white font-medium mb-2">{t('exercises.create.form.types_selected')} ({exerciseType.length}):</p>
               <div className="flex flex-wrap gap-2">
-                {exerciseType.map(t => (
-                  <span key={t} className="px-3 py-1 bg-primary text-white rounded-full text-sm font-semibold">
-                    {ExerciseTypeLabels[t]}
+                {exerciseType.map(type => (
+                  <span key={type} className="px-3 py-1 bg-primary text-white rounded-full text-sm font-semibold">
+                    {t(`enums.exerciseType.${type}`)}
                   </span>
                 ))}
               </div>
@@ -1013,15 +1036,15 @@ const CreateExercise: React.FC = () => {
           )}
 
           <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
-            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
+            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> {t('exercises.create.actions.back')}</button>
             <button 
               onClick={() => {
                 if (exerciseType.length === 0) {
                   Swal.fire({
                     icon: 'warning',
-                    title: 'Tipo de ejercicio requerido',
-                    text: 'Por favor selecciona al menos un tipo de ejercicio para continuar.',
-                    confirmButtonText: 'Entendido',
+                    title: t('exercises.create.alerts.type_required_title'),
+                    text: t('exercises.create.alerts.type_required_msg'),
+                    confirmButtonText: t('common.actions.understood'),
                   });
                   return;
                 }
@@ -1030,7 +1053,7 @@ const CreateExercise: React.FC = () => {
               className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
               disabled={exerciseType.length === 0}
             >
-              Continuar <ArrowRight size={18} className="ml-2" />
+              {t('exercises.create.actions.continue')} <ArrowRight size={18} className="ml-2" />
             </button>
           </div>
         </section>
@@ -1046,12 +1069,12 @@ const CreateExercise: React.FC = () => {
       <Layout>
         <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 md:gap-8">
         <header className="flex items-center gap-3 sm:gap-4 pt-12 sm:pt-0">
-          <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+          <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label={t('exercises.create.actions.back')}>
             <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
           </button>
           <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
-            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 4: Contenido Multimedia</h1>
-            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Añade un video (URL) o archivos multimedia (imágenes/videos). Puedes usar una o ambas opciones.</p>
+            <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">{t('exercises.create.steps.step4_title')}</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">{t('exercises.create.steps.step4_desc')}</p>
           </div>
         </header>
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
@@ -1060,19 +1083,19 @@ const CreateExercise: React.FC = () => {
             <div>
               <h3 className="text-gray-900 dark:text-white font-bold text-lg mb-4 flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center">1</div>
-                URL del Video
+                {t('exercises.create.form.video_url_title')}
               </h3>
               <div>
-                <label htmlFor="video-url" className="text-gray-900 dark:text-white font-medium mb-2 block">Enlace del Video (YouTube, Vimeo, etc.)</label>
+                <label htmlFor="video-url" className="text-gray-900 dark:text-white font-medium mb-2 block">{t('exercises.create.form.video_url_label')}</label>
                 <input 
                   id="video-url"
                   type="url"
                   value={video}
                   onChange={(e) => setVideo(e.target.value)}
                   className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none placeholder-gray-500 dark:placeholder-gray-400"
-                  placeholder="https://www.youtube.com/watch?v=..."
+                  placeholder={t('exercises.create.form.video_url_placeholder')}
                 />
-                <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">Proporciona un enlace válido a un video que demuestre el ejercicio</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">{t('exercises.create.form.video_url_help')}</p>
               </div>
             </div>
 
@@ -1080,7 +1103,7 @@ const CreateExercise: React.FC = () => {
               {/* Opción 2: Archivos Multimedia */}
               <h3 className="text-gray-900 dark:text-white font-bold text-lg mb-4 flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center">2</div>
-                Archivos Multimedia
+                {t('exercises.create.form.media_files_title')}
               </h3>
               <div
                 onDragOver={handleDragOver}
@@ -1090,14 +1113,14 @@ const CreateExercise: React.FC = () => {
               >
                 <Upload size={48} className="text-gray-400" />
                 <div className="text-center">
-                  <p className="text-gray-900 dark:text-white font-bold">Arrastra aquí o haz clic para seleccionar</p>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">PNG, JPG, MP4</p>
+                  <p className="text-gray-900 dark:text-white font-bold">{t('exercises.create.form.drag_drop_text')}</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">{t('exercises.create.form.file_types')}</p>
                 </div>
               </div>
 
               {previewMedia.length > 0 && (
                 <div className="mt-8">
-                  <p className="text-gray-900 dark:text-white font-medium mb-4">Multimedia cargada ({previewMedia.length})</p>
+                  <p className="text-gray-900 dark:text-white font-medium mb-4">{t('exercises.create.form.preview_media_uploaded')} ({previewMedia.length})</p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {previewMedia.map((file) => (
                       <div key={file.key} className="relative rounded-lg overflow-hidden bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
@@ -1129,8 +1152,8 @@ const CreateExercise: React.FC = () => {
           </div>
 
           <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
-            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> Anterior</button>
-            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">Continuar <ArrowRight size={18} className="ml-2" /></button>
+            <button onClick={goPrev} className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10"><ArrowLeft size={18} className="mr-2" /> {t('exercises.create.actions.back')}</button>
+            <button onClick={goNext} className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">{t('exercises.create.actions.continue')} <ArrowRight size={18} className="ml-2" /></button>
           </div>
         </section>
       </div>
@@ -1148,12 +1171,12 @@ const CreateExercise: React.FC = () => {
     <Layout>
       <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 md:gap-8">
       <header className="flex items-center gap-3 sm:gap-4 pt-12 sm:pt-0">
-        <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label="Volver">
+        <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label={t('exercises.create.actions.back')}>
           <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
         </button>
         <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
-          <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">Paso 1: {isEditing ? 'Editar Ejercicio' : 'Crear Nuevo Ejercicio'}</h1>
-          <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">{isEditing ? 'Actualiza la información del ejercicio.' : 'Introduce la información básica del ejercicio.'}</p>
+          <h1 className="text-gray-900 dark:text-white text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight break-words">{t('exercises.create.steps.step1_title', { title: isEditing ? t('exercises.create.steps.step1_header_edit') : t('exercises.create.steps.step1_header_create') }).replace(/Paso 1: |Step 1: /, '')}</h1>
+          <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">{isEditing ? t('exercises.create.steps.step1_desc_edit') : t('exercises.create.steps.step1_desc_create')}</p>
         </div>
       </header>
 
@@ -1164,25 +1187,25 @@ const CreateExercise: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="col-span-2 md:col-span-1">
-              <label htmlFor="exercise-name" className="text-gray-900 dark:text-white font-medium mb-2 block">Nombre del Ejercicio</label>
+              <label htmlFor="exercise-name" className="text-gray-900 dark:text-white font-medium mb-2 block">{t('exercises.create.form.name')}</label>
               <input 
                 id="exercise-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder="Ej: Press de Banca"
+                placeholder={t('exercises.create.form.name_placeholder')}
               />
             </div>
              <div className="col-span-2 md:col-span-1">
-               <label htmlFor="exercise-equipment" className="text-gray-900 dark:text-white font-medium mb-2 block">Equipo Necesario</label>
+               <label htmlFor="exercise-equipment" className="text-gray-900 dark:text-white font-medium mb-2 block">{t('exercises.create.form.equipment')}</label>
                <select 
                  id="exercise-equipment"
                  value={equipment}
                  onChange={(e) => setEquipment(e.target.value as Equipment)}
                  className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
                >
-                 {Object.entries(EquipmentLabels).map(([key, label]) => (
-                   <option key={key} value={key}>{label}</option>
+                 {Object.keys(EquipmentLabels).map((key) => (
+                   <option key={key} value={key}>{t(`enums.equipment.${key}`)}</option>
                  ))}
                </select>
              </div>
@@ -1190,7 +1213,7 @@ const CreateExercise: React.FC = () => {
 
           <div className="col-span-2">
             <label htmlFor="parent-exercise" className="text-gray-900 dark:text-white font-medium mb-2 block">
-              ¿Es variante de otro ejercicio? (Opcional)
+              {t('exercises.create.form.is_variant')}
             </label>
             <select 
               id="parent-exercise"
@@ -1198,15 +1221,15 @@ const CreateExercise: React.FC = () => {
               onChange={(e) => setParentExerciseId(e.target.value)}
               className="w-full h-12 px-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
             >
-              <option value="">No es variante</option>
+              <option value="">{t('exercises.create.form.no_variant')}</option>
               {availableExercises.map(ex => (
                 <option key={ex.id} value={ex.id}>
-                  {ex.name} ({EquipmentLabels[ex.equipment]})
+                  {ex.name} ({t(`enums.equipment.${ex.equipment}`)})
                 </option>
               ))}
             </select>
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-              Si este ejercicio es una variante de otro, selecciona el ejercicio base.
+              {t('exercises.create.form.variant_help')}
             </p>
           </div>
 
@@ -1214,7 +1237,7 @@ const CreateExercise: React.FC = () => {
 
           <div className="col-span-2">
              <div className="flex justify-between items-center mb-2">
-                <label className="text-gray-900 dark:text-white font-medium">Descripción</label>
+                <label className="text-gray-900 dark:text-white font-medium">{t('exercises.create.form.description')}</label>
                 <button 
                   type="button"
                   onClick={handleGenerateAI}
@@ -1223,7 +1246,7 @@ const CreateExercise: React.FC = () => {
                   className="flex items-center gap-1 text-xs font-bold text-background-dark bg-primary px-3 py-1 rounded-full hover:bg-primary/90 disabled:opacity-50 transition-all focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
                 >
                   <Sparkles size={14} />
-                  {isGenerating ? 'Generando...' : 'Generar con AI'}
+                  {isGenerating ? t('exercises.create.actions.generating') : t('exercises.create.actions.generate_ai')}
                 </button>
              </div>
              <textarea 
@@ -1231,16 +1254,16 @@ const CreateExercise: React.FC = () => {
                value={description}
                onChange={(e) => setDescription(e.target.value)}
                className="w-full min-h-[150px] p-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none placeholder-gray-500 dark:placeholder-gray-400 resize-y"
-               placeholder="Describe el movimiento o usa el botón AI..."
+               placeholder={t('exercises.create.form.description_placeholder')}
              />
           </div>
 
           <div className="flex justify-end gap-4 pt-6 border-t border-gray-200 dark:border-white/10">
             <button onClick={handleCancel} type="button" className="flex items-center justify-center h-12 px-6 rounded-xl border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-white/10 transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2">
-              <X size={18} className="mr-2" /> Cancelar
+              <X size={18} className="mr-2" /> {t('exercises.create.actions.cancel')}
             </button>
             <button onClick={handleSave} type="button" className="flex items-center justify-center h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2">
-              Continuar <ArrowRight size={18} className="ml-2" />
+              {t('exercises.create.actions.continue')} <ArrowRight size={18} className="ml-2" />
             </button>
           </div>
           </form>

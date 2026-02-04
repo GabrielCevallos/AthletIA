@@ -6,8 +6,10 @@ import { deleteExercise, getAllExercises } from '../../lib/exerciseStore';
 import { MuscleTargetLabels, EquipmentLabels } from '../../lib/enums';
 import Swal from 'sweetalert2';
 import api from '../../lib/api';
+import { useTranslation } from 'react-i18next';
 
 const Exercises: React.FC = () => {
+  const { t } = useTranslation();
   const [exercises, setExercises] = useState<any[]>([]);
   const navigate = useNavigate();
 
@@ -30,21 +32,21 @@ const Exercises: React.FC = () => {
     if (isSeed) {
       await Swal.fire({
         icon: 'info',
-        title: 'Ejercicio protegido',
-        text: 'Los ejercicios base no se pueden eliminar.',
-        confirmButtonText: 'Entendido',
+        title: t('exercises.delete.protected_title'),
+        text: t('exercises.delete.protected_text'),
+        confirmButtonText: t('common.actions.understood'),
       });
       return;
     }
 
     const result = await Swal.fire({
-      title: '¿Eliminar ejercicio?',
-      text: 'Esta acción no se puede deshacer.',
+      title: t('exercises.delete.confirm_title'),
+      text: t('exercises.delete.confirm_text'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonText: 'Cancelar',
-      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: t('common.actions.cancel'),
+      confirmButtonText: t('exercises.delete.confirm_button'),
     });
 
     if (result.isConfirmed) {
@@ -52,7 +54,7 @@ const Exercises: React.FC = () => {
         await api.delete(`/workout/exercises/${id}`);
         await Swal.fire({
           icon: 'success',
-          title: 'Ejercicio eliminado',
+          title: t('exercises.delete.success_title'),
           timer: 1500,
           timerProgressBar: true,
           showConfirmButton: false,
@@ -67,8 +69,8 @@ const Exercises: React.FC = () => {
         }
         await Swal.fire({
           icon: 'error',
-          title: 'No se pudo eliminar',
-          text: error?.response?.data?.message || 'Requiere permisos de administrador.',
+          title: t('exercises.delete.error_title'),
+          text: error?.response?.data?.message || t('exercises.delete.admin_required'),
         });
       }
     }
@@ -78,12 +80,12 @@ const Exercises: React.FC = () => {
       <div className="flex flex-col gap-4 sm:gap-6">
       <header className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">Biblioteca de Ejercicios</h1>
-          <p className="text-gray-500 dark:text-gray-300 text-sm sm:text-base leading-relaxed">Busca, visualiza y gestiona la base de datos.</p>
+          <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight">{t('exercises.title')}</h1>
+          <p className="text-gray-500 dark:text-gray-300 text-sm sm:text-base leading-relaxed">{t('exercises.subtitle')}</p>
         </div>
-        <Link to="/exercises/new" aria-label="Añadir nuevo ejercicio" className="flex items-center justify-center gap-2 bg-primary text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-bold hover:bg-primary/90 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 whitespace-nowrap">
+        <Link to="/exercises/new" aria-label={t('exercises.add_button')} className="flex items-center justify-center gap-2 bg-primary text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-bold hover:bg-primary/90 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 whitespace-nowrap">
           <Plus size={20} />
-          <span>Añadir Ejercicio</span>
+          <span>{t('exercises.add_button')}</span>
         </Link>
       </header>
 
@@ -96,17 +98,17 @@ const Exercises: React.FC = () => {
             </div>
             <input
               type="text"
-              placeholder="Buscar ejercicio por nombre..."
-              aria-label="Buscar ejercicio por nombre"
+              placeholder={t('exercises.search_placeholder')}
+              aria-label={t('exercises.search_placeholder')}
               className="w-full h-11 sm:h-12 pl-10 sm:pl-12 pr-4 rounded-xl bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-primary text-sm sm:text-base"
             />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-            <button className="flex items-center gap-2 px-3 sm:px-4 h-11 sm:h-12 rounded-xl bg-white dark:bg-white/5 text-gray-900 dark:text-white whitespace-nowrap border border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary text-sm sm:text-base" aria-label="Filtrar por grupo muscular">
-              Grupo Muscular <Filter size={16} />
+            <button className="flex items-center gap-2 px-3 sm:px-4 h-11 sm:h-12 rounded-xl bg-white dark:bg-white/5 text-gray-900 dark:text-white whitespace-nowrap border border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary text-sm sm:text-base" aria-label={t('exercises.filter_muscle')}>
+              {t('exercises.filter_muscle')} <Filter size={16} />
             </button>
-            <button className="flex items-center gap-2 px-3 sm:px-4 h-11 sm:h-12 rounded-xl bg-white dark:bg-white/5 text-gray-900 dark:text-white whitespace-nowrap border border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary text-sm sm:text-base" aria-label="Filtrar por equipo">
-              Equipo <Filter size={16} />
+            <button className="flex items-center gap-2 px-3 sm:px-4 h-11 sm:h-12 rounded-xl bg-white dark:bg-white/5 text-gray-900 dark:text-white whitespace-nowrap border border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary text-sm sm:text-base" aria-label={t('exercises.filter_equipment')}>
+              {t('exercises.filter_equipment')} <Filter size={16} />
             </button>
           </div>
         </div>
@@ -114,17 +116,17 @@ const Exercises: React.FC = () => {
 
       {/* Grid */}
       <section aria-labelledby="exercises-grid-heading">
-        <h2 id="exercises-grid-heading" className="sr-only">Lista de ejercicios</h2>
+        <h2 id="exercises-grid-heading" className="sr-only">{t('exercises.grid_heading')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
           {exercises.map((ex) => (
             <div key={ex.id} className="bg-white dark:bg-background-dark rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 hover:border-primary dark:hover:border-primary group transition-all shadow-card-md hover:shadow-lg">
               <div className="relative aspect-video">
                 <img src={ex.coverUrl || 'https://via.placeholder.com/400x250?text=Ejercicio'} alt={ex.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => navigate(`/exercises/${ex.id}/edit`)} className="bg-black/60 p-1.5 rounded-full text-white hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-primary" aria-label={`Editar ejercicio ${ex.name}`}>
+                  <button onClick={() => navigate(`/exercises/${ex.id}/edit`)} className="bg-black/60 p-1.5 rounded-full text-white hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-primary" aria-label={`${t('common.actions.edit')} ${ex.name}`}>
                     <MoreVertical size={16} />
                   </button>
-                  <button onClick={() => handleDelete(ex.id, ex.isSeed)} className="bg-black/60 p-1.5 rounded-full text-red-400 hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-red-500" aria-label={`Eliminar ejercicio ${ex.name}`}>
+                  <button onClick={() => handleDelete(ex.id, ex.isSeed)} className="bg-black/60 p-1.5 rounded-full text-red-400 hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-red-500" aria-label={`${t('common.actions.delete')} ${ex.name}`}>
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -139,7 +141,7 @@ const Exercises: React.FC = () => {
                       </span>
                       {ex.muscleTarget.length > 1 && (
                         <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
-                          +{ex.muscleTarget.length - 1}
+                          {t('exercises.card.plus_more')}{ex.muscleTarget.length - 1}
                         </span>
                       )}
                     </>
@@ -147,15 +149,15 @@ const Exercises: React.FC = () => {
                     <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/20 text-primary">{ex.muscle}</span>
                   ) : null}
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white/90">
-                    {ex.equipment && EquipmentLabels[ex.equipment as keyof typeof EquipmentLabels] ? EquipmentLabels[ex.equipment as keyof typeof EquipmentLabels] : ex.equipment || 'No especificado'}
+                    {ex.equipment && EquipmentLabels[ex.equipment as keyof typeof EquipmentLabels] ? EquipmentLabels[ex.equipment as keyof typeof EquipmentLabels] : ex.equipment || t('exercises.card.unspecified_equipment')}
                   </span>
                 </div>
                 <Link 
                   to={`/exercises/${ex.id}`}
-                  aria-label={`Ver detalles del ejercicio ${ex.name}`} 
+                  aria-label={`${t('exercises.card.details_button')} ${ex.name}`} 
                   className="mt-3 sm:mt-4 block w-full text-center py-2 rounded-lg border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  Ver Detalles
+                  {t('exercises.card.details_button')}
                 </Link>
               </div>
             </div>

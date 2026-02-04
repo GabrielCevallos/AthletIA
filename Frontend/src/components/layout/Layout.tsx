@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import Sidebar from './Sidebar'
 import ThemeToggle from '../ThemeToggle'
+import LanguageSelector from '../LanguageSelector'
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
@@ -11,7 +12,8 @@ export default function Layout({ children }: { children: ReactNode }) {
       </main>
       
       {/* Botón flotante de cambio de tema - responsivo */}
-      <div className="fixed bottom-6 left-6 z-40 lg:left-[280px]">
+      <div className="fixed bottom-6 left-6 z-40 lg:left-[280px] flex gap-4 items-center">
+        <LanguageSelector />
         <ThemeToggle />
       </div>
     </div>

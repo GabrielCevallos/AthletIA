@@ -1,0 +1,486 @@
+{
+  "common": {
+    "welcome": "Bienvenido a Athletia",
+    "branding_subtitle": "¡Comienza tu transformación hoy!",
+    "feature_routines": "Rutinas personalizadas",
+    "feature_measurements": "Seguimiento de medidas",
+    "feature_progress": "Análisis de progreso",
+    "loading": "Cargando...",
+    "actions": {
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "save": "Guardar",
+      "understood": "Entendido"
+    },
+    "pagination": {
+      "show": "Mostrar",
+      "per_page": "por página",
+      "total": "Total:",
+      "page": "Página",
+      "of": "de",
+      "prev": "Página anterior",
+      "next": "Página siguiente"
+    }
+  },
+  "login": {
+    "main_title": "Bienvenido",
+    "subtitle": "Inicia sesión en tu cuenta",
+    "title": "Iniciar Sesión",
+    "email_label": "Email o usuario",
+    "password_label": "Contraseña",
+    "email_placeholder": "correo@ejemplo.com",
+    "password_placeholder": "*******",
+    "submit_button": "Entrar",
+    "submitting": "Entrando...",
+    "remember_me": "Recuérdame",
+    "forgot_password": "Olvidé mi contraseña",
+    "or_continue_with": "o continúa con",
+    "validation": {
+      "email_invalid": "Email inválido",
+      "password_min": "Mínimo 6 caracteres"
+    },
+    "no_account": "¿No tienes cuenta?",
+    "register_link": "Regístrate aquí"
+  },
+  "register": {
+    "title": "Crear Cuenta",
+    "subtitle": "Crea una cuenta nueva",
+    "email_label": "Email",
+    "confirm_password_label": "Confirmar Contraseña",
+    "terms_conditions": "Acepto los términos y condiciones de servicio",
+    "submit_button": "Crear Cuenta",
+    "submitting": "Registrando...",
+    "or_register_with": "o regístrate con",
+    "already_have_account": "¿Ya tienes cuenta?",
+    "login_link": "Inicia sesión",
+    "validation": {
+      "passwords_mismatch": "Las contraseñas no coinciden",
+      "error_default": "Error al registrar la cuenta"
+    }
+  },
+  "dashboard": {
+    "title": "Panel de Administración",
+    "subtitle": "Gestiona y monitorea los usuarios de la plataforma.",
+    "registered_users": "Usuarios Registrados",
+    "last_7_days": "Últimos 7 días",
+    "new_users": "nuevos",
+    "quick_access": "Accesos Rápidos",
+    "explore_exercises": "Explorar Ejercicios",
+    "week_days": ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+  },
+  "sidebar": {
+    "dashboard": "Panel Principal",
+    "exercises": "Ejercicios",
+    "routines": "Rutinas",
+    "users": "Usuarios",
+    "logout": "Cerrar sesión",
+    "view_profile": "Ver mi perfil",
+    "no_name": "Sin nombre",
+    "role_user": "Usuario"
+  },
+  "exercises": {
+    "title": "Biblioteca de Ejercicios",
+    "subtitle": "Busca, visualiza y gestiona la base de datos.",
+    "add_button": "Añadir Ejercicio",
+    "search_placeholder": "Buscar ejercicio por nombre...",
+    "filter_muscle": "Grupo Muscular",
+    "filter_equipment": "Equipo",
+    "grid_heading": "Lista de ejercicios",
+    "card": {
+      "details_button": "Ver Detalles",
+      "unspecified_equipment": "No especificado",
+      "plus_more": "+"
+    },
+    "delete": {
+      "protected_title": "Ejercicio protegido",
+      "protected_text": "Los ejercicios base no se pueden eliminar.",
+      "confirm_title": "¿Eliminar ejercicio?",
+      "confirm_text": "Esta acción no se puede deshacer.",
+      "confirm_button": "Sí, eliminar",
+      "success_title": "Ejercicio eliminado",
+      "error_title": "No se pudo eliminar",
+      "admin_required": "Requiere permisos de administrador."
+    },
+    "create": {
+      "steps": {
+        "step1_title": "Paso 1: {{title}}",
+        "step1_desc_edit": "Actualiza la información del ejercicio.",
+        "step1_desc_create": "Introduce la información básica del ejercicio.",
+        "step1_header_edit": "Editar Ejercicio",
+        "step1_header_create": "Crear Nuevo Ejercicio",
+        "step2_title": "Paso 2: Grupos Musculares",
+        "step2_desc": "Selecciona uno o más grupos musculares involucrados.",
+        "step3_title": "Paso 3: Tipos de Ejercicio",
+        "step3_desc": "Selecciona uno o más tipos de ejercicio (ej: Fuerza, Cardio, etc).",
+        "step4_title": "Paso 4: Contenido Multimedia",
+        "step4_desc": "Añade un video (URL) o archivos multimedia (imágenes/videos). Puedes usar una o ambas opciones.",
+        "step5_title": "Paso 5: Beneficios del Ejercicio",
+        "step5_desc": "Define beneficios y categorías (Opcional).",
+        "step6_title": "Paso 6: Visibilidad",
+        "step6_desc": "Configura quién puede ver este ejercicio.",
+        "step7_title": "Paso 7: Vista Previa",
+        "step7_desc": "Revisa todos los detalles antes de finalizar."
+      },
+      "form": {
+        "name": "Nombre del Ejercicio",
+        "name_placeholder": "Ej: Press de Banca",
+        "equipment": "Equipo Necesario",
+        "is_variant": "¿Es variante de otro ejercicio? (Opcional)",
+        "no_variant": "No es variante",
+        "variant_help": "Si este ejercicio es una variante de otro, selecciona el ejercicio base.",
+        "description": "Descripción",
+        "description_placeholder": "Describe el movimiento o usa el botón AI...",
+        "video_url_title": "URL del Video",
+        "video_url_label": "Enlace del Video (YouTube, Vimeo, etc.)",
+        "video_url_placeholder": "https://www.youtube.com/watch?v=...",
+        "video_url_help": "Proporciona un enlace válido a un video que demuestre el ejercicio",
+        "media_files_title": "Archivos Multimedia",
+        "drag_drop_text": "Arrastra aquí o haz clic para seleccionar",
+        "file_types": "PNG, JPG, MP4",
+        "benefit_title": "Título del Beneficio",
+        "benefit_desc": "Descripción",
+        "categories_label": "Selecciona las categorías que aplican:",
+        "categories_selected": "Categorías seleccionadas",
+        "categories": "Categorías",
+        "muscles_selected": "Músculos seleccionados",
+        "muscles_required": "⚠️ Debes seleccionar al menos un grupo muscular para continuar",
+        "types_selected": "Tipos seleccionados",
+        "types_required": "⚠️ Debes seleccionar al menos un tipo de ejercicio para continuar",
+        "preview_media_uploaded": "Multimedia cargada",
+        "basic_info": "Información Básica",
+        "classification": "Clasificación",
+        "no_specified": "No especificado",
+        "variant_of": "Variante de",
+        "multimedia_empty": "No se añadió contenido multimedia"
+      },
+      "visibility": {
+        "public": "Público",
+        "public_desc": "Visible para todos los usuarios. Ideal para compartir.",
+        "private": "Privado",
+        "private_desc": "Solo visible para ti. Nadie más podrá verlo.",
+        "restricted": "Restringido (Próximamente)",
+        "restricted_desc": "Solo visible para usuarios específicos o clientes."
+      },
+      "alerts": {
+        "saving": "Guardando ejercicio...",
+        "please_wait": "Por favor espera...",
+        "success": "¡Éxito!",
+        "created": "El ejercicio ha sido creado correctamente.",
+        "updated": "El ejercicio ha sido actualizado correctamente.",
+        "error": "Error",
+        "error_unknown": "Ocurrió un error desconocido",
+        "fill_required": "Campos incompletos",
+        "fill_required_msg": "Por favor completa todos los campos requeridos y asegúrate de añadir al menos una instrucción.",
+        "muscle_required_title": "Grupo muscular requerido",
+        "muscle_required_msg": "Por favor selecciona al menos un grupo muscular para continuar.",
+        "type_required_title": "Tipo de ejercicio requerido",
+        "type_required_msg": "Por favor selecciona al menos un tipo de ejercicio para continuar.",
+        "instruction_empty": "Instrucción vacía",
+        "instruction_empty_msg": "Por favor escribe el texto de la instrucción antes de agregarla.",
+        "discard_title": "¿Descartar los cambios?",
+        "discard_text": "Perderás la información no guardada.",
+        "keep_editing": "Seguir editando",
+        "discard_confirm": "Descartar"
+      },
+      "actions": {
+        "generate_ai": "Generar con AI",
+        "generating": "Generando...",
+        "back": "Anterior",
+        "continue": "Continuar",
+        "cancel": "Cancelar",
+        "skip": "Omitir",
+        "publish": "Publicar Ejercicio",
+        "save_changes": "Guardar Cambios",
+        "add_instruction": "Agregar Instrucción",
+        "remove": "Eliminar"
+      },
+      "categories": {
+        "cardio": "Cardio",
+        "general_health": "Salud General",
+        "strength": "Fuerza",
+        "endurance": "Resistencia",
+        "flexibility": "Flexibilidad",
+        "weight_loss": "Pérdida de Peso",
+        "mass_gain": "Aumento de Masa"
+      },
+      "preview": {
+        "variant_of": "Variante de",
+        "muscle_groups": "Grupos Musculares",
+        "exercise_types": "Tipos de Ejercicio"
+      }
+    }
+  },
+  "routines": {
+    "title": "Rutinas",
+    "subtitle": "Administra tus rutinas guardadas.",
+    "new_button": "Nueva rutina",
+    "empty_state": "Aún no tienes rutinas. Crea la primera.",
+    "card": {
+      "exercise_count": "ejercicios",
+      "edit_label": "Editar rutina",
+      "delete_label": "Eliminar rutina",
+      "more_exercises": "más",
+      "view_details": "Ver detalle"
+    },
+    "delete": {
+      "confirm_title": "¿Eliminar rutina?",
+      "confirm_text": "Esta acción no se puede deshacer.",
+      "confirm_button": "Sí, eliminar",
+      "success_title": "Rutina eliminada"
+    },
+    "create": {
+      "default_name": "Nueva Rutina",
+      "title": "Creador de Rutinas",
+      "subtitle": "Crea rutinas personalizadas.",
+      "actions": {
+        "delete": "Eliminar",
+        "save_template": "Guardar Plantilla",
+        "save_routine": "Guardar Rutina"
+      },
+      "library": {
+        "title": "Biblioteca",
+        "search_aria": "Buscar en biblioteca",
+        "search_placeholder": "Buscar...",
+        "add_aria": "Añadir {{name}} a la rutina"
+      },
+      "builder": {
+        "heading_aria": "Constructor de ejercicios",
+        "routine_name_label": "Nombre de la Rutina",
+        "description_placeholder": "Descripción breve",
+        "empty_state": "Añade ejercicios de la biblioteca",
+        "headers": {
+          "sets": "Series",
+          "reps": "Reps",
+          "rest": "Descanso"
+        },
+        "inputs": {
+          "sets_aria": "Series para {{name}}",
+          "reps_aria": "Repeticiones para {{name}}",
+          "rest_aria": "Descanso para {{name}}"
+        },
+        "actions": {
+          "notes_aria": "Notas para {{name}}",
+          "remove_aria": "Eliminar {{name}} de la rutina"
+        }
+      },
+      "alerts": {
+        "add_exercises_title": "Añade ejercicios",
+        "add_exercises_text": "Por favor añade al menos un ejercicio a la rutina.",
+        "routine_saved_title": "Rutina guardada",
+        "routine_saved_text": "La rutina \"{{name}}\" ha sido guardada.",
+        "delete_title": "¿Eliminar rutina?",
+        "delete_text": "Esta acción no se puede deshacer.",
+        "delete_success": "Rutina eliminada"
+      }
+    }
+  },
+  "users": {
+    "title": "Gestión de Usuarios",
+    "subtitle": "Administra el acceso y detalles de los usuarios",
+    "search_placeholder": "Buscar usuarios...",
+    "table": {
+      "headers": {
+        "name": "Nombre",
+        "email": "Email",
+        "role": "Rol",
+        "status": "Estado",
+        "age": "Edad",
+        "actions": "Acciones"
+      },
+      "status": {
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "suspended": "Suspendido"
+      },
+      "role": {
+        "user": "Usuario",
+        "admin": "Admin",
+        "moderator": "Moderador"
+      },
+      "empty": "No se encontraron usuarios",
+      "loading": "Cargando usuarios...",
+      "error": "Error al cargar usuarios",
+      "actions": {
+        "promote": "Hacer Moderador",
+        "suspend": "Suspender",
+        "view_profile": "Ver Perfil"
+      }
+    },
+    "modals": {
+      "promote": {
+        "title": "¿Estás seguro?",
+        "text": "Estás a punto de otorgar permisos de moderador a {{name}}.",
+        "confirm": "Sí, otorgar permisos",
+        "success_title": "¡Permisos otorgados!",
+        "success_text": "El usuario ahora es moderador."
+      },
+      "suspend": {
+        "title": "¿Estás seguro?",
+        "text": "¿Quieres suspender a {{name}}? Perderá el acceso al sistema.",
+        "confirm": "Sí, suspender",
+        "success_title": "¡Suspendido!",
+        "success_text": "El usuario ha sido suspendido."
+      },
+      "error_title": "Error",
+      "promote_error": "No se pudo actualizar el rol.",
+      "suspend_error": "No se pudo suspender al usuario."
+    },
+    "profile": {
+      "back": "Volver",
+      "back_to_list": "Volver al listado",
+      "edit": "Editar Perfil",
+      "reset_password": "Restablecer contraseña",
+      "no_name": "Usuario sin nombre",
+      "no_email": "Sin correo",
+      "personal_info": "Información Personal",
+      "gender": "Género",
+      "not_specified": "No especificado",
+      "birthdate": "Fecha de Nacimiento",
+      "not_defined": "No definida",
+      "age": "Edad",
+      "years": "años",
+      "phone": "Teléfono",
+      "member_since": "Miembro desde",
+      "last_updated": "Última actualización",
+      "fitness_goals": "Objetivos Fitness",
+      "no_goals": "Este usuario no ha definido objetivos fitness.",
+      "groups_trainers": "Grupos y Entrenadores",
+      "no_assignments": "Sin asignaciones activas.",
+      "errors": {
+        "load_failed": "Error al cargar el perfil del usuario",
+        "not_found": "No se encontró el perfil solicitado",
+        "title": "Error",
+        "retry": "Reintentar"
+      }
+    }
+  },
+  "complete_profile": {
+    "title": "Completar Perfil",
+    "subtitle": "Necesitamos algunos datos adicionales para personalizar tu experiencia.",
+    "validation": {
+      "name_required": "El nombre es obligatorio",
+      "birthdate_required": "La fecha de nacimiento es obligatoria",
+      "phone_length": "El número debe tener 10 dígitos",
+      "phone_digits": "Solo números",
+      "gender_invalid": "Selecciona un género válido",
+      "goals_min": "Selecciona al menos un objetivo"
+    },
+    "success_message": "Tu perfil se ha registrado correctamente. Ahora puedes interactuar con el sistema.",
+    "error_default": "Error al guardar el perfil",
+    "labels": {
+      "name": "Nombre Completo",
+      "birthdate": "Fecha de Nacimiento",
+      "phone": "Teléfono (10 dígitos)",
+      "gender": "Género",
+      "goals": "Objetivos Fitness"
+    },
+    "placeholders": {
+      "select": "Selecciona..."
+    },
+    "gender_options": {
+      "male": "Masculino",
+      "female": "Femenino"
+    },
+    "submit": {
+      "default": "Completar Registro",
+      "loading": "Guardando..."
+    },
+    "goals": {
+      "WEIGHT_LOSS": "Pérdida de peso",
+      "MUSCLE_GAIN": "Ganancia muscular",
+      "WEIGHT_MAINTENANCE": "Mantenimiento de peso",
+      "ENDURANCE": "Resistencia",
+      "FLEXIBILITY": "Flexibilidad",
+      "GENERAL_FITNESS": "Fitness general",
+      "REHABILITATION": "Rehabilitación",
+      "IMPROVED_POSTURE": "Mejorar postura",
+      "BALANCE_AND_COORDINATION": "Equilibrio y coordinación",
+      "CARDIOVASCULAR_HEALTH": "Salud cardiovascular",
+      "STRENGTH_TRAINING": "Entrenamiento de fuerza",
+      "ATHLETIC_PERFORMANCE": "Rendimiento atlético",
+      "LIFESTYLE_ENHANCEMENT": "Mejorar estilo de vida"
+    }
+  },
+  "accessibility": {
+    "title": "Accesibilidad",
+    "text_size": "Tamaño de Texto",
+    "decrease_text_size": "Disminuir tamaño de texto",
+    "increase_text_size": "Aumentar tamaño de texto",
+    "contrast_color": "Contraste y Color",
+    "grayscale": "Escala de Grises",
+    "high_contrast": "Alto Contraste",
+    "negative_contrast": "Contraste Negativo",
+    "readability": "Legibilidad",
+    "readable_font": "Fuente Legible",
+    "underline_links": "Enlaces Subrayados",
+    "screen_reader": "Lector de Pantalla",
+    "read_page": "Leer Página",
+    "stop": "Detener",
+    "reading_speed": "Velocidad de Lectura",
+    "speed": {
+      "slow": "Lenta",
+      "normal": "Normal",
+      "fast": "Rápida",
+      "very_fast": "Muy Rápida"
+    },
+    "reset": "Restablecer Todo",
+    "reset_label": "Restablecer todas las configuraciones de accesibilidad",
+    "close_menu": "Cerrar menú de accesibilidad",
+    "open_menu": "Abrir menú de accesibilidad"
+  },
+  "settings": {
+    "language": "Idioma",
+    "theme": "Tema"
+  },
+
+  "enums": {
+    "muscle": {
+        "chest": "Pecho",
+        "core": "Core",
+        "trapezius": "Trapecio",
+        "lats": "Dorsales",
+        "deltoids": "Deltoides",
+        "triceps": "Tríceps",
+        "biceps": "Bíceps",
+        "forearms": "Antebrazos",
+        "quads": "Cuádriceps",
+        "hamstrings": "Isquiotibiales",
+        "glutes": "Glúteos",
+        "adductors": "Aductores",
+        "calves": "Gemelos",
+        "neck": "Cuello"
+    },
+    "equipment": {
+        "barbell": "Barra",
+        "dumbbell": "Mancuernas",
+        "machine": "Máquina",
+        "bodyweight": "Peso Corporal",
+        "kettlebell": "Pesa Rusa",
+        "resistance_band": "Banda de Resistencia",
+        "cable": "Cable",
+        "other": "Otro"
+    },
+     "exerciseType": {
+        "cardio": "Cardio",
+        "strength": "Fuerza",
+        "flexibility": "Flexibilidad",
+        "hiit": "HIIT",
+        "pilates": "Pilates",
+        "yoga": "Yoga",
+        "crossfit": "CrossFit",
+        "calisthenics": "Calistenia",
+        "aerobics": "Aeróbica",
+        "endurance": "Resistencia",
+        "powerlifting": "Powerlifting",
+        "olympic_weightlifting": "Levantamiento Olímpico",
+        "bodybuilding": "Fisicoculturismo",
+        "functional_training": "Entrenamiento Funcional",
+        "rehabilitation": "Rehabilitación",
+        "sports_specific": "Específico del Deporte",
+        "warm_up": "Calentamiento",
+        "cool_down": "Enfriamiento"
+      }
+  }
+}
