@@ -36,10 +36,16 @@ type ProfileResponse = {
 };
 
 const editProfileSchema = z.object({
-  name: z.union([z.string().min(2, 'Ingresa tu nombre'), z.literal('')]),
-  birthDate: z.union([z.string().min(4, 'Ingresa tu fecha de nacimiento'), z.literal('')]),
-  phoneNumber: z.union([z.string().min(8, 'Ingresa tu teléfono'), z.literal('')]),
-  language: z.enum(['es', 'en']).optional(),
+  name: z.string().refine((val) => val === '' || val.trim().length >= 2, {
+    message: 'El nombre debe tener al menos 2 letras.',
+  }),
+  birthDate: z.string().refine((val) => val === '' || val.trim().length >= 8, {
+    message: 'La fecha debe tener el formato completo (MM/DD/YYYY).',
+  }),
+  phoneNumber: z.string().refine((val) => val === '' || val.trim().length >= 8, {
+    message: 'El teléfono debe tener al menos 8 dígitos.',
+  }),
+  language: z.enum(['spanish', 'english']).optional(),
 });
 
 type EditProfileForm = z.infer<typeof editProfileSchema>;
@@ -103,7 +109,7 @@ export default function EditProfileScreen() {
       name: '',
       birthDate: '',
       phoneNumber: '',
-      language: 'es',
+      language: 'spanish',
     },
   });
 
@@ -140,7 +146,7 @@ export default function EditProfileScreen() {
       setValue('name', data.name ?? '');
       setValue('birthDate', formatBirthDateForInput(data.birthDate));
       setValue('phoneNumber', data.phoneNumber ?? '');
-      setValue('language', (data.language as 'es' | 'en') || 'es');
+      setValue('language', (data.language as 'spanish' | 'english') || 'spanish');
     } catch (error) {
       await handleApiError(error);
       Alert.alert('Error', error instanceof Error ? error.message : 'No se pudo cargar el perfil');
@@ -308,7 +314,15 @@ export default function EditProfileScreen() {
               />
             </View>
 
-            <PrimaryButton label={submitLabel} onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
+            <PrimaryButton
+              label={submitLabel}
+              onPress={handleSubmit(onSubmit, (errors) => {
+                console.log('Validation errors:', errors);
+                const firstError = Object.values(errors)[0];
+                Alert.alert('Revisa los datos', (firstError?.message as string) || 'Verifica la información ingresada.');
+              })}
+              loading={isSubmitting}
+            />
           </ScrollView>
         </View>
 
@@ -325,7 +339,7 @@ export default function EditProfileScreen() {
                   key={option.value}
                   style={styles.sheetRow}
                   onPress={() => {
-                    setValue('language', option.value as 'es' | 'en', { shouldValidate: true });
+                    setValue('language', option.value as 'spanish' | 'english', { shouldValidate: true });
                     setLanguageSheetOpen(false);
                   }}
                 >
