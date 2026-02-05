@@ -4,17 +4,17 @@ import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import {
-    Alert,
-    Keyboard,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableWithoutFeedback,
-    View,
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 import { z } from 'zod';
 
@@ -111,13 +111,18 @@ export default function CompleteProfileScreen() {
           phoneNumber: data.phone.replace(/\D/g, ''),
           gender: data.gender,
           fitGoals: data.goals,
+          language: 'spanish',
         }),
       });
 
       const result = await response.json();
 
       if (!result?.success) {
-        Alert.alert(t('signup.errorTitle'), result?.message || t('completeProfile.errors.profileIncomplete'));
+        const errorMessage = Array.isArray(result?.message)
+          ? result.message.join('\n')
+          : result?.message || t('completeProfile.errors.profileIncomplete');
+          
+        Alert.alert(t('signup.errorTitle'), errorMessage);
         return;
       }
 

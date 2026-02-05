@@ -20,22 +20,26 @@ import { z } from 'zod';
 import { DumbbellIcon } from '@/components/ui/dumbbell-icon';
 import { FormInput } from '@/components/ui/form-input';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { SelectField } from '@/components/ui/select-field';
 import { Config } from '@/constants';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { handleApiError } from '@/services/api-error-handler';
 import { GlobalStyles } from '@/styles/global';
+import { Modal } from 'react-native';
 
 type ProfileResponse = {
   name?: string;
   birthDate?: string;
   phoneNumber?: string;
+  language?: string;
 };
 
 const editProfileSchema = z.object({
   name: z.union([z.string().min(2, 'Ingresa tu nombre'), z.literal('')]),
   birthDate: z.union([z.string().min(4, 'Ingresa tu fecha de nacimiento'), z.literal('')]),
   phoneNumber: z.union([z.string().min(8, 'Ingresa tu teléfono'), z.literal('')]),
+  language: z.enum(['es', 'en']).optional(),
 });
 
 type EditProfileForm = z.infer<typeof editProfileSchema>;
@@ -80,11 +84,18 @@ export default function EditProfileScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [languageSheetOpen, setLanguageSheetOpen] = useState(false);
+
+  const languageOptions = [
+    { label: 'Español (LatAm)', value: 'spanish' },
+    { label: 'English (US)', value: 'english' },
+  ];
 
   const {
     control,
     handleSubmit,
     setValue,
+    watch,
     formState: { isSubmitting },
   } = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
@@ -92,8 +103,11 @@ export default function EditProfileScreen() {
       name: '',
       birthDate: '',
       phoneNumber: '',
+      language: 'es',
     },
   });
+
+  const languageValue = watch('language');
 
   const behavior = Platform.OS === 'ios' ? 'padding' : 'height';
 
@@ -126,6 +140,7 @@ export default function EditProfileScreen() {
       setValue('name', data.name ?? '');
       setValue('birthDate', formatBirthDateForInput(data.birthDate));
       setValue('phoneNumber', data.phoneNumber ?? '');
+      setValue('language', (data.language as 'es' | 'en') || 'es');
     } catch (error) {
       await handleApiError(error);
       Alert.alert('Error', error instanceof Error ? error.message : 'No se pudo cargar el perfil');
@@ -154,6 +169,7 @@ export default function EditProfileScreen() {
       ...(data.name?.trim() ? { name: data.name.trim() } : {}),
       ...(data.birthDate?.trim() ? { birthDate: normalizeBirthDate(data.birthDate) } : {}),
       ...(data.phoneNumber?.trim() ? { phoneNumber: data.phoneNumber.trim() } : {}),
+      ...(data.language ? { language: data.language } : {}),
     };
 
     console.log('[EditProfile] Payload a enviar:', JSON.stringify(payload, null, 2));
@@ -276,11 +292,50 @@ export default function EditProfileScreen() {
                   />
                 )}
               />
+
+              <Controller
+                control={control}
+                name="language"
+                render={({ field: { value } }) => (
+                  <SelectField
+                    label="Idioma / Language"
+                    placeholder="Selecciona tu idioma"
+                    iconName="language"
+                    value={languageOptions.find((o) => o.value === value)?.label}
+                    onPress={() => setLanguageSheetOpen(true)}
+                  />
+                )}
+              />
             </View>
 
             <PrimaryButton label={submitLabel} onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
           </ScrollView>
         </View>
+
+        <Modal
+          visible={languageSheetOpen}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setLanguageSheetOpen(false)}
+        >
+          <Pressable style={styles.sheetBackdrop} onPress={() => setLanguageSheetOpen(false)}>
+            <View style={styles.sheet}>
+              {languageOptions.map((option) => (
+                <Pressable
+                  key={option.value}
+                  style={styles.sheetRow}
+                  onPress={() => {
+                    setValue('language', option.value as 'es' | 'en', { shouldValidate: true });
+                    setLanguageSheetOpen(false);
+                  }}
+                >
+                  <Text style={styles.sheetText}>{option.label}</Text>
+                  {languageValue === option.value ? <Text style={styles.check}>•</Text> : null}
+                </Pressable>
+              ))}
+            </View>
+          </Pressable>
+        </Modal>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
@@ -364,5 +419,24 @@ const styles = StyleSheet.create({
   cardTitle: {
     ...Typography.styles.h3,
     fontSize: Typography.fontSize.lg,
+  },
+  sheetBackdrop: {
+    ...GlobalStyles.modalBackdrop,
+  },
+  sheet: {
+    ...GlobalStyles.modalSheet,
+  },
+  sheetRow: {
+    ...GlobalStyles.modalSheetRow,
+  },
+  sheetText: {
+    color: Colors.text.secondary,
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+  },
+  check: {
+    color: Colors.primary.light,
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.extrabold,
   },
 });
