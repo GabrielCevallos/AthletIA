@@ -16,10 +16,11 @@ import RoutineCreator from './pages/Routines/RoutineCreator'
 import Splits from './pages/Splits/Splits'
 import SplitForm from './pages/Splits/SplitForm'
 import SplitDetail from './pages/Splits/SplitDetail'
-import Measurements from './pages/Measurements/Measurements'
 import UserManagement from './pages/UserManagement'
 import UserProfile from './pages/UserProfile'
 import MobileAppRedirect from './pages/MobileAppRedirect'
+import { ForgotPassword } from './pages/ForgotPassword'
+import { ResetPassword } from './pages/ResetPassword'
 import { AccessibilityProvider } from './context/AccessibilityContext'
 import AccessibilityButton from './components/AccessibilityButton'
 
@@ -33,6 +34,8 @@ export default function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/mobile-app-redirect" element={<MobileAppRedirect />} />
@@ -50,7 +53,6 @@ export default function App() {
             <Route path="/splits/new" element={<SplitForm />} />
             <Route path="/splits/:id" element={<SplitDetail />} />
             <Route path="/splits/:id/edit" element={<SplitForm />} />
-            <Route path="/measurements" element={<Measurements />} />
             <Route path="/users" element={<UserManagement />} />
           <Route path="/users/:accountId" element={<UserProfile />} />
           </Route>

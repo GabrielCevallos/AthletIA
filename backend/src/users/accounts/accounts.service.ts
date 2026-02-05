@@ -303,4 +303,46 @@ export class AccountsService {
 
     return { message: 'Moderator role request submitted successfully' };
   }
+
+  async updateResetToken(
+    accountId: string,
+    token: string,
+    expiry: Date,
+  ): Promise<void> {
+    const account = await this.accountsRepository.findOneBy({ id: accountId });
+    if (!account) {
+      throw new NotFoundException('Account not found');
+    }
+    account.resetPasswordToken = token;
+    account.resetPasswordTokenExpiry = expiry;
+    await this.accountsRepository.save(account);
+  }
+
+  async getAllAccounts(): Promise<Account[]> {
+    return await this.accountsRepository.find();
+  }
+
+  async save(account: Account): Promise<void> {
+    await this.accountsRepository.save(account);
+  }
+
+  async findByResetToken(token: string): Promise<Account | null> {
+    const accounts = await this.accountsRepository.find();
+    
+    for (const account of accounts) {
+      if (account.resetPasswordToken && account.resetPasswordTokenExpiry) {
+        try {
+          const isValid = await argon2.verify(account.resetPasswordToken, token);
+          if (isValid) {
+            return account;
+          }
+        } catch (error) {
+          // Continue to next account if verification fails
+          continue;
+        }
+      }
+    }
+    
+    return null;
+  }
 }

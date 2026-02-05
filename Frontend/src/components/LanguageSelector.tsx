@@ -30,10 +30,10 @@ export default function LanguageSelector() {
         <button
           key={code}
           onClick={() => handleLanguageChange(code)}
-          className={`px-2 py-1 rounded text-xs sm:text-sm font-medium transition-colors ${
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
             i18n.language.startsWith(code)
-              ? 'bg-primary text-white dark:bg-primary-dark'
-              : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+              ? 'bg-primary text-white'
+              : 'bg-gray-100 text-gray-900 dark:bg-[#233c48] dark:text-white hover:bg-gray-200 dark:hover:bg-[#2d4a5a]'
           }`}
           title={LANGUAGES[code as keyof typeof LANGUAGES].label}
           aria-label={`Switch to ${LANGUAGES[code as keyof typeof LANGUAGES].label}`}

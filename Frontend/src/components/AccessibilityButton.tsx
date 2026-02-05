@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAccessibility } from '../context/AccessibilityContext'
+import LanguageSelector from './LanguageSelector'
+import ThemeToggle from './ThemeToggle'
 
 export default function AccessibilityButton() {
   const { t } = useTranslation()
@@ -72,6 +74,17 @@ export default function AccessibilityButton() {
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
+              {/* Preferencias rápidas */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                  {t('accessibility.preferences')}
+                </label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <LanguageSelector />
+                  <ThemeToggle />
+                </div>
+              </div>
+
               {/* Tamaño de texto */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-900 dark:text-white">

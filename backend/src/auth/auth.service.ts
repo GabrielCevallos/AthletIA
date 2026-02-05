@@ -7,8 +7,10 @@ import {
 import { AccountsService } from 'src/users/accounts/accounts.service';
 import {
   ChangePasswordRequest,
+  ForgotPasswordRequest,
   LoginRequest,
   RegisterAccountRequest,
+  ResetPasswordRequest,
   TokenResponse,
 } from './dto/auth.dto';
 import * as argon2 from 'argon2';
@@ -23,6 +25,7 @@ import { ProfileRequest } from 'src/users/profiles/dto/profiles.dto';
 import { GoogleUser } from './strategies/google.strategy';
 import { User } from 'src/users/accounts/dto/user-response.dtos';
 import { RateLimitService } from 'src/common/guards/rate-limit.service';
+import * as crypto from 'crypto';
 
 dotenv.config();
 
@@ -387,5 +390,66 @@ export class AuthService {
     // Must wait until window passes
     const secondsToWait = Math.ceil((windowMs - elapsed) / 1000);
     return { allowed: false, secondsToWait };
+  }
+
+  async forgotPassword(forgotPasswordRequest: ForgotPasswordRequest): Promise<{ message: string }> {
+    const { email } = forgotPasswordRequest;
+
+    const account = await this.accountsService.findByEmail(email);
+    if (!account) {
+      // Don't reveal if email exists for security reasons
+      return { message: 'Si el correo existe en nuestro sistema, recibirás un enlace para resetear tu contraseña.' };
+    }
+
+    // Generate secure random token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = await argon2.hash(resetToken);
+
+    // Set expiry to 24 hours from now
+    const expiryDate = new Date();
+    expiryDate.setHours(expiryDate.getHours() + 24);
+
+    // Save token to database
+    await this.accountsService.updateResetToken(account.id, hashedToken, expiryDate);
+
+    // Send email with reset link
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
+
+    try {
+      await this.mailService.sendPasswordResetEmail(email, resetLink);
+    } catch (error) {
+      this.logger.error(`Failed to send password reset email: ${error.message}`);
+      throw new BadRequestException('No se pudo enviar el correo de recuperación. Intenta más tarde.');
+    }
+
+    return { message: 'Si el correo existe en nuestro sistema, recibirás un enlace para resetear tu contraseña.' };
+  }
+
+  async resetPassword(resetPasswordRequest: ResetPasswordRequest): Promise<{ message: string }> {
+    const { token, newPassword } = resetPasswordRequest;
+
+    // Find account with reset token
+    const account = await this.accountsService.findByResetToken(token);
+
+    if (!account) {
+      throw new BadRequestException('El enlace de recuperación es inválido o ha expirado.');
+    }
+
+    // Check if token has expired
+    if (!account.resetPasswordTokenExpiry || account.resetPasswordTokenExpiry < new Date()) {
+      throw new BadRequestException('El enlace de recuperación ha expirado. Solicita uno nuevo.');
+    }
+
+    // Hash new password
+    const hashedPassword = await argon2.hash(newPassword);
+
+    // Update account
+    account.password = hashedPassword;
+    account.resetPasswordToken = null;
+    account.resetPasswordTokenExpiry = null;
+    await this.accountsService.save(account);
+
+    return { message: 'Contraseña reestablecida exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.' };
   }
 }

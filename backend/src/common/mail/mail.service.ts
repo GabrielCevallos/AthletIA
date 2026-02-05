@@ -117,4 +117,50 @@ export class MailService {
       this.logger.warn('Email notification failed, but user operation continues');
     }
   }
+
+  async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
+    const subject = 'Resestablece tu contraseña';
+    const html = `<p>Hola,</p>
+      <p>Recibimos una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace para continuar:</p>
+      <p><a href="${resetLink}">Restablecer contraseña</a></p>
+      <p>Este enlace es válido por 24 horas.</p>
+      <p>Si no solicitaste esto, ignora este correo y tu contraseña permanecerá sin cambios.</p>
+      <p>Saludos,<br>Equipo de Athletia</p>`;
+
+    if (!this.isConfigured) {
+      this.logger.log(
+        `Simulated send to ${to}: subject=${subject} link=${resetLink}`,
+      );
+      return;
+    }
+
+    try {
+      const request = this.client
+        .post('send', { version: 'v3.1' })
+        .request({
+          Messages: [
+            {
+              From: {
+                Email: this.senderEmail,
+                Name: 'Athletia',
+              },
+              To: [
+                {
+                  Email: to,
+                },
+              ],
+              Subject: subject,
+              HTMLPart: html,
+            },
+          ],
+        });
+
+      await request;
+      this.logger.log(`Password reset email sent to ${to}`);
+    } catch (e) {
+      this.logger.error('Failed to send password reset email', e);
+      throw e;
+    }
+  }
 }
+

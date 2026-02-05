@@ -15,8 +15,10 @@ import { ApiTags, ApiExtraModels } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
   ChangePasswordRequest,
+  ForgotPasswordRequest,
   LoginRequest,
   RegisterAccountRequest,
+  ResetPasswordRequest,
   TokenResponse,
 } from './dto/auth.dto';
 import { Public } from 'src/auth/guards/decorators/public.decorator';
@@ -118,6 +120,38 @@ export class AuthController {
   ): Promise<ResponseBody<{ allowed: boolean; secondsToWait?: number }>> {
     const status = await this.authService.getResendVerificationStatus(email);
     return ResponseBody.success(status, 'Status fetched');
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({
+    maxAttempts: 3,
+    windowMs: 60 * 60 * 1000,
+    blockDurationMs: 60 * 60 * 1000,
+    keyGenerator: (req) => req.body?.email || req.ip,
+  })
+  async forgotPassword(
+    @Body() forgotPasswordRequest: ForgotPasswordRequest,
+  ): Promise<ResponseBody<{ message: string }>> {
+    const result = await this.authService.forgotPassword(forgotPasswordRequest);
+    return ResponseBody.success(result, result.message);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({
+    maxAttempts: 5,
+    windowMs: 15 * 60 * 1000,
+    blockDurationMs: 30 * 60 * 1000,
+    keyGenerator: (req) => req.ip,
+  })
+  async resetPassword(
+    @Body() resetPasswordRequest: ResetPasswordRequest,
+  ): Promise<ResponseBody<{ message: string }>> {
+    const result = await this.authService.resetPassword(resetPasswordRequest);
+    return ResponseBody.success(result, result.message);
   }
 
   @UseGuards(AuthGuard)

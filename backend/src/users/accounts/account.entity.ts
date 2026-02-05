@@ -57,6 +57,12 @@ export class Account {
   @Column({ type: 'text', nullable: true })
   refreshTokenHash: string | null;
 
+  @Column({ type: 'text', nullable: true })
+  resetPasswordToken: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  resetPasswordTokenExpiry: Date | null;
+
   @OneToOne(() => Measurement, (measurement) => measurement.account)
   measurement: Measurement;
 }

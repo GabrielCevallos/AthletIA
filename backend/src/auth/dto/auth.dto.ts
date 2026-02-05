@@ -58,3 +58,31 @@ export class ChangePasswordRequest {
   })
   newPassword: string;
 }
+export class ForgotPasswordRequest {
+  @IsEmail()
+  @ApiProperty({
+    description: 'User email',
+    example: 'user@example.com',
+    format: 'email',
+  })
+  email: string;
+}
+
+export class ResetPasswordRequest {
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({
+    description: 'Reset token from email',
+    example: 'token123...',
+  })
+  token: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({
+    description: 'New password',
+    example: 'NewP@ss1234',
+    minLength: 8,
+  })
+  newPassword: string;
+}

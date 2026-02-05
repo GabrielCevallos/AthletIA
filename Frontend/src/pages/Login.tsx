@@ -4,10 +4,8 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '../context/AuthContext'
-import ThemeToggle from '../components/ThemeToggle'
 import api from '../lib/api'
 import { useTranslation } from 'react-i18next'
-import LanguageSelector from '../components/LanguageSelector'
 
 export default function Login() {
   const { t } = useTranslation()
@@ -97,19 +95,13 @@ export default function Login() {
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-gray-900/70 to-primary/40"></div>
       </div>
 
-      {/* Theme Toggle */}
-      <div className="absolute top-6 right-6 z-20 flex gap-4 items-center">
-        <LanguageSelector />
-        <ThemeToggle />
-      </div>
-
       {/* Main Content */}
       <div className="w-full max-w-6xl relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-0">
         {/* Left Side - Image/Branding (Hidden on mobile) */}
         <div className="hidden lg:flex flex-col justify-center items-center text-white px-8 animate-slide-in">
           <div className="text-center">
             <h1 className="text-5xl font-black mb-4 leading-tight">
-              <span className="block">AthetIA</span>
+              <span className="block">AthletIA</span>
             </h1>
             <p className="text-xl text-gray-300 mb-8 font-light">{t('common.branding_subtitle')}</p>
             <div className="space-y-4 text-left">
@@ -217,9 +209,9 @@ export default function Login() {
                   <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
                   <span className="text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition">{t('login.remember_me')}</span>
                 </label>
-                <a href="#" className="text-primary font-semibold hover:text-primary/80 transition">
+                <Link to="/forgot-password" className="text-primary font-semibold hover:text-primary/80 transition">
                   {t('login.forgot_password')}
-                </a>
+                </Link>
               </div>
 
               {/* Submit Button */}

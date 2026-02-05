@@ -89,6 +89,15 @@ export default function Sidebar() {
               <p className="text-gray-900 dark:text-white text-sm font-medium">{t('sidebar.routines')}</p>
             </NavLink>
             <NavLink 
+              to="/splits" 
+              className={linkCls} 
+              aria-label={t('sidebar.splits')}
+              onClick={closeSidebar}
+            >
+              <span className="material-symbols-outlined text-gray-900 dark:text-white">calendar_month</span>
+              <p className="text-gray-900 dark:text-white text-sm font-medium">{t('sidebar.splits')}</p>
+            </NavLink>
+            <NavLink 
               to="/users" 
               className={linkCls} 
               aria-label={t('sidebar.users')}
