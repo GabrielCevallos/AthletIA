@@ -1,0 +1,140 @@
+---
+title: "AthletIA - Documentación Técnica"
+subtitle: "AthletIA"
+author: "Equipo de Desarrollo de AthletIA"
+date: today
+format: 
+  pdf:
+    toc: true
+    number-sections: true
+lang: es
+---
+
+# Introducción
+
+AthletIA es una plataforma integral para gestión de rutinas de ejercicios, entrenamiento y monitoreo de progreso físico. La arquitectura está diseñada para soportar múltiples clientes (Web y Mobile) con un backend robusto.
+
+# Arquitectura C4
+
+## Nivel 1: Contexto
+
+![Diagrama C4 - Nivel 1 (Contexto)](arquitecture/C4-model-level-1-context.drawio.png){width=80%}
+
+El sistema se estructura alrededor del usuario final, proporcionando acceso a través de aplicaciones web y móvil, integradas con servicios de autenticación y notificaciones.
+
+## Nivel 2: Contenedores
+
+![Diagrama C4 - Nivel 2 (Contenedores)](arquitecture/C4-model-level-2-container.drawio.png){width=80%}
+
+Los contenedores principales son:
+- **Frontend Web**: Aplicación React + Vite para gestión administrativa
+- **Mobile App**: Aplicación Expo/React Native para usuarios finales
+- **Backend API**: NestJS con bases de datos relacionales
+- **Servicios Externos**: Autenticación Google, notificaciones
+
+## Nivel 3: Componentes
+
+![Diagrama C4 - Nivel 3 (Componentes)](arquitecture/C4-model-level-3-component.drawio.png){width=80%}
+
+El backend se divide en módulos especializados:
+- **Auth Module**: Autenticación y autorización
+- **Users Module**: Gestión de perfiles y cuentas
+- **Workout Module**: Ejercicios, rutinas y splits
+- **Measurements Module**: Mediciones de progreso
+- **Notifications Module**: Sistema de notificaciones
+- **AI Module**: Integración con IA
+
+## Nivel 3: Frontend
+
+![Diagrama C4 - Nivel 3 (Frontend)](arquitecture/C4-model-level-3-frontend.drawio.png){width=80%}
+
+# Diagrama de Clases
+
+![Diagrama de Clases](arquitecture/Diagrama-Clases-AthletIA.drawio.png){width=85%}
+
+# Tecnologías por Componente
+
+## Backend
+
+- **Framework**: NestJS (Node.js)
+- **Base de Datos**: PostgreSQL
+- **Autenticación**: JWT + Google OAuth
+- **Validación**: Class Validator
+- **API Documentation**: Swagger/OpenAPI
+- **Rate Limiting**: Sistema integrado
+- **Correo**: Nodemailer
+
+### Módulos Principales
+
+| Módulo | Responsabilidad |
+|--------|-----------------|
+| Auth | Autenticación, autorización, roles |
+| Users | Perfiles, cuentas, datos de usuario |
+| Workout | Ejercicios, rutinas, splits |
+| Measurements | Seguimiento de progreso |
+| Notifications | Sistema de notificaciones |
+| AI | Integración con servicios IA |
+
+## Frontend Web
+
+- **Framework**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **Estilos**: Tailwind CSS
+- **UI Components**: Componentes personalizados
+- **Internacionalización**: i18n
+- **Gestión de Estado**: Context API
+- **HTTP Client**: Axios
+
+### Secciones Principales
+
+- Dashboard
+- Gestión de Usuarios
+- Gestión de Ejercicios
+- Rutinas y Splits
+- Mediciones
+- Perfil de Usuario
+
+## Mobile App
+
+- **Framework**: Expo + React Native
+- **Lenguaje**: TypeScript
+- **Navegación**: Expo Router
+- **Estilos**: NativeWind (Tailwind para React Native)
+- **Almacenamiento**: AsyncStorage
+- **Internacionalización**: i18n
+- **Mapeo de Pantallas**: Routing File-based
+
+### Pantallas Principales
+
+- Login / Signup
+- Dashboard (Inicio)
+- Explorar Ejercicios
+- Mis Rutinas
+- Splits/Entrenamientos
+- Mediciones
+- Notificaciones
+- Perfil
+
+# Stack Tecnológico General
+
+| Capa | Tecnología |
+|------|-----------|
+| **Backend** | NestJS, TypeScript, PostgreSQL |
+| **Frontend Web** | React, TypeScript, Vite, Tailwind |
+| **Mobile** | Expo, React Native, TypeScript |
+| **Autenticación** | JWT, OAuth2 (Google) |
+| **Comunicación** | REST API |
+| **Deployment** | Node.js (Backend), Vite (Frontend) |
+
+# Consideraciones de Seguridad
+
+- Autenticación basada en JWT
+- Validación de pertenencia de datos (Ownership Guard)
+- Control de acceso basado en roles
+- Rate limiting en endpoints
+- Encriptación de contraseñas
+- CORS configurado
+
+---
+
+
