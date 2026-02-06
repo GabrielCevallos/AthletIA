@@ -426,6 +426,16 @@ export class AuthService {
     return { message: 'If the email exists in our system, you will receive a link to reset your password.' };
   }
 
+  async adminResetPassword(accountId: string): Promise<{ message: string }> {
+    const account = await this.accountsService.findById(accountId);
+    if (!account) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Reuse forgotPassword logic
+    return this.forgotPassword({ email: account.email });
+  }
+
   async resetPassword(resetPasswordRequest: ResetPasswordRequest): Promise<{ message: string }> {
     const { token, newPassword } = resetPasswordRequest;
 

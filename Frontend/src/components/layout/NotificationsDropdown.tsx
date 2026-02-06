@@ -20,13 +20,19 @@ export default function NotificationsDropdown() {
   const [markingId, setMarkingId] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const formatDate = (value: string | null) =>
-    value
-      ? new Intl.DateTimeFormat(i18n.language, {
-          dateStyle: 'medium',
-          timeStyle: 'short',
-        }).format(new Date(value))
-      : t('dashboard.not_available')
+  const formatDate = (value: string | null) => {
+    if (!value) return t('dashboard.not_available')
+    
+    // Asegurar que la fecha se interprete como UTC si no tiene información de zona horaria
+    const dateStr = value.includes('Z') || value.includes('+') || value.includes('-') && value.lastIndexOf('-') > 10
+      ? value
+      : value + 'Z'
+    
+    return new Intl.DateTimeFormat(i18n.language, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(dateStr))
+  }
 
   const getTypeLabel = (type?: string): string => {
     const typeMap: Record<string, string> = {

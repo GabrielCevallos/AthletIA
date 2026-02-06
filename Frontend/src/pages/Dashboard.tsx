@@ -189,13 +189,19 @@ export default function Dashboard() {
       ? t('dashboard.not_available')
       : `${Math.round(value * 100)}%`
 
-  const formatDate = (value: string | null) =>
-    value
-      ? new Intl.DateTimeFormat(i18n.language, {
-          dateStyle: 'medium',
-          timeStyle: 'short',
-        }).format(new Date(value))
-      : t('dashboard.not_available')
+  const formatDate = (value: string | null) => {
+    if (!value) return t('dashboard.not_available')
+    
+    // Asegurar que la fecha se interprete como UTC si no tiene información de zona horaria
+    const dateStr = value.includes('Z') || value.includes('+') || value.includes('-') && value.lastIndexOf('-') > 10
+      ? value
+      : value + 'Z'
+    
+    return new Intl.DateTimeFormat(i18n.language, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(dateStr))
+  }
 
   const getTypeBadgeClass = (type?: string) => {
     if (!type) return 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-200'

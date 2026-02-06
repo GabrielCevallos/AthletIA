@@ -71,6 +71,24 @@ export class Exercise {
     categories?: string[];
   } | null;
 
+  @Column({ type: 'jsonb', nullable: true, default: '[]' })
+  mediaFiles: Array<{
+    id: string;
+    name: string;
+    size: number;
+    type: string;
+    data: string;
+  }>;
+
+  @Column({ default: true })
+  isPublic: boolean;
+
+  @Column({ nullable: true })
+  coverUrl: string;
+
+  @Column({ default: false })
+  isSeed: boolean;
+
   @ManyToOne(() => Exercise, (exercise) => exercise.variants, {
     nullable: true,
     onDelete: 'SET NULL',

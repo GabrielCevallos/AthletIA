@@ -100,11 +100,35 @@ const CreateExercise: React.FC = () => {
       return;
     }
     setIsGenerating(true);
-    const muscleLabel = muscleTarget.length > 0 ? t(`enums.muscle.${muscleTarget[0]}`) : 'General';
-    const equipmentLabel = t(`enums.equipment.${equipment}`);
-    const desc = await generateExerciseDescription(name, muscleLabel, equipmentLabel);
-    setDescription(desc);
-    setIsGenerating(false);
+    try {
+      const muscleLabel = muscleTarget.length > 0 ? t(`enums.muscle.${muscleTarget[0]}`) : 'General';
+      const equipmentLabel = t(`enums.equipment.${equipment}`);
+      console.log('🔄 Generando descripción:', { name, muscleLabel, equipmentLabel });
+      const desc = await generateExerciseDescription(name, muscleLabel, equipmentLabel);
+      console.log('✅ Descripción generada:', desc);
+      setDescription(desc);
+      
+      // Always show success notification (backend now has smart fallback)
+      await Swal.fire({
+        icon: 'success',
+        title: '¡Descripción generada!',
+        text: 'Se ha creado una descripción detallada para tu ejercicio.',
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (error: any) {
+      console.error('❌ Error generating description:', error);
+      const errorMessage = error?.message || error?.response?.data?.message || 'Error desconocido';
+      
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error inesperado',
+        html: `<p>No se pudo generar la descripción.</p><small class="text-gray-500">${errorMessage}</small>`,
+        confirmButtonText: t('common.actions.understood'),
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleSelectMedia = () => {
@@ -168,8 +192,45 @@ const CreateExercise: React.FC = () => {
   const goNext = () => setStep((s) => Math.min(s + 1, 7));
   const goPrev = () => setStep((s) => Math.max(s - 1, 1));
 
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    // Only reject if user is ADDING characters beyond 500 (not when deleting)
+    if (newValue.length > 500 && newValue.length > description.length) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Límite de caracteres alcanzado',
+        text: `La descripción no puede exceder 500 caracteres`,
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      return;
+    }
+    setDescription(newValue);
+  };
+
   const handlePublish = async () => {
     console.log('🚀 Iniciando handlePublish...');
+    
+    // Validar descripción primero
+    if (!description || description.trim().length === 0) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Descripción requerida',
+        text: 'La descripción es obligatoria para crear el ejercicio',
+        confirmButtonText: t('common.actions.understood'),
+      });
+      return;
+    }
+
+    if (description.length > 500) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Límite de caracteres excedido',
+        text: `La descripción no puede exceder 500 caracteres (actualmente tiene ${description.length})`,
+        confirmButtonText: t('common.actions.understood'),
+      });
+      return;
+    }
     
     // Compilar el ejercicio con todos los campos
     const exerciseData: Partial<Exercise> = {
@@ -1171,7 +1232,7 @@ const CreateExercise: React.FC = () => {
     <Layout>
       <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-6 md:gap-8">
       <header className="flex items-center gap-3 sm:gap-4 pt-12 sm:pt-0">
-        <button onClick={goPrev} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label={t('exercises.create.actions.back')}>
+        <button onClick={() => navigate('/exercises')} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label={t('exercises.create.actions.back')}>
           <ArrowLeft size={20} className="sm:size-6 text-gray-900 dark:text-white" />
         </button>
         <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
@@ -1238,21 +1299,27 @@ const CreateExercise: React.FC = () => {
           <div className="col-span-2">
              <div className="flex justify-between items-center mb-2">
                 <label className="text-gray-900 dark:text-white font-medium">{t('exercises.create.form.description')}</label>
-                <button 
-                  type="button"
-                  onClick={handleGenerateAI}
-                  disabled={isGenerating}
-                  aria-live="polite"
-                  className="flex items-center gap-1 text-xs font-bold text-background-dark bg-primary px-3 py-1 rounded-full hover:bg-primary/90 disabled:opacity-50 transition-all focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
-                >
-                  <Sparkles size={14} />
-                  {isGenerating ? t('exercises.create.actions.generating') : t('exercises.create.actions.generate_ai')}
-                </button>
+                <div className="flex items-center gap-3">
+                  <span className={`text-sm font-bold ${description.length > 400 ? 'text-red-500' : 'text-gray-500'}`}>
+                    {description.length}/500
+                  </span>
+                  <button 
+                    type="button"
+                    onClick={handleGenerateAI}
+                    disabled={isGenerating}
+                    aria-live="polite"
+                    className="flex items-center gap-1 text-xs font-bold text-background-dark bg-primary px-3 py-1 rounded-full hover:bg-primary/90 disabled:opacity-50 transition-all focus-visible:outline-[3px] focus-visible:outline-white/30 focus-visible:outline-offset-2"
+                  >
+                    <Sparkles size={14} />
+                    {isGenerating ? t('exercises.create.actions.generating') : t('exercises.create.actions.generate_ai')}
+                  </button>
+                </div>
              </div>
              <textarea 
                id="exercise-description"
                value={description}
-               onChange={(e) => setDescription(e.target.value)}
+               onChange={handleDescriptionChange}
+               maxLength={500}
                className="w-full min-h-[150px] p-4 rounded-xl bg-white dark:bg-background-dark border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none placeholder-gray-500 dark:placeholder-gray-400 resize-y"
                placeholder={t('exercises.create.form.description_placeholder')}
              />

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Search, Plus, GripVertical, Trash2, Save, FileText } from 'lucide-react';
+import { Search, Plus, GripVertical, Trash2, Save, FileText, ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
 import { getAllExercises } from '../../lib/exerciseStore';
@@ -29,8 +29,31 @@ const RoutineCreator: React.FC = () => {
   const [description, setDescription] = useState('');
 
   const library = useMemo(() => {
-    return getAllExercises().map((ex) => ({ id: ex.id, name: ex.name, muscle: ex.muscle }));
+    return getAllExercises().map((ex) => ({ 
+      id: ex.id, 
+      name: ex.name, 
+      muscle: ex.muscle,
+      coverUrl: ex.coverUrl,
+      mediaFiles: ex.mediaFiles
+    }));
   }, []);
+
+  // Helper to get exercise image
+  const getExerciseImage = (exercise: any): string => {
+    // Priority 1: coverUrl
+    if (exercise.coverUrl) return exercise.coverUrl;
+    
+    // Priority 2: First image from mediaFiles
+    if (exercise.mediaFiles && exercise.mediaFiles.length > 0) {
+      const firstImage = exercise.mediaFiles.find((file: any) => 
+        file.data && file.type?.startsWith('image/')
+      );
+      if (firstImage) return firstImage.data;
+    }
+    
+    // Priority 3: No image
+    return '';
+  };
 
   useEffect(() => {
     // Si no está editando, asegurarse de establecer el nombre por defecto traducido
@@ -49,7 +72,7 @@ const RoutineCreator: React.FC = () => {
     setRoutineExercises(found.exercises);
   }, [id, isEditing, navigate, t]);
 
-  const addToRoutine = (exercise: { id: string; name: string; muscle?: string }) => {
+  const addToRoutine = (exercise: { id: string; name: string; muscle?: string; coverUrl?: string; mediaFiles?: any[] }) => {
     setRoutineExercises([
       ...routineExercises,
       { ...exercise, uid: generateLocalUUID(), sets: 4, reps: '8-12' } as RoutineExercise,
@@ -132,9 +155,14 @@ const RoutineCreator: React.FC = () => {
     <Layout>
         <div className="flex flex-col h-[calc(100vh-100px)] gap-4 md:gap-6">
          <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-         <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight">{t('routines.create.title')}</h1>
-          <p className="text-gray-300 text-sm sm:text-base leading-relaxed">{t('routines.create.subtitle')}</p>
+         <div className="flex items-center gap-3">
+            <button onClick={() => navigate('/routines')} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2" aria-label={t('common.actions.back')}>
+              <ArrowLeft size={20} className="text-gray-900 dark:text-white" />
+            </button>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight">{t('routines.create.title')}</h1>
+              <p className="text-gray-300 text-sm sm:text-base leading-relaxed">{t('routines.create.subtitle')}</p>
+            </div>
          </div>
         <div className="flex gap-2 sm:gap-3">
           {isEditing && (
@@ -156,17 +184,29 @@ const RoutineCreator: React.FC = () => {
                 </div>
              </div>
              <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-2">
-              {library.map(ex => (
-              <div key={ex.id} className="flex justify-between items-center p-3 bg-white/5 rounded-lg group hover:bg-white/10 transition-colors">
-                        <div>
-                  <p className="text-white font-medium text-sm">{ex.name}</p>
-                  <p className="text-gray-400 text-xs">{ex.muscle}</p>
-                        </div>
-                <button onClick={() => addToRoutine(ex)} aria-label={t('routines.create.library.add_aria', { name: ex.name })} className="p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-background-dark transition-colors focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2">
-                            <Plus size={16} />
-                        </button>
-                    </div>
-                ))}
+              {library.map(ex => {
+                const imageUrl = getExerciseImage(ex);
+                return (
+              <div key={ex.id} className="flex justify-between items-center p-2 bg-white/5 rounded-lg group hover:bg-white/10 transition-colors gap-3">
+                {imageUrl ? (
+                  <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                    <img src={imageUrl} alt={ex.name} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg">💪</span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-medium text-sm truncate">{ex.name}</p>
+                  <p className="text-gray-400 text-xs truncate">{ex.muscle}</p>
+                </div>
+                <button onClick={() => addToRoutine(ex)} aria-label={t('routines.create.library.add_aria', { name: ex.name })} className="p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-background-dark transition-colors focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2 flex-shrink-0">
+                  <Plus size={16} />
+                </button>
+              </div>
+              );
+              })}
              </div>
           </aside>
 
@@ -196,12 +236,23 @@ const RoutineCreator: React.FC = () => {
                         <p className="mt-2">{t('routines.create.builder.empty_state')}</p>
                     </div>
                 ) : (
-                    routineExercises.map((ex) => (
-                <div key={ex.uid} className="bg-white/5 rounded-lg p-4 flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-bottom-2">
-                  <GripVertical className="text-gray-400 cursor-grab" />
-                            <div className="flex-1 min-w-[150px]">
-                                <p className="text-white font-bold">{ex.name}</p>
-                            </div>
+                    routineExercises.map((ex) => {
+                      const imageUrl = getExerciseImage(ex);
+                      return (
+                <div key={ex.uid} className="bg-white/5 rounded-lg p-3 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+                  <GripVertical className="text-gray-400 cursor-grab flex-shrink-0" size={20} />
+                  {imageUrl ? (
+                    <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                      <img src={imageUrl} alt={ex.name} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0">
+                      <span className="text-base">💪</span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-[100px]">
+                    <p className="text-white font-bold text-sm">{ex.name}</p>
+                  </div>
                             <div className="flex gap-4 items-center">
                                 <div className="flex flex-col gap-1">
                                     <label className="text-[10px] text-[#92c9a4] uppercase">{t('routines.create.builder.headers.sets')}</label>
@@ -216,12 +267,13 @@ const RoutineCreator: React.FC = () => {
                   <input aria-label={t('routines.create.builder.inputs.rest_aria', { name: ex.name })} className="w-16 bg-white/10 rounded p-1 text-center text-white text-sm border border-white/10" placeholder="60s" value={ex.rest ?? ''} onChange={(e) => updateField(ex.uid as string, 'rest', e.target.value)} />
                                 </div>
                             </div>
-                            <div className="flex gap-2 ml-auto">
+                            <div className="flex gap-2 ml-auto flex-shrink-0">
                     <button className="p-2 hover:bg-white/10 rounded text-gray-300" aria-label={t('routines.create.builder.actions.notes_aria', { name: ex.name })}><FileText size={18} /></button>
                   <button onClick={() => removeFromRoutine(ex.uid as string)} className="p-2 hover:bg-red-900/30 rounded text-red-400" aria-label={t('routines.create.builder.actions.remove_aria', { name: ex.name })}><Trash2 size={18} /></button>
                             </div>
                         </div>
-                    ))
+                      );
+                    })
                 )}
              </div>
           </article>

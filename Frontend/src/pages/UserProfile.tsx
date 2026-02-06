@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import Layout from '../components/layout/Layout'
 import api from '../lib/api'
-import { ArrowLeft, Calendar, Mail, User as UserIcon, Phone, FileText, Clock, Users } from 'lucide-react'
+import { ArrowLeft, Calendar, Mail, User as UserIcon, Phone, FileText, Clock, Users, X } from 'lucide-react'
+import Swal from 'sweetalert2'
 
 interface UserProfileData {
   id: string
@@ -28,6 +29,13 @@ export default function UserProfile() {
   const [profile, setProfile] = useState<UserProfileData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editForm, setEditForm] = useState({
+    name: '',
+    birthDate: '',
+    gender: '',
+    phoneNumber: '',
+  })
 
   useEffect(() => {
     if (accountId) {
@@ -57,6 +65,74 @@ export default function UserProfile() {
       case 'inactive': return 'bg-rose-500/10 text-rose-500 border-rose-500/20'
       case 'suspended': return 'bg-amber-500/10 text-amber-500 border-amber-500/20'
       default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+    }
+  }
+
+  const handleEditClick = () => {
+    if (profile) {
+      setEditForm({
+        name: profile.name || '',
+        birthDate: profile.birthDate || '',
+        gender: profile.gender || '',
+        phoneNumber: profile.phoneNumber || '',
+      })
+      setIsEditModalOpen(true)
+    }
+  }
+
+  const handleSaveProfile = async () => {
+    try {
+      if (!accountId) return
+      
+      await api.patch(`/profiles/${accountId}`, editForm)
+      
+      await Swal.fire({
+        icon: 'success',
+        title: t('users.profile.edit_success'),
+        timer: 1500,
+        showConfirmButton: false,
+      })
+      
+      setIsEditModalOpen(false)
+      fetchProfile(accountId)
+    } catch (err: any) {
+      console.error('Error updating profile:', err)
+      await Swal.fire({
+        icon: 'error',
+        title: t('users.profile.edit_error'),
+        text: err.response?.data?.message || t('users.profile.errors.update_failed'),
+      })
+    }
+  }
+
+  const handleResetPassword = async () => {
+    try {
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: t('users.profile.reset_password_confirm_title'),
+        text: t('users.profile.reset_password_confirm_text'),
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonText: t('common.actions.cancel'),
+        confirmButtonText: t('users.profile.reset_password_confirm'),
+      })
+
+      if (result.isConfirmed && accountId) {
+        await api.post(`/auth/admin-reset-password/${accountId}`)
+        
+        await Swal.fire({
+          icon: 'success',
+          title: t('users.profile.reset_password_success_title'),
+          text: t('users.profile.reset_password_success_text'),
+        })
+      }
+    } catch (err: any) {
+      console.error('Error resetting password:', err)
+      await Swal.fire({
+        icon: 'error',
+        title: t('users.profile.reset_password_error'),
+        text: err.response?.data?.message || t('users.profile.errors.reset_failed'),
+      })
     }
   }
 
@@ -167,10 +243,16 @@ export default function UserProfile() {
               </div>
 
               <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-                <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm shadow-sm hover:shadow active:scale-95 transform duration-100">
+                <button 
+                  onClick={handleEditClick}
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm shadow-sm hover:shadow active:scale-95 transform duration-100"
+                >
                   {t('users.profile.edit')}
                 </button>
-                <button className="px-4 py-2 bg-white dark:bg-transparent border border-gray-200 dark:border-[#325567] text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-[#233c48] transition-colors font-medium text-sm">
+                <button 
+                  onClick={handleResetPassword}
+                  className="px-4 py-2 bg-white dark:bg-transparent border border-gray-200 dark:border-[#325567] text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-[#233c48] transition-colors font-medium text-sm"
+                >
                   {t('users.profile.reset_password')}
                 </button>
               </div>
@@ -266,6 +348,93 @@ export default function UserProfile() {
           </div>
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#1a2831] rounded-2xl p-6 max-w-md w-full shadow-2xl border border-gray-200 dark:border-[#325567] max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('users.profile.edit')}</h2>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-[#233c48] rounded-lg transition-colors"
+              >
+                <X size={20} className="text-gray-500 dark:text-gray-400" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t('users.profile.name')}
+                </label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-[#325567] bg-white dark:bg-[#233c48] text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t('users.profile.birthdate')}
+                </label>
+                <input
+                  type="date"
+                  value={editForm.birthDate}
+                  onChange={(e) => setEditForm({ ...editForm, birthDate: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-[#325567] bg-white dark:bg-[#233c48] text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t('users.profile.gender')}
+                </label>
+                <select
+                  value={editForm.gender}
+                  onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-[#325567] bg-white dark:bg-[#233c48] text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
+                >
+                  <option value="">{t('users.profile.select_gender')}</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t('users.profile.phone')}
+                </label>
+                <input
+                  type="tel"
+                  value={editForm.phoneNumber}
+                  onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-[#325567] bg-white dark:bg-[#233c48] text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
+                  placeholder="0000000000"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-[#325567] text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-[#233c48] transition-colors font-medium"
+              >
+                {t('common.actions.cancel')}
+              </button>
+              <button
+                onClick={handleSaveProfile}
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+              >
+                {t('common.actions.save')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   )
 }

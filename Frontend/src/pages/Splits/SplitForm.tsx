@@ -6,22 +6,24 @@ import { getSplitById, upsertSplit, Days, Split } from '../../lib/splitStore'
 import { getAllRoutines, Routine } from '../../lib/routineStore'
 import { useAuth } from '../../context/AuthContext'
 import Swal from 'sweetalert2'
-
-const DAY_OPTIONS = [
-  { label: 'Lunes', value: Days.MONDAY },
-  { label: 'Martes', value: Days.TUESDAY },
-  { label: 'Miércoles', value: Days.WEDNESDAY },
-  { label: 'Jueves', value: Days.THURSDAY },
-  { label: 'Viernes', value: Days.FRIDAY },
-  { label: 'Sábado', value: Days.SATURDAY },
-  { label: 'Domingo', value: Days.SUNDAY },
-];
+import { useTranslation } from 'react-i18next'
 
 export default function SplitForm() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { role } = useAuth()
-  const isAdmin = role === 'ADMIN'
+  const isAdmin = role === 'admin'
+  
+  const DAY_OPTIONS = [
+    { label: t('splits.days.monday'), value: Days.MONDAY },
+    { label: t('splits.days.tuesday'), value: Days.TUESDAY },
+    { label: t('splits.days.wednesday'), value: Days.WEDNESDAY },
+    { label: t('splits.days.thursday'), value: Days.THURSDAY },
+    { label: t('splits.days.friday'), value: Days.FRIDAY },
+    { label: t('splits.days.saturday'), value: Days.SATURDAY },
+    { label: t('splits.days.sunday'), value: Days.SUNDAY },
+  ];
   
   console.log('🔑 SplitForm - Role:', role, 'isAdmin:', isAdmin)
   
@@ -92,8 +94,8 @@ export default function SplitForm() {
   const handleSave = async () => {
     if (!form.name || !form.name.trim()) {
       await Swal.fire({
-        title: 'Error',
-        text: 'El nombre del split es requerido.',
+        title: t('splits.alerts.name_required_title'),
+        text: t('splits.alerts.name_required_text'),
         icon: 'error',
       })
       return
@@ -101,8 +103,8 @@ export default function SplitForm() {
 
     if ((form.trainingDays || []).length === 0) {
       await Swal.fire({
-        title: 'Error',
-        text: 'Selecciona al menos un día de entrenamiento.',
+        title: t('splits.alerts.days_required_title'),
+        text: t('splits.alerts.days_required_text'),
         icon: 'error',
       })
       return
@@ -122,8 +124,8 @@ export default function SplitForm() {
     })
 
     await Swal.fire({
-      title: 'Guardado',
-      text: `Split "${record.name}" guardado correctamente.`,
+      title: t('splits.alerts.saved_title'),
+      text: t('splits.alerts.saved_text', { name: record.name }),
       icon: 'success',
       timer: 1600,
       timerProgressBar: true,
@@ -136,39 +138,39 @@ export default function SplitForm() {
   return (
     <Layout>
       <div className="flex flex-col gap-4 sm:gap-6 max-w-4xl">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-primary hover:text-primary/80 font-medium text-sm mb-2">
-          <ArrowLeft size={18} /> Volver
+        <button onClick={() => navigate('/splits')} className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2 w-fit" aria-label={t('common.actions.back')}>
+          <ArrowLeft size={20} className="text-gray-900 dark:text-white" />
         </button>
 
         <header className="flex flex-col gap-2">
           <h1 className="text-gray-900 dark:text-white text-2xl sm:text-3xl font-black">
-            {form.id ? 'Editar split' : 'Nuevo split'}
+            {form.id ? t('splits.form.title_edit') : t('splits.form.title_new')}
           </h1>
           <p className="text-gray-500 dark:text-gray-300 text-sm">
-            {form.id ? 'Actualiza los detalles de tu split.' : 'Crea un nuevo plan de entrenamiento.'}
+            {form.id ? t('splits.form.subtitle_edit') : t('splits.form.subtitle_new')}
           </p>
         </header>
 
         <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 flex flex-col gap-4 shadow-card-md">
           {/* Nombre */}
           <div className="flex flex-col gap-2">
-            <label className="font-semibold text-gray-900 dark:text-white text-sm">Nombre *</label>
+            <label className="font-semibold text-gray-900 dark:text-white text-sm">{t('splits.form.name_label')} *</label>
             <input
               type="text"
               value={form.name || ''}
               onChange={(e) => handleChange('name', e.target.value)}
-              placeholder="Ej: Push/Pull/Legs"
+              placeholder={t('splits.form.name_placeholder')}
               className="px-3 py-2.5 border border-gray-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             />
           </div>
 
           {/* Descripción */}
           <div className="flex flex-col gap-2">
-            <label className="font-semibold text-gray-900 dark:text-white text-sm">Descripción</label>
+            <label className="font-semibold text-gray-900 dark:text-white text-sm">{t('splits.form.description_label')}</label>
             <textarea
               value={form.description || ''}
               onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Describe tu split..."
+              placeholder={t('splits.form.description_placeholder')}
               rows={3}
               className="px-3 py-2.5 border border-gray-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary resize-none"
             />
@@ -176,7 +178,7 @@ export default function SplitForm() {
 
           {/* Días de entrenamiento */}
           <div className="flex flex-col gap-3">
-            <label className="font-semibold text-gray-900 dark:text-white text-sm">Días de entrenamiento *</label>
+            <label className="font-semibold text-gray-900 dark:text-white text-sm">{t('splits.form.training_days_label')} *</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {DAY_OPTIONS.map((day) => (
                 <button
@@ -197,7 +199,7 @@ export default function SplitForm() {
           {/* Relacionar rutinas con días seleccionados */}
           {(form.trainingDays || []).length > 0 && (
             <div className="flex flex-col gap-3">
-              <label className="font-semibold text-gray-900 dark:text-white text-sm">Asignar rutina por día</label>
+              <label className="font-semibold text-gray-900 dark:text-white text-sm">{t('splits.form.assign_routine_label')}</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {(form.trainingDays || []).map((day) => (
                   <div key={day} className="flex flex-col gap-1">
@@ -207,7 +209,7 @@ export default function SplitForm() {
                       onChange={(e) => assignRoutineToDay(day, e.target.value)}
                       className="px-3 py-2.5 border border-gray-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-gray-900 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
-                      <option value="">Sin rutina</option>
+                      <option value="">{t('splits.form.no_routine')}</option>
                       {routines.map((r) => (
                         <option key={r.id} value={r.id}>{r.name}</option>
                       ))}
@@ -221,11 +223,11 @@ export default function SplitForm() {
           {/* Resumen */}
           <div className="flex flex-col gap-2 pt-4 border-t border-gray-200 dark:border-white/10">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500 dark:text-gray-400">Días de entrenamiento:</span>
+              <span className="text-gray-500 dark:text-gray-400">{t('splits.form.training_days')}</span>
               <span className="font-semibold text-gray-900 dark:text-white">{form.nTrainingDays || 0}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500 dark:text-gray-400">Días de descanso:</span>
+              <span className="text-gray-500 dark:text-gray-400">{t('splits.form.rest_days')}</span>
               <span className="font-semibold text-gray-900 dark:text-white">{form.nRestDays ?? 7}</span>
             </div>
           </div>
@@ -235,7 +237,7 @@ export default function SplitForm() {
             onClick={handleSave}
             className="flex items-center justify-center gap-2 bg-primary text-white px-4 py-2.5 rounded-xl font-bold hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary mt-4"
           >
-            <Save size={20} /> Guardar split
+            <Save size={20} /> {t('splits.form.save_button')}
           </button>
         </div>
       </div>

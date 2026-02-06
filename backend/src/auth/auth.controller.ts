@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Patch,
   Post,
   Req,
@@ -47,6 +48,9 @@ import {
 } from './swagger.decorators';
 import { User } from 'src/users/accounts/dto/user-response.dtos';
 import { RateLimit } from 'src/common/guards/rate-limit.decorator';
+import { RolesGuard } from './guards/roles.guard';
+import { Roles } from './guards/decorators/roles.decorator';
+import { Role } from 'src/users/accounts/enum/role.enum';
 //import { log } from 'console';
 
 type accountIdOnly = { accountId: string };
@@ -138,6 +142,18 @@ export class AuthController {
     @Body() forgotPasswordRequest: ForgotPasswordRequest,
   ): Promise<ResponseBody<void>> {
     const result = await this.authService.forgotPassword(forgotPasswordRequest);
+    return ResponseBody.success(undefined, result.message);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR)
+  @Post('admin-reset-password/:accountId')
+  @HttpCode(HttpStatus.OK)
+  @ApiAuthForgotPassword()
+  async adminResetPassword(
+    @Param('accountId') accountId: string,
+  ): Promise<ResponseBody<void>> {
+    const result = await this.authService.adminResetPassword(accountId);
     return ResponseBody.success(undefined, result.message);
   }
 

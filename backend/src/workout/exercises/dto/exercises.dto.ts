@@ -188,6 +188,51 @@ export class ExerciseRequest {
     description?: string;
     categories?: string[];
   };
+
+  @IsArray()
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Media files (images/videos) in base64 format',
+    type: 'array',
+    example: [
+      {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        name: 'exercise.jpg',
+        size: 1024000,
+        type: 'image/jpeg',
+        data: 'data:image/jpeg;base64,/9j/4AAQSkZJRg...',
+      },
+    ],
+  })
+  mediaFiles?: Array<{
+    id: string;
+    name: string;
+    size: number;
+    type: string;
+    data: string;
+  }>;
+
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Whether the exercise is publicly visible',
+    example: true,
+  })
+  isPublic?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({
+    description: 'Cover image URL (base64)',
+    example: 'data:image/jpeg;base64,/9j/4AAQSkZJRg...',
+  })
+  coverUrl?: string;
+
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Whether this is a seed/base exercise',
+    example: false,
+  })
+  isSeed?: boolean;
 }
 
 export class Exercise {
@@ -539,6 +584,51 @@ export class ExerciseUpdate {
     description?: string;
     categories?: string[];
   };
+
+  @IsArray()
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Media files (images/videos) in base64 format',
+    type: 'array',
+    example: [
+      {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        name: 'exercise.jpg',
+        size: 1024000,
+        type: 'image/jpeg',
+        data: 'data:image/jpeg;base64,/9j/4AAQSkZJRg...',
+      },
+    ],
+  })
+  mediaFiles?: Array<{
+    id: string;
+    name: string;
+    size: number;
+    type: string;
+    data: string;
+  }>;
+
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Whether the exercise is publicly visible',
+    example: true,
+  })
+  isPublic?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({
+    description: 'Cover image URL (base64)',
+    example: 'data:image/jpeg;base64,/9j/4AAQSkZJRg...',
+  })
+  coverUrl?: string;
+
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Whether this is a seed/base exercise',
+    example: false,
+  })
+  isSeed?: boolean;
 }
 
 export class ExerciseFilterRequest extends PaginationRequest {

@@ -8,6 +8,7 @@ import * as dotenv from 'dotenv';
 import { expand } from 'dotenv-expand';
 import { RateLimitGuard } from './common/guards/rate-limit.guard';
 import { RateLimitService } from './common/guards/rate-limit.service';
+import { DateSerializerInterceptor } from './common/interceptors/date-serializer.interceptor';
 
 const myEnv = dotenv.config();
 expand(myEnv);
@@ -33,6 +34,9 @@ async function bootstrap() {
   const reflector = app.get(Reflector);
   const rateLimitService = app.get(RateLimitService);
   app.useGlobalGuards(new RateLimitGuard(reflector, rateLimitService));
+  
+  // Date Serializer Interceptor - asegura que todas las fechas se envíen en formato UTC con 'Z'
+  app.useGlobalInterceptors(new DateSerializerInterceptor());
   
   app.useGlobalPipes(
     new ValidationPipe({

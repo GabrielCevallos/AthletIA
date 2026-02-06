@@ -56,6 +56,23 @@ export class ProfilesController {
     return ResponseBody.success(undefined, message);
   }
 
+  @Patch(':accountId')
+  @Roles(Role.ADMIN, Role.MODERATOR)
+  @ApiUpdateProfile()
+  async updateUserProfile(
+    @Param('accountId') accountId: string,
+    @Body() profileUpdate: ProfileUpdate,
+  ): Promise<ResponseBody<undefined>> {
+    const account = await this.accountsService.findById(accountId);
+    if (!account) {
+      throw new ForbiddenException('Account not found');
+    }
+
+    await this.profilesService.merge(accountId, profileUpdate);
+    const message = 'Profile updated successfully';
+    return ResponseBody.success(undefined, message);
+  }
+
   @Roles(Role.USER, Role.ADMIN, Role.MODERATOR)
   @Post('complete-setup')
   @ApiCompleteProfileSetup()

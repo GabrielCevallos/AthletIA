@@ -14,6 +14,50 @@ const ExerciseDetail: React.FC = () => {
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Check if video URL is valid (not example/placeholder)
+  const isValidVideoUrl = (url: string): boolean => {
+    if (!url || url.trim() === '') return false;
+    
+    // Reject common placeholder URLs
+    const invalidDomains = ['example.com', 'example.org', 'localhost', 'test.com', '127.0.0.1'];
+    if (invalidDomains.some(domain => url.toLowerCase().includes(domain))) {
+      return false;
+    }
+    
+    // Check if it's a valid video platform URL
+    const isYouTube = /(?:youtube\.com\/(?:watch|embed)|youtu\.be)/.test(url);
+    const isVimeo = /vimeo\.com/.test(url);
+    const isDailymotion = /dailymotion\.com/.test(url);
+    const isTwitch = /twitch\.tv/.test(url);
+    
+    return isYouTube || isVimeo || isDailymotion || isTwitch;
+  };
+
+  // Convert video URLs to embeddable format
+  const getEmbedUrl = (url: string): string => {
+    if (!url) return '';
+    
+    // YouTube - extract video ID
+    let youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+    if (youtubeMatch) {
+      return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+    }
+    
+    // Vimeo - extract video ID
+    let vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) {
+      return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    }
+    
+    // If already an embed URL, return as is
+    if (url.includes('/embed/') || url.includes('/video/')) {
+      return url;
+    }
+    
+    // Fallback: return original URL
+    return url;
+  };
+
   useEffect(() => {
     const fetchExercise = async () => {
       if (!id) return;
@@ -22,13 +66,21 @@ const ExerciseDetail: React.FC = () => {
         const res = await api.get(`/workout/exercises/${id}`);
         // Backend returns: { success: true, message: '...', data: Exercise }
         if (res.data?.data) {
+          console.log('📦 Exercise from backend:', res.data.data);
+          console.log('🎬 mediaFiles:', res.data.data.mediaFiles);
           setExercise(res.data.data);
         } else {
-          setExercise(getExerciseById(id) || null);
+          const localExercise = getExerciseById(id);
+          console.log('📦 Exercise from localStorage:', localExercise);
+          console.log('🎬 mediaFiles:', localExercise?.mediaFiles);
+          setExercise(localExercise || null);
         }
       } catch (error) {
         console.warn('Backend fetch failed, trying local store', error);
-        setExercise(getExerciseById(id) || null);
+        const localExercise = getExerciseById(id);
+        console.log('📦 Exercise from localStorage (fallback):', localExercise);
+        console.log('🎬 mediaFiles:', localExercise?.mediaFiles);
+        setExercise(localExercise || null);
       } finally {
         setLoading(false);
       }
@@ -206,26 +258,39 @@ const ExerciseDetail: React.FC = () => {
         )}
       </section>
 
-      {/* Multimedia */}
-      {exercise.mediaFiles && exercise.mediaFiles.length > 0 && (
+      {/* Video URL */}
+      {exercise.video && isValidVideoUrl(exercise.video) && (
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
           <div className="flex items-center gap-2 mb-4">
             <Video size={20} className="text-primary" />
             <h2 className="text-gray-900 dark:text-white text-xl font-bold">{t('exercises.detail.multimedia_title')}</h2>
           </div>
+          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+            <iframe
+              src={getEmbedUrl(exercise.video)}
+              className="absolute top-0 left-0 w-full h-full rounded-lg border border-gray-200 dark:border-white/10"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title="Exercise video"
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Multimedia Files */}
+      {exercise.mediaFiles && exercise.mediaFiles.filter((f: any) => f.data).length > 0 && (
+        <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
+          <div className="flex items-center gap-2 mb-4">
+            <ImageIcon size={20} className="text-primary" />
+            <h2 className="text-gray-900 dark:text-white text-xl font-bold">{t('exercises.detail.media_files_title', 'Archivos Multimedia')}</h2>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {exercise.mediaFiles.map((file: any, idx: number) => (
+            {exercise.mediaFiles.filter((f: any) => f.data).map((file: any, idx: number) => (
               <div key={idx} className="bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden">
-                {file.data ? (
-                  file.type?.startsWith('image/') ? (
-                    <img src={file.data} alt={file.name} className="w-full aspect-video object-cover" />
-                  ) : (
-                    <video src={file.data} controls className="w-full aspect-video bg-black" />
-                  )
+                {file.type?.startsWith('image/') ? (
+                  <img src={file.data} alt={file.name} className="w-full aspect-video object-cover" />
                 ) : (
-                  <div className="flex items-center justify-center aspect-video bg-white/10">
-                    {file.type?.startsWith('image/') ? <ImageIcon size={48} className="text-primary" /> : <Video size={48} className="text-primary" />}
-                  </div>
+                  <video src={file.data} controls className="w-full aspect-video bg-black" />
                 )}
                 <div className="p-3">
                   <p className="text-gray-900 dark:text-white text-xs font-medium truncate">{file.name}</p>
@@ -270,7 +335,7 @@ const ExerciseDetail: React.FC = () => {
             {exercise.benefit.categories && exercise.benefit.categories.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {exercise.benefit.categories.map((cat: string, idx: number) => (
-                  <span key={idx} className="px-2 py-1 text-xs rounded-full bg-gray-200 text-gray-900 border border-gray-300 dark:bg-white/10 dark:text-white dark:border-white/10">{cat}</span>
+                  <span key={idx} className="px-3 py-1.5 text-xs font-semibold rounded-full bg-primary/20 text-primary border border-primary/30 dark:bg-primary/10 dark:text-primary dark:border-primary/30">{t(`exercises.create.categories.${cat}`, cat)}</span>
                 ))}
               </div>
             )}
