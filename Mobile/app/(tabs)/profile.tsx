@@ -122,8 +122,7 @@ export default function ProfileScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <DumbbellIcon size={20} />
-          <Text style={styles.headerTitle}>{t('screenTitle')}</Text>
+          <Text style={styles.headerTitle}>{t('profile.title')}</Text>
         </View>
         <Pressable style={styles.notificationButton} onPress={() => router.push('/notifications')}>
           <Text style={styles.bellIcon}>🔔</Text>
@@ -152,16 +151,17 @@ export default function ProfileScreen() {
               </View>
               <View style={styles.onlineBadge} />
             </View>
-            <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>{displayName}</Text>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoIcon}>✉️</Text>
-                <Text style={styles.infoText}>{displayEmail}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoIcon}>📱</Text>
-                <Text style={styles.infoText}>{displayPhone}</Text>
-              </View>
+          </View>
+
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{displayName}</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoIcon}>✉️</Text>
+              <Text style={styles.infoText} numberOfLines={1} ellipsizeMode="middle">{displayEmail}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoIcon}>📱</Text>
+              <Text style={styles.infoText}>{displayPhone}</Text>
             </View>
           </View>
 
@@ -334,10 +334,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.border.DEFAULT,
   },
   profileHeader: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.lg,
-    marginBottom: Spacing['3xl'],
+    marginBottom: Spacing.lg,
   },
   profileAvatarContainer: {
     position: 'relative',
@@ -367,17 +365,21 @@ const styles = StyleSheet.create({
     borderColor: Colors.surface.DEFAULT,
   },
   profileInfo: {
-    flex: 1,
-    gap: Spacing.xs,
+    gap: Spacing.sm,
+    marginBottom: Spacing.xl,
+    alignItems: 'center',
   },
   profileName: {
     ...Typography.styles.h2,
     fontSize: Typography.fontSize['2xl'],
+    textAlign: 'center',
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: Spacing.xs,
+    maxWidth: '100%',
   },
   infoIcon: {
     fontSize: Typography.fontSize.sm,
@@ -385,6 +387,7 @@ const styles = StyleSheet.create({
   infoText: {
     ...Typography.styles.small,
     color: Colors.text.muted,
+    flexShrink: 1,
   },
   profileActions: {
     flexDirection: 'row',
@@ -412,6 +415,7 @@ const styles = StyleSheet.create({
     borderColor: `${Colors.error.DEFAULT}4D`,
     backgroundColor: `${Colors.error.DEFAULT}1A`,
     paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.md,
   },
   logoutIcon: {

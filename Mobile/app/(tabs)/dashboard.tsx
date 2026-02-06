@@ -9,6 +9,7 @@ import { useRoutines } from '@/hooks/use-routines';
 import { useSplits } from '@/hooks/use-splits';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useIsFocused } from '@react-navigation/native';
 
 type MeasurementData = {
   weight: number;
@@ -19,8 +20,9 @@ export default function DashboardScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuth();
-  const { splits, fetchSplits, loading: splitsLoading } = useSplits();
-  const { routines, refetch: fetchRoutines, loading: routinesLoading } = useRoutines();
+  const isFocused = useIsFocused();
+  const { splits, fetchSplits, loading: splitsLoading } = useSplits({ autoFetch: false });
+  const { routines, refetch: fetchRoutines, loading: routinesLoading } = useRoutines({ autoFetch: false });
 
   const [userName, setUserName] = useState<string>('Usuario');
   const [measurement, setMeasurement] = useState<MeasurementData | null>(null);
@@ -70,10 +72,12 @@ export default function DashboardScreen() {
       }
     };
 
+    if (!isFocused) return;
+
     void loadData();
     void fetchSplits();
     void fetchRoutines();
-  }, [user?.token]);
+  }, [user?.token, isFocused, fetchSplits, fetchRoutines]);
 
   const activeSplits = splits.filter((s) => s.active).length;
   const totalRoutines = routines.length;
@@ -208,6 +212,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 12,
   },
   brandRow: {
     flexDirection: 'row',

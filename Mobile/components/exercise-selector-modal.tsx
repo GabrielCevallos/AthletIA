@@ -3,6 +3,7 @@ import { useAuth } from '@/context/auth-context';
 import { useExerciseSelector } from '@/hooks/use-exercise-selector';
 import { Exercise, useExercises } from '@/hooks/use-exercises';
 import { useCallback, useMemo, useState } from 'react';
+import { useIsFocused } from '@react-navigation/native';
 import {
     FlatList,
     Modal,
@@ -37,7 +38,10 @@ export function ExerciseSelectorModal({
   onConfirm,
 }: ExerciseSelectorModalProps) {
   const { user } = useAuth();
-  const { exercises, loading, error } = useExercises();
+  const isFocused = useIsFocused();
+  const { exercises, loading, error } = useExercises(undefined, {
+    autoFetch: visible && isFocused,
+  });
   const {
     selectedExercises,
     selectedIds,

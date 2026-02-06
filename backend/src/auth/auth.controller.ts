@@ -35,6 +35,8 @@ import {
   ApiAuthVerifyEmail,
   ApiAuthResendVerification,
   ApiAuthResendVerificationStatus,
+  ApiAuthForgotPassword,
+  ApiAuthResetPassword,
   ApiAuthChangePassword,
   ApiAuthRefreshToken,
   ApiAuthLogout,
@@ -125,6 +127,7 @@ export class AuthController {
   @Public()
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
+  @ApiAuthForgotPassword()
   @RateLimit({
     maxAttempts: 3,
     windowMs: 60 * 60 * 1000,
@@ -133,14 +136,15 @@ export class AuthController {
   })
   async forgotPassword(
     @Body() forgotPasswordRequest: ForgotPasswordRequest,
-  ): Promise<ResponseBody<{ message: string }>> {
+  ): Promise<ResponseBody<void>> {
     const result = await this.authService.forgotPassword(forgotPasswordRequest);
-    return ResponseBody.success(result, result.message);
+    return ResponseBody.success(undefined, result.message);
   }
 
   @Public()
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
+  @ApiAuthResetPassword()
   @RateLimit({
     maxAttempts: 5,
     windowMs: 15 * 60 * 1000,
@@ -149,9 +153,9 @@ export class AuthController {
   })
   async resetPassword(
     @Body() resetPasswordRequest: ResetPasswordRequest,
-  ): Promise<ResponseBody<{ message: string }>> {
+  ): Promise<ResponseBody<void>> {
     const result = await this.authService.resetPassword(resetPasswordRequest);
-    return ResponseBody.success(result, result.message);
+    return ResponseBody.success(undefined, result.message);
   }
 
   @UseGuards(AuthGuard)
@@ -206,7 +210,7 @@ export class AuthController {
       );
 
       if (!response.ok) {
-        throw new UnauthorizedException('Token inválido de Google');
+        throw new UnauthorizedException('Invalid Google token');
       }
 
       const googleUserResponse = await response.json();
@@ -225,7 +229,7 @@ export class AuthController {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      throw new UnauthorizedException('Error autenticando con Google');
+      throw new UnauthorizedException('Error authenticating with Google');
     }
   }
 

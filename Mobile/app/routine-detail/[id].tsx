@@ -16,10 +16,10 @@ import {
 } from 'react-native';
 
 export default function RoutineDetailScreen() {
-  const { t, i18n } = useTranslation(['routines', 'common']);
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { fetchRoutineById, deleteRoutine, loading } = useRoutines();
+  const { fetchRoutineById, deleteRoutine, loading } = useRoutines({ autoFetch: false });
 
   const [routine, setRoutine] = useState<Routine | null>(null);
 

@@ -2,6 +2,7 @@ import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
 import { useRoutines, type Routine } from '@/hooks/use-routines';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useIsFocused } from '@react-navigation/native';
 import {
     ActivityIndicator,
     FlatList,
@@ -29,7 +30,10 @@ export function RoutineSelectorModal({
   maxSelection,
 }: RoutineSelectorModalProps) {
   const { t } = useTranslation();
-  const { routines, loading, error } = useRoutines();
+  const isFocused = useIsFocused();
+  const { routines, loading, error } = useRoutines({
+    autoFetch: visible && isFocused,
+  });
   const [searchText, setSearchText] = useState('');
   const [localSelected, setLocalSelected] = useState<Set<string>>(new Set(selectedRoutineIds));
 

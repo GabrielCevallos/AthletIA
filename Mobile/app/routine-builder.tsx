@@ -7,6 +7,7 @@ import { type RoutineGoal, createRoutine } from '@/services/routines-api';
 import { GlobalStyles } from '@/styles/global';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 interface RoutineExercise {
@@ -21,6 +22,7 @@ const DEFAULT_ROUTINE_GOALS: RoutineGoal[] = ['general_fitness'];
 
 export default function RoutineBuilderScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [routineName, setRoutineName] = useState('');
   const [description, setDescription] = useState('');
@@ -58,17 +60,17 @@ export default function RoutineBuilderScreen() {
 
   const handleSave = async () => {
     if (!user?.token) {
-      setError('Usuario no autenticado');
+      setError(t('routineBuilder.errors.auth'));
       return;
     }
 
     if (!routineName.trim()) {
-      setError('El nombre de la rutina es obligatorio');
+      setError(t('routineBuilder.errors.nameRequired'));
       return;
     }
 
     if (!description.trim()) {
-      setError('La descripción es obligatoria');
+      setError(t('routineBuilder.errors.descriptionRequired'));
       return;
     }
 
@@ -89,7 +91,7 @@ export default function RoutineBuilderScreen() {
 
       router.back();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al guardar la rutina';
+      const message = err instanceof Error ? err.message : t('routineBuilder.errors.save');
       setError(message);
     } finally {
       setSaving(false);
@@ -101,9 +103,9 @@ export default function RoutineBuilderScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backIcon}>←</Text>
+          <Text style={styles.backIcon}>X</Text>
         </Pressable>
-        <Text style={styles.title}>Creador de Rutinas</Text>
+        <Text style={styles.title}>{t('routineBuilder.headerTitle')}</Text>
         <Pressable style={styles.menuButton}>
           <Text style={styles.menuIcon}>⋮</Text>
         </Pressable>
@@ -116,19 +118,17 @@ export default function RoutineBuilderScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.intro}>
-          <Text style={styles.heading}>Nueva Rutina</Text>
-          <Text style={styles.subheading}>
-            Crea rutinas personalizadas para tus objetivos.
-          </Text>
+          <Text style={styles.heading}>{t('routineBuilder.introTitle')}</Text>
+          <Text style={styles.subheading}>{t('routineBuilder.introSubtitle')}</Text>
         </View>
 
         {/* Routine Info */}
         <View style={styles.section}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nombre de la Rutina</Text>
+            <Text style={styles.label}>{t('routineBuilder.form.nameLabel')}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: Hipertrofia Pecho/Triceps"
+              placeholder={t('routineBuilder.form.namePlaceholder')}
               placeholderTextColor={Colors.text.muted}
               value={routineName}
               onChangeText={(text) => {
@@ -139,10 +139,10 @@ export default function RoutineBuilderScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Descripción breve</Text>
+            <Text style={styles.label}>{t('routineBuilder.form.descriptionLabel')}</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
-              placeholder="Describe el objetivo..."
+              placeholder={t('routineBuilder.form.descriptionPlaceholder')}
               placeholderTextColor={Colors.text.muted}
               value={description}
               onChangeText={(text) => {
@@ -160,8 +160,10 @@ export default function RoutineBuilderScreen() {
         {/* Exercises Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Ejercicios</Text>
-            <Text style={styles.exerciseCount}>{exercises.length} ejercicios</Text>
+            <Text style={styles.sectionTitle}>{t('routineBuilder.exercises.title')}</Text>
+            <Text style={styles.exerciseCount}>
+              {t('routineBuilder.exercises.count', { count: exercises.length })}
+            </Text>
           </View>
 
           {/* Exercise Cards */}
@@ -187,7 +189,7 @@ export default function RoutineBuilderScreen() {
 
               <View style={styles.exerciseInputs}>
                 <View style={styles.inputColumn}>
-                  <Text style={styles.inputLabel}>SERIES</Text>
+                  <Text style={styles.inputLabel}>{t('routineBuilder.exercises.sets')}</Text>
                   <TextInput
                     style={styles.numberInput}
                     value={exercise.sets.toString()}
@@ -198,7 +200,7 @@ export default function RoutineBuilderScreen() {
                   />
                 </View>
                 <View style={styles.inputColumn}>
-                  <Text style={styles.inputLabel}>REPS</Text>
+                  <Text style={styles.inputLabel}>{t('routineBuilder.exercises.reps')}</Text>
                   <TextInput
                     style={styles.numberInput}
                     value={exercise.reps.toString()}
@@ -209,7 +211,7 @@ export default function RoutineBuilderScreen() {
                   />
                 </View>
                 <View style={styles.inputColumn}>
-                  <Text style={styles.inputLabel}>PESO (KG)</Text>
+                  <Text style={styles.inputLabel}>{t('routineBuilder.exercises.weight')}</Text>
                   <TextInput
                     style={styles.numberInput}
                     value={exercise.weight.toString()}
@@ -230,18 +232,18 @@ export default function RoutineBuilderScreen() {
               onPress={() => setModalVisible(true)}
             >
               <Text style={styles.addIcon}>+</Text>
-              <Text style={styles.addText}>Agregar Ejercicios Existentes</Text>
+              <Text style={styles.addText}>{t('routineBuilder.exercises.addExisting')}</Text>
             </Pressable>
           )}
 
           <Pressable style={styles.addExerciseButton}>
             <Text style={styles.addIcon}>+</Text>
-            <Text style={styles.addText}>Crear Ejercicio Personalizado</Text>
+            <Text style={styles.addText}>{t('routineBuilder.exercises.addCustom')}</Text>
           </Pressable>
         </View>
 
         {/* Save Button */}
-        <PrimaryButton label="Guardar Rutina" onPress={handleSave} loading={saving} />
+        <PrimaryButton label={t('routineBuilder.actions.save')} onPress={handleSave} loading={saving} />
       </ScrollView>
 
       {/* Exercise Selector Modal */}
@@ -261,7 +263,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: Colors.background.DEFAULT,
     paddingHorizontal: Spacing.base,
-    paddingTop: Spacing['3xl'],
+    paddingTop: Spacing['4xl'],
     paddingBottom: Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',

@@ -1,75 +1,32 @@
 import React from 'react';
-import { View } from 'react-native';
+import { SymbolView } from 'expo-symbols';
+import { Platform } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface DumbbellIconProps {
   size?: number;
+  color?: string;
 }
 
-export function DumbbellIcon({ size = 24 }: DumbbellIconProps) {
-  const scale = size / 24;
+export function DumbbellIcon({ size = 24, color = '#e3e3e3' }: DumbbellIconProps) {
+  // En iOS usamos SymbolView para SF Symbols
+  if (Platform.OS === 'ios') {
+    return (
+      <SymbolView
+        name="dumbbell.fill"
+        size={size}
+        tintColor={color}
+        type="monochrome"
+      />
+    );
+  }
   
+  // En Android/Web usamos MaterialIcons
   return (
-    <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
-      {/* Peso izquierdo */}
-      <View
-        style={{
-          position: 'absolute',
-          left: 0,
-          width: 6 * scale,
-          height: 8 * scale,
-          backgroundColor: '#e3e3e3',
-          borderRadius: 1 * scale,
-        }}
-      />
-      
-      {/* Barra izquierda */}
-      <View
-        style={{
-          position: 'absolute',
-          left: 6 * scale,
-          width: 4 * scale,
-          height: 3 * scale,
-          backgroundColor: '#e3e3e3',
-          borderRadius: 0.5 * scale,
-        }}
-      />
-      
-      {/* Barra central */}
-      <View
-        style={{
-          position: 'absolute',
-          left: '50%',
-          marginLeft: -(6 * scale) / 2,
-          width: 6 * scale,
-          height: 2 * scale,
-          backgroundColor: '#e3e3e3',
-          borderRadius: 1 * scale,
-        }}
-      />
-      
-      {/* Barra derecha */}
-      <View
-        style={{
-          position: 'absolute',
-          right: 6 * scale,
-          width: 4 * scale,
-          height: 3 * scale,
-          backgroundColor: '#e3e3e3',
-          borderRadius: 0.5 * scale,
-        }}
-      />
-      
-      {/* Peso derecho */}
-      <View
-        style={{
-          position: 'absolute',
-          right: 0,
-          width: 6 * scale,
-          height: 8 * scale,
-          backgroundColor: '#e3e3e3',
-          borderRadius: 1 * scale,
-        }}
-      />
-    </View>
+    <MaterialIcons
+      name="fitness-center"
+      size={size}
+      color={color}
+    />
   );
 }

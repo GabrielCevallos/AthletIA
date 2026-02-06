@@ -6,6 +6,7 @@ import { GlobalStyles } from '@/styles/global';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useIsFocused } from '@react-navigation/native';
 import {
   ActivityIndicator,
   Image,
@@ -16,6 +17,7 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from 'react-native';
 
 // Mapeo de valores del backend (inglés) a etiquetas para la UI (español)
@@ -39,6 +41,8 @@ const MUSCLE_TARGETS = [
 export default function ExercisesScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const isFocused = useIsFocused();
+  const { width, height } = useWindowDimensions();
   const { user, loading: authLoading } = useAuth();
   const muscleTargetsScrollRef = useRef<ScrollView>(null);
   const muscleTargetPositions = useRef<Record<string, number>>({});
@@ -65,7 +69,9 @@ export default function ExercisesScreen() {
   });
 
   // Hook personalizado para ejercicios con autenticación
-  const { exercises, loading, error, refetch } = useExercises(selectedMuscleTarget);
+  const { exercises, loading, error, refetch } = useExercises(selectedMuscleTarget, {
+    autoFetch: isFocused,
+  });
 
   // Redirigir si no está autenticado
   useEffect(() => {
@@ -240,24 +246,17 @@ export default function ExercisesScreen() {
     }
   };
 
+  const fabSize = Math.max(60, Math.min(72, Math.round(width * 0.16)));
+  const fabIconSize = Math.round(fabSize * 0.52);
+  const fabInset = Math.max(Spacing.base, Math.round(width * 0.04));
+  const fabBottom = Math.max(Spacing['4xl'], Math.round(height * 0.08));
+
   return (
     <View style={styles.screen}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.title}>{t('exercises.title')}</Text>
-          {user?.role === 'admin' && (
-            <Pressable
-              style={styles.addExerciseButton}
-              onPress={() => {
-                setCreateError(null);
-                setCreateSuccess(null);
-                setIsCreateModalVisible(true);
-              }}
-            >
-              <Text style={styles.addExerciseButtonText}>{t('exercises.newButton')}</Text>
-            </Pressable>
-          )}
         </View>
 
         {/* Search Bar */}
@@ -326,7 +325,12 @@ export default function ExercisesScreen() {
       ) : (
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {filteredExercises.length > 0 ? (
-            <View style={styles.exerciseList}>
+            <View
+              style={[
+                styles.exerciseList,
+                { paddingBottom: Math.max(Spacing['5xl'], fabSize + Spacing['3xl']) },
+              ]}
+            >
               {filteredExercises.map((exercise) => (
                 <Pressable
                   key={exercise.id}
@@ -366,6 +370,28 @@ export default function ExercisesScreen() {
             </View>
           )}
         </ScrollView>
+      )}
+
+      {user?.role === 'admin' && (
+        <Pressable
+          style={[
+            styles.fabButton,
+            {
+              width: fabSize,
+              height: fabSize,
+              borderRadius: fabSize / 2,
+              right: fabInset,
+              bottom: fabBottom,
+            },
+          ]}
+          onPress={() => {
+            setCreateError(null);
+            setCreateSuccess(null);
+            setIsCreateModalVisible(true);
+          }}
+        >
+          <Text style={[styles.fabButtonText, { fontSize: fabIconSize }]}>+</Text>
+        </Pressable>
       )}
 
       <Modal
@@ -550,6 +576,7 @@ export default function ExercisesScreen() {
 const styles = StyleSheet.create({
   screen: {
     ...GlobalStyles.container,
+    position: 'relative',
   },
   header: {
     backgroundColor: Colors.background.DEFAULT,
@@ -565,16 +592,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  addExerciseButton: {
+  fabButton: {
+    position: 'absolute',
+    right: Spacing.base,
+    bottom: Spacing['4xl'],
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: Colors.primary.DEFAULT,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
   },
-  addExerciseButtonText: {
+  fabButtonText: {
     color: Colors.text.primary,
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.semibold,
+    fontSize: 28,
+    fontWeight: Typography.fontWeight.extrabold,
+    marginTop: -2,
   },
   title: {
     ...Typography.styles.h2,
@@ -682,6 +720,7 @@ const styles = StyleSheet.create({
   },
   exerciseList: {
     padding: Spacing.base,
+    paddingBottom: Spacing['5xl'],
     gap: Spacing.md,
   },
   exerciseCard: {

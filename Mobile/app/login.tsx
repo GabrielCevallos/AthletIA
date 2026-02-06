@@ -166,7 +166,7 @@ export default function LoginScreen() {
                       <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]} />
                       <Text style={styles.rememberText}>{t('login.rememberMe')}</Text>
                     </Pressable>
-                    <Pressable>
+                    <Pressable onPress={() => router.push('/forgot-password')}>
                       <Text style={styles.link}>{t('login.forgotPassword')}</Text>
                     </Pressable>
                   </View>

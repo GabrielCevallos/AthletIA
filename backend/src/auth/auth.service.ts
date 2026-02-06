@@ -257,7 +257,7 @@ export class AuthService {
       // Create minimal account in UNPROFILED state without password
       account = await this.accountsService.createFromOAuth({
         email: googleUser.email,
-        name: googleUser.name || 'Usuario',
+        name: googleUser.name || 'User',
       });
     }
     // If unprofiled, throw to let frontend complete profile
@@ -398,7 +398,7 @@ export class AuthService {
     const account = await this.accountsService.findByEmail(email);
     if (!account) {
       // Don't reveal if email exists for security reasons
-      return { message: 'Si el correo existe en nuestro sistema, recibirás un enlace para resetear tu contraseña.' };
+      return { message: 'If the email exists in our system, you will receive a link to reset your password.' };
     }
 
     // Generate secure random token
@@ -420,10 +420,10 @@ export class AuthService {
       await this.mailService.sendPasswordResetEmail(email, resetLink);
     } catch (error) {
       this.logger.error(`Failed to send password reset email: ${error.message}`);
-      throw new BadRequestException('No se pudo enviar el correo de recuperación. Intenta más tarde.');
+      throw new BadRequestException('Could not send recovery email. Please try again later.');
     }
 
-    return { message: 'Si el correo existe en nuestro sistema, recibirás un enlace para resetear tu contraseña.' };
+    return { message: 'If the email exists in our system, you will receive a link to reset your password.' };
   }
 
   async resetPassword(resetPasswordRequest: ResetPasswordRequest): Promise<{ message: string }> {
@@ -433,12 +433,12 @@ export class AuthService {
     const account = await this.accountsService.findByResetToken(token);
 
     if (!account) {
-      throw new BadRequestException('El enlace de recuperación es inválido o ha expirado.');
+      throw new BadRequestException('The recovery link is invalid or has expired.');
     }
 
     // Check if token has expired
     if (!account.resetPasswordTokenExpiry || account.resetPasswordTokenExpiry < new Date()) {
-      throw new BadRequestException('El enlace de recuperación ha expirado. Solicita uno nuevo.');
+      throw new BadRequestException('The recovery link has expired. Please request a new one.');
     }
 
     // Hash new password
@@ -450,6 +450,6 @@ export class AuthService {
     account.resetPasswordTokenExpiry = null;
     await this.accountsService.save(account);
 
-    return { message: 'Contraseña reestablecida exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.' };
+    return { message: 'Password reset successfully. You can now log in with your new password.' };
   }
 }

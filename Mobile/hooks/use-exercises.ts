@@ -38,7 +38,11 @@ export type UseExercisesReturn = {
   getExerciseById: (id: string) => Promise<Exercise | null>;
 };
 
-export function useExercises(muscleTarget?: string): UseExercisesReturn {
+type UseExercisesOptions = {
+  autoFetch?: boolean;
+};
+
+export function useExercises(muscleTarget?: string, options?: UseExercisesOptions): UseExercisesReturn {
   const { user } = useAuth();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(false);
@@ -58,7 +62,6 @@ export function useExercises(muscleTarget?: string): UseExercisesReturn {
       // Construir URL con parámetros opcionales
       const url = new URL(`${Config.apiUrl}/workout/exercises`);
       if (muscleTarget) url.searchParams.append('muscleTarget', muscleTarget);
-      console.log('Fetching exercises from URL:', url.toString());
 
       const response = await fetch(url.toString(), {
         headers: {
@@ -84,8 +87,6 @@ export function useExercises(muscleTarget?: string): UseExercisesReturn {
       }
 
       const result = await response.json();
-      
-      console.log('API Response:', JSON.stringify(result, null, 2));
 
       // El backend puede retornar directamente un array o con estructura success
       let items: any[] = [];
@@ -166,8 +167,11 @@ export function useExercises(muscleTarget?: string): UseExercisesReturn {
   );
 
   useEffect(() => {
-    void fetchExercises();
-  }, [fetchExercises]);
+    // Solo hacer fetch si autoFetch es true
+    if (options?.autoFetch === true) {
+      void fetchExercises();
+    }
+  }, [fetchExercises, options?.autoFetch]);
 
   return {
     exercises,

@@ -16,11 +16,11 @@ import {
 } from 'react-native';
 
 export default function ExerciseDetailScreen() {
-  const { t } = useTranslation(['exercises', 'common']);
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
-  const { getExerciseById } = useExercises();
+  const { getExerciseById } = useExercises(undefined, { autoFetch: false });
   const scrollViewRef = useRef<ScrollView>(null);
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(true);

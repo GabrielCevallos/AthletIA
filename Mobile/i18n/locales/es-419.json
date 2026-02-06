@@ -15,6 +15,16 @@
     "noAccount": "¿No tienes cuenta?",
     "signUp": "Regístrate aquí"
   },
+  "forgotPasswordScreen": {
+    "title": "Recuperar Contraseña",
+    "caption": "Ingresa tu email para recibir instrucciones",
+    "sendButton": "ENVIAR INSTRUCCIONES",
+    "backToLogin": "Volver al inicio de sesión",
+    "successTitle": "Email Enviado",
+    "successMessage": "Si el correo existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña.",
+    "errorTooManyRequests": "Demasiadas solicitudes. Intenta más tarde.",
+    "errorGeneric": "Ocurrió un error. Intenta nuevamente."
+  },
   "errors": {
     "authError": "Error de autenticación"
   },
@@ -256,6 +266,35 @@
         "goalsTitle": "Objetivos"
     }
   },
+  "routineBuilder": {
+    "headerTitle": "Creador de Rutinas",
+    "introTitle": "Nueva Rutina",
+    "introSubtitle": "Crea rutinas personalizadas para tus objetivos.",
+    "form": {
+      "nameLabel": "Nombre de la Rutina",
+      "namePlaceholder": "Ej: Hipertrofia Pecho/Tríceps",
+      "descriptionLabel": "Descripción breve",
+      "descriptionPlaceholder": "Describe el objetivo..."
+    },
+    "exercises": {
+      "title": "Ejercicios",
+      "count": "{{count}} ejercicios",
+      "sets": "Series",
+      "reps": "Reps",
+      "weight": "Peso (kg)",
+      "addExisting": "Agregar Ejercicios Existentes",
+      "addCustom": "Crear Ejercicio Personalizado"
+    },
+    "actions": {
+      "save": "Guardar Rutina"
+    },
+    "errors": {
+      "auth": "Usuario no autenticado",
+      "nameRequired": "El nombre de la rutina es obligatorio",
+      "descriptionRequired": "La descripción es obligatoria",
+      "save": "Error al guardar la rutina"
+    }
+  },
   "splits": {
     "title": "Mis Splits",
     "subtitle": "Gestiona tus planes de entrenamiento",
@@ -299,6 +338,38 @@
             "name": "Ej: Push/Pull/Legs",
             "description": "Describe tu split..."
         }
+    }
+  },
+  "createSplit": {
+    "title": "Nuevo Split",
+    "subtitle": "Crea un nuevo plan de entrenamiento personalizado.",
+    "form": {
+      "nameLabel": "Nombre",
+      "namePlaceholder": "Ej: Push/Pull/Legs",
+      "descriptionLabel": "Descripción",
+      "descriptionPlaceholder": "Describe tu split...",
+      "trainingDays": "Días de entrenamiento",
+      "routinesLabel": "Rutinas",
+      "routinesHint": "Selecciona las rutinas que formarán parte de este split",
+      "addRoutines": "Agregar rutinas",
+      "addMoreRoutines": "Agregar más rutinas"
+    },
+    "summary": {
+      "trainingDays": "Días de entrenamiento:",
+      "restDays": "Días de descanso:",
+      "routinesAssigned": "Rutinas asignadas:"
+    },
+    "actions": {
+      "create": "Crear Split",
+      "creating": "Creando..."
+    },
+    "errors": {
+      "validationDays": "Por favor completa el nombre y selecciona al menos un día de entrenamiento.",
+      "validationRoutines": "Por favor selecciona al menos una rutina para el split.",
+      "create": "No se pudo crear el split. Por favor intenta de nuevo."
+    },
+    "success": {
+      "created": "Split creado exitosamente"
     }
   },
   "measurements": {

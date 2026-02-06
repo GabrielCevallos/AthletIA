@@ -328,6 +328,103 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
+## AuthController_forgotPassword
+
+<a id="opIdAuthController_forgotPassword"></a>
+
+
+
+`POST /auth/forgot-password`
+
+*Request password reset*
+
+> Body parameter
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+<h3 id="authcontroller_forgotpassword-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[ForgotPasswordRequest](#schemaforgotpasswordrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "success": true,
+  "message": "If the email exists in our system, you will receive a link to reset your password."
+}
+```
+
+<h3 id="authcontroller_forgotpassword-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Password reset email sent (if email exists)|Inline|
+|429|[Too Many Requests](https://tools.ietf.org/html/rfc6585#section-4)|Too Many Requests|None|
+
+<h3 id="authcontroller_forgotpassword-responseschema">Response Schema</h3>
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## AuthController_resetPassword
+
+<a id="opIdAuthController_resetPassword"></a>
+
+
+
+`POST /auth/reset-password`
+
+*Reset password using token*
+
+> Body parameter
+
+```json
+{
+  "token": "token123...",
+  "newPassword": "NewP@ss1234"
+}
+```
+
+<h3 id="authcontroller_resetpassword-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[ResetPasswordRequest](#schemaresetpasswordrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "success": true,
+  "message": "Password reset successfully. You can now log in with your new password."
+}
+```
+
+<h3 id="authcontroller_resetpassword-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Password reset successfully|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Invalid token or password requirements not met|Inline|
+
+<h3 id="authcontroller_resetpassword-responseschema">Response Schema</h3>
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
 ## AuthController_changePassword
 
 <a id="opIdAuthController_changePassword"></a>
@@ -2985,6 +3082,48 @@ None
 |---|---|---|---|---|
 |email|string(email)|true|none|User email|
 |password|string|true|none|Password (min 8 chars)|
+
+<h2 id="tocS_ForgotPasswordRequest">ForgotPasswordRequest</h2>
+<!-- backwards compatibility -->
+<a id="schemaforgotpasswordrequest"></a>
+<a id="schema_ForgotPasswordRequest"></a>
+<a id="tocSforgotpasswordrequest"></a>
+<a id="tocsforgotpasswordrequest"></a>
+
+```json
+{
+  "email": "user@example.com"
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|email|string(email)|true|none|User email|
+
+<h2 id="tocS_ResetPasswordRequest">ResetPasswordRequest</h2>
+<!-- backwards compatibility -->
+<a id="schemaresetpasswordrequest"></a>
+<a id="schema_ResetPasswordRequest"></a>
+<a id="tocSresetpasswordrequest"></a>
+<a id="tocsresetpasswordrequest"></a>
+
+```json
+{
+  "token": "token123...",
+  "newPassword": "NewP@ss1234"
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|token|string|true|none|Reset token from email|
+|newPassword|string|true|none|New password|
 
 <h2 id="tocS_NotificationPreferencesDto">NotificationPreferencesDto</h2>
 <!-- backwards compatibility -->

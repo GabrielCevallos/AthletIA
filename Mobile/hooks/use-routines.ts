@@ -22,9 +22,13 @@ export type UseRoutinesReturn = {
   deleteRoutine: (id: string) => Promise<boolean>;
 };
 
+type UseRoutinesOptions = {
+  autoFetch?: boolean;
+};
+
 export { type Routine, type RoutineGoal };
 
-export function useRoutines(): UseRoutinesReturn {
+export function useRoutines(options?: UseRoutinesOptions): UseRoutinesReturn {
   const { user } = useAuth();
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(false);
@@ -125,8 +129,9 @@ export function useRoutines(): UseRoutinesReturn {
   );
 
   useEffect(() => {
+    if (options?.autoFetch === false) return;
     void fetchAll();
-  }, [fetchAll]);
+  }, [fetchAll, options?.autoFetch]);
 
   return {
     routines,

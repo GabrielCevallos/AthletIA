@@ -26,10 +26,11 @@ function RootNavigation() {
     const [rootSegment] = segments;
     const isLoginRoute = rootSegment === 'login';
     const isSignupRoute = rootSegment === 'signup';
+    const isForgotPasswordRoute = rootSegment === 'forgot-password';
     const isVerificationEmailSentRoute = rootSegment === 'verification-email-sent';
     const isCompleteProfileRoute = rootSegment === 'complete-profile';
     const isAuthRoute =
-      isLoginRoute || isSignupRoute || isVerificationEmailSentRoute || isCompleteProfileRoute;
+      isLoginRoute || isSignupRoute || isVerificationEmailSentRoute || isCompleteProfileRoute || isForgotPasswordRoute;
 
     if (!user) {
       if (!isAuthRoute || isCompleteProfileRoute) {
@@ -69,6 +70,9 @@ function RootNavigation() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="signup" options={{ headerShown: false }} />
+        <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+        <Stack.Screen name="routine-builder" options={{ headerShown: false }} />
+        <Stack.Screen name="create-split" options={{ headerShown: false }} />
         <Stack.Screen name="verification-email-sent" options={{ headerShown: false }} />
         <Stack.Screen
           name="complete-profile"

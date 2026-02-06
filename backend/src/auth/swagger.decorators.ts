@@ -2,8 +2,10 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import {
   ChangePasswordRequest,
+  ForgotPasswordRequest,
   LoginRequest,
   RegisterAccountRequest,
+  ResetPasswordRequest,
   TokenResponse,
 } from './dto/auth.dto';
 import { ProfileRequest } from '../users/profiles/dto/profiles.dto';
@@ -215,7 +217,60 @@ export function ApiAuthCompleteProfileSetup() {
         required: ['accountId', 'profileRequest'],
       },
     }),
-    ApiResponse({ status: 200, description: 'Profile completed' }),
+    ApiResponse({
+      status: 200,
+      description: 'Profile completed',
+    }),
+  );
+}
+
+export function ApiAuthForgotPassword() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Request password reset' }),
+    ApiBody({ type: ForgotPasswordRequest }),
+    ApiResponse({
+      status: 200,
+      description: 'Password reset email sent (if email exists)',
+      schema: {
+        example: {
+          success: true,
+          message:
+            'If the email exists in our system, you will receive a link to reset your password.',
+        },
+      },
+    }),
+    ApiResponse({
+      status: 429,
+      description: 'Too Many Requests',
+    }),
+  );
+}
+
+export function ApiAuthResetPassword() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Reset password using token' }),
+    ApiBody({ type: ResetPasswordRequest }),
+    ApiResponse({
+      status: 200,
+      description: 'Password reset successfully',
+      schema: {
+        example: {
+          success: true,
+          message:
+            'Password reset successfully. You can now log in with your new password.',
+        },
+      },
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Invalid token or password requirements not met',
+      schema: {
+        example: {
+          success: false,
+          message: 'The recovery link is invalid or has expired.',
+        },
+      },
+    }),
   );
 }
 

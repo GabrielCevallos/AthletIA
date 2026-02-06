@@ -5,7 +5,8 @@ import { GlobalStyles } from '@/styles/global';
 import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
 const DAY_MAP: { [key: string]: number } = {
   'Monday': 0,
@@ -20,7 +21,9 @@ const DAY_MAP: { [key: string]: number } = {
 export default function SplitsTabScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { splits, loading, refresh, deleteSplit } = useSplits();
+  const { width, height } = useWindowDimensions();
+  const isFocused = useIsFocused();
+  const { splits, loading, refresh, deleteSplit } = useSplits({ autoFetch: isFocused });
   
   // Obtener los días traducidos como array
   const DAYS = t('splits.daysShort', { returnObjects: true }) as string[];
@@ -55,6 +58,11 @@ export default function SplitsTabScreen() {
     router.push(`/split-detail/${splitId}`);
   };
 
+  const fabSize = Math.max(60, Math.min(72, Math.round(width * 0.16)));
+  const fabIconSize = Math.round(fabSize * 0.52);
+  const fabInset = Math.max(Spacing.base, Math.round(width * 0.04));
+  const fabBottom = Math.max(Spacing['4xl'], Math.round(height * 0.08));
+
   return (
     <View style={styles.screen}>
       {/* Header */}
@@ -72,7 +80,10 @@ export default function SplitsTabScreen() {
       {/* Content */}
       <ScrollView
         style={styles.content}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[
+          styles.contentContainer,
+          { paddingBottom: Math.max(Spacing['5xl'], fabSize + Spacing['3xl']) },
+        ]}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
       >
@@ -150,15 +161,23 @@ export default function SplitsTabScreen() {
           })
         )}
 
-        {/* Add New Split Button */}
-        <Pressable
-          style={styles.addButton}
-          onPress={() => router.push('/create-split')}
-        >
-          <IconSymbol size={32} name="plus" color={Colors.primary.DEFAULT} />
-          <Text style={styles.addText}>{t('splits.actions.create')}</Text>
-        </Pressable>
       </ScrollView>
+
+      <Pressable
+        style={[
+          styles.fabButton,
+          {
+            width: fabSize,
+            height: fabSize,
+            borderRadius: fabSize / 2,
+            right: fabInset,
+            bottom: fabBottom,
+          },
+        ]}
+        onPress={() => router.push('/create-split')}
+      >
+        <Text style={[styles.fabButtonText, { fontSize: fabIconSize }]}>+</Text>
+      </Pressable>
     </View>
   );
 }
@@ -166,6 +185,7 @@ export default function SplitsTabScreen() {
 const styles = StyleSheet.create({
   screen: {
     ...GlobalStyles.container,
+    position: 'relative',
   },
   header: {
     backgroundColor: Colors.background.DEFAULT,
@@ -329,19 +349,20 @@ const styles = StyleSheet.create({
     ...Typography.styles.body,
     color: Colors.text.muted,
   },
-  addButton: {
-    borderWidth: 2,
-    borderColor: Colors.primary.DEFAULT,
-    borderStyle: 'dashed',
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.xl,
+  fabButton: {
+    position: 'absolute',
+    backgroundColor: Colors.primary.DEFAULT,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: Spacing.base,
-    gap: Spacing.sm,
+    shadowColor: '#000',
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
   },
-  addText: {
-    ...Typography.styles.bodyBold,
-    color: Colors.primary.DEFAULT,
+  fabButtonText: {
+    color: Colors.text.primary,
+    fontWeight: Typography.fontWeight.extrabold,
+    marginTop: -2,
   },
 });

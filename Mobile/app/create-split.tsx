@@ -7,6 +7,7 @@ import type { TrainingDay } from '@/services/splits-api';
 import { GlobalStyles } from '@/styles/global';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 const DAYS_OF_WEEK = [
@@ -21,7 +22,8 @@ const DAYS_OF_WEEK = [
 
 export default function CreateSplitScreen() {
   const router = useRouter();
-  const { createSplit, loading } = useSplits();
+  const { t } = useTranslation();
+  const { createSplit, loading } = useSplits({ autoFetch: false });
   const { routines } = useRoutines();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -37,12 +39,12 @@ export default function CreateSplitScreen() {
 
   const handleCreateSplit = async () => {
     if (!name.trim() || selectedDays.length === 0) {
-      Alert.alert('Error', 'Por favor completa el nombre y selecciona al menos un día de entrenamiento.');
+      Alert.alert(t('common.error'), t('createSplit.errors.validationDays'));
       return;
     }
 
     if (selectedRoutineIds.length === 0) {
-      Alert.alert('Error', 'Por favor selecciona al menos una rutina para el split.');
+      Alert.alert(t('common.error'), t('createSplit.errors.validationRoutines'));
       return;
     }
 
@@ -55,11 +57,11 @@ export default function CreateSplitScreen() {
     });
 
     if (result) {
-      Alert.alert('Éxito', 'Split creado exitosamente', [
-        { text: 'OK', onPress: () => router.back() },
+      Alert.alert(t('common.success'), t('createSplit.success.created'), [
+        { text: t('common.ok'), onPress: () => router.back() },
       ]);
     } else {
-      Alert.alert('Error', 'No se pudo crear el split. Por favor intenta de nuevo.');
+      Alert.alert(t('common.error'), t('createSplit.errors.create'));
     }
   };
 
@@ -78,9 +80,9 @@ export default function CreateSplitScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backIcon}>←</Text>
+          <Text style={styles.backIcon}>X</Text>
         </Pressable>
-        <Text style={styles.title}>Nuevo Split</Text>
+        <Text style={styles.title}>{t('createSplit.title')}</Text>
       </View>
 
       {/* Content */}
@@ -89,16 +91,16 @@ export default function CreateSplitScreen() {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.subtitle}>Crea un nuevo plan de entrenamiento personalizado.</Text>
+        <Text style={styles.subtitle}>{t('createSplit.subtitle')}</Text>
 
         {/* Name Input */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>
-            Nombre <Text style={styles.required}>*</Text>
+            {t('createSplit.form.nameLabel')} <Text style={styles.required}>*</Text>
           </Text>
           <TextInput
             style={styles.input}
-            placeholder="Ej: Push/Pull/Legs"
+            placeholder={t('createSplit.form.namePlaceholder')}
             placeholderTextColor={Colors.text.muted}
             value={name}
             onChangeText={setName}
@@ -107,10 +109,10 @@ export default function CreateSplitScreen() {
 
         {/* Description Input */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Descripción</Text>
+          <Text style={styles.label}>{t('createSplit.form.descriptionLabel')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
-            placeholder="Describe tu split..."
+            placeholder={t('createSplit.form.descriptionPlaceholder')}
             placeholderTextColor={Colors.text.muted}
             value={description}
             onChangeText={setDescription}
@@ -122,7 +124,7 @@ export default function CreateSplitScreen() {
         {/* Days Selection */}
         <View style={styles.daysSection}>
           <Text style={styles.label}>
-            Días de entrenamiento <Text style={styles.required}>*</Text>
+            {t('createSplit.form.trainingDays')} <Text style={styles.required}>*</Text>
           </Text>
           <View style={styles.daysGrid}>
             {DAYS_OF_WEEK.map((day) => (
@@ -144,11 +146,9 @@ export default function CreateSplitScreen() {
         {/* Routine Selection */}
         <View style={styles.routinesSection}>
           <Text style={styles.label}>
-            Rutinas <Text style={styles.required}>*</Text>
+            {t('createSplit.form.routinesLabel')} <Text style={styles.required}>*</Text>
           </Text>
-          <Text style={styles.helperText}>
-            Selecciona las rutinas que formarán parte de este split
-          </Text>
+          <Text style={styles.helperText}>{t('createSplit.form.routinesHint')}</Text>
           
           {selectedRoutines.length > 0 && (
             <View style={styles.selectedRoutinesList}>
@@ -171,7 +171,9 @@ export default function CreateSplitScreen() {
           >
             <Text style={styles.addRoutineIcon}>+</Text>
             <Text style={styles.addRoutineText}>
-              {selectedRoutines.length === 0 ? 'Agregar rutinas' : 'Agregar más rutinas'}
+              {selectedRoutines.length === 0
+                ? t('createSplit.form.addRoutines')
+                : t('createSplit.form.addMoreRoutines')}
             </Text>
           </Pressable>
         </View>
@@ -179,15 +181,15 @@ export default function CreateSplitScreen() {
         {/* Summary */}
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Días de entrenamiento:</Text>
+            <Text style={styles.summaryLabel}>{t('createSplit.summary.trainingDays')}</Text>
             <Text style={styles.summaryValue}>{selectedDays.length}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Días de descanso:</Text>
+            <Text style={styles.summaryLabel}>{t('createSplit.summary.restDays')}</Text>
             <Text style={styles.summaryValue}>{7 - selectedDays.length}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Rutinas asignadas:</Text>
+            <Text style={styles.summaryLabel}>{t('createSplit.summary.routinesAssigned')}</Text>
             <Text style={styles.summaryValue}>{selectedRoutineIds.length}</Text>
           </View>
         </View>
@@ -195,7 +197,7 @@ export default function CreateSplitScreen() {
         {/* Action Buttons */}
         <View style={styles.actions}>
           <PrimaryButton
-            label={loading ? 'Creando...' : 'Crear Split'}
+            label={loading ? t('createSplit.actions.creating') : t('createSplit.actions.create')}
             onPress={handleCreateSplit}
             disabled={!name || selectedDays.length === 0 || selectedRoutineIds.length === 0 || loading}
           />

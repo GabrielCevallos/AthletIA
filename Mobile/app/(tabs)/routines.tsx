@@ -5,12 +5,15 @@ import { GlobalStyles } from '@/styles/global';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function RoutinesScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { routines, loading, error } = useRoutines();
+  const { width, height } = useWindowDimensions();
+  const isFocused = useIsFocused();
+  const { routines, loading, error } = useRoutines({ autoFetch: isFocused });
 
   useEffect(() => {
     console.log('🎬 [RoutinesScreen] Componente montado/actualizado');
@@ -38,6 +41,11 @@ export default function RoutinesScreen() {
     [routines, t]
   );
 
+  const fabSize = Math.max(60, Math.min(72, Math.round(width * 0.16)));
+  const fabIconSize = Math.round(fabSize * 0.52);
+  const fabInset = Math.max(Spacing.base, Math.round(width * 0.04));
+  const fabBottom = Math.max(Spacing['4xl'], Math.round(height * 0.08));
+
   return (
     <View style={styles.screen}>
       {/* Header */}
@@ -56,7 +64,10 @@ export default function RoutinesScreen() {
       {/* Routines List */}
       <ScrollView
         style={styles.content}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[
+          styles.contentContainer,
+          { paddingBottom: Math.max(Spacing['5xl'], fabSize + Spacing['3xl']) },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {loading && <Text style={styles.statusText}>{t('routines.loading')}</Text>}
@@ -101,15 +112,23 @@ export default function RoutinesScreen() {
           </Pressable>
         ))}
 
-        {/* Add New Button */}
-        <Pressable 
-          style={styles.addButton}
-          onPress={() => router.push('/routine-builder')}
-        >
-          <IconSymbol size={32} name="plus" color={Colors.primary.DEFAULT} />
-          <Text style={styles.addText}>{t('routines.newRoutine')}</Text>
-        </Pressable>
       </ScrollView>
+
+      <Pressable
+        style={[
+          styles.fabButton,
+          {
+            width: fabSize,
+            height: fabSize,
+            borderRadius: fabSize / 2,
+            right: fabInset,
+            bottom: fabBottom,
+          },
+        ]}
+        onPress={() => router.push('/routine-builder')}
+      >
+        <Text style={[styles.fabButtonText, { fontSize: fabIconSize }]}>+</Text>
+      </Pressable>
     </View>
   );
 }
@@ -117,6 +136,7 @@ export default function RoutinesScreen() {
 const styles = StyleSheet.create({
   screen: {
     ...GlobalStyles.container,
+    position: 'relative',
   },
   header: {
     backgroundColor: Colors.background.DEFAULT,
@@ -238,20 +258,20 @@ const styles = StyleSheet.create({
     color: Colors.text.tertiary,
     fontWeight: Typography.fontWeight.medium,
   },
-  addButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: Colors.primary.DEFAULT,
-    borderStyle: 'dashed',
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.xl,
+  fabButton: {
+    position: 'absolute',
+    backgroundColor: Colors.primary.DEFAULT,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.sm,
-    marginTop: Spacing.base,
+    shadowColor: '#000',
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
   },
-  addText: {
-    ...Typography.styles.bodyBold,
-    color: Colors.primary.DEFAULT,
+  fabButtonText: {
+    color: Colors.text.primary,
+    fontWeight: Typography.fontWeight.extrabold,
+    marginTop: -2,
   },
 });

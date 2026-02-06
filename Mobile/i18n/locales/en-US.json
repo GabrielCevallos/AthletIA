@@ -15,6 +15,16 @@
     "noAccount": "Don't have an account?",
     "signUp": "Sign up here"
   },
+  "forgotPasswordScreen": {
+    "title": "Reset Password",
+    "caption": "Enter your email to receive instructions",
+    "sendButton": "SEND INSTRUCTIONS",
+    "backToLogin": "Back to login",
+    "successTitle": "Email Sent",
+    "successMessage": "If the email exists in our system, you will receive a link to reset your password.",
+    "errorTooManyRequests": "Too many requests. Please try again later.",
+    "errorGeneric": "An error occurred. Please try again."
+  },
   "errors": {
     "authError": "Authentication Error"
   },
@@ -256,6 +266,35 @@
         "goalsTitle": "Goals"
     }
   },
+  "routineBuilder": {
+    "headerTitle": "Routine Builder",
+    "introTitle": "New Routine",
+    "introSubtitle": "Create personalized routines for your goals.",
+    "form": {
+      "nameLabel": "Routine Name",
+      "namePlaceholder": "Ex: Chest/Triceps Hypertrophy",
+      "descriptionLabel": "Short description",
+      "descriptionPlaceholder": "Describe the goal..."
+    },
+    "exercises": {
+      "title": "Exercises",
+      "count": "{{count}} exercises",
+      "sets": "Sets",
+      "reps": "Reps",
+      "weight": "Weight (kg)",
+      "addExisting": "Add Existing Exercises",
+      "addCustom": "Create Custom Exercise"
+    },
+    "actions": {
+      "save": "Save Routine"
+    },
+    "errors": {
+      "auth": "User not authenticated",
+      "nameRequired": "Routine name is required",
+      "descriptionRequired": "Description is required",
+      "save": "Error saving routine"
+    }
+  },
   "splits": {
     "title": "My Splits",
     "subtitle": "Manage your workout plans",
@@ -299,6 +338,38 @@
             "name": "Ex: Push/Pull/Legs",
             "description": "Describe your split..."
         }
+    }
+  },
+  "createSplit": {
+    "title": "New Split",
+    "subtitle": "Create a new personalized training plan.",
+    "form": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Ex: Push/Pull/Legs",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Describe your split...",
+      "trainingDays": "Training Days",
+      "routinesLabel": "Routines",
+      "routinesHint": "Select the routines that will be part of this split",
+      "addRoutines": "Add routines",
+      "addMoreRoutines": "Add more routines"
+    },
+    "summary": {
+      "trainingDays": "Training days:",
+      "restDays": "Rest days:",
+      "routinesAssigned": "Assigned routines:"
+    },
+    "actions": {
+      "create": "Create Split",
+      "creating": "Creating..."
+    },
+    "errors": {
+      "validationDays": "Please complete the name and select at least one training day.",
+      "validationRoutines": "Please select at least one routine for the split.",
+      "create": "Could not create the split. Please try again."
+    },
+    "success": {
+      "created": "Split created successfully"
     }
   },
   "measurements": {

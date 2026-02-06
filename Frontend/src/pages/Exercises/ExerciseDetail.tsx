@@ -3,18 +3,37 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Eye, EyeOff, Dumbbell, Target, Video, ImageIcon, ListOrdered, Heart, GitBranch, Edit, Trash2 } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import { deleteExercise, getExerciseById, Exercise } from '../../lib/exerciseStore';
-import { MuscleTargetLabels, EquipmentLabels } from '../../lib/enums';
 import Swal from 'sweetalert2';
+import api from '../../lib/api';
+import { useTranslation } from 'react-i18next';
 
 const ExerciseDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [exercise, setExercise] = useState<Exercise | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
-    const found = getExerciseById(id);
-    setExercise(found || null);
+    const fetchExercise = async () => {
+      if (!id) return;
+      setLoading(true);
+      try {
+        const res = await api.get(`/workout/exercises/${id}`);
+        // Backend returns: { success: true, message: '...', data: Exercise }
+        if (res.data?.data) {
+          setExercise(res.data.data);
+        } else {
+          setExercise(getExerciseById(id) || null);
+        }
+      } catch (error) {
+        console.warn('Backend fetch failed, trying local store', error);
+        setExercise(getExerciseById(id) || null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchExercise();
   }, [id]);
 
   const handleDelete = async () => {
@@ -22,41 +41,70 @@ const ExerciseDetail: React.FC = () => {
     if (exercise.isSeed) {
       await Swal.fire({
         icon: 'info',
-        title: 'Ejercicio protegido',
-        text: 'Los ejercicios base no se pueden eliminar.',
-        confirmButtonText: 'Entendido',
+        title: t('exercises.delete.protected_title'),
+        text: t('exercises.delete.protected_text'),
+        confirmButtonText: t('common.actions.understood'),
       });
       return;
     }
 
     const result = await Swal.fire({
-      title: '¿Eliminar ejercicio?',
-      text: `Se eliminará "${exercise.name}"`,
+      title: t('exercises.delete.confirm_title'),
+      text: t('exercises.delete.confirm_text'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonText: 'Cancelar',
-      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: t('common.actions.cancel'),
+      confirmButtonText: t('exercises.delete.confirm_button'),
     });
 
     if (result.isConfirmed) {
-      deleteExercise(exercise.id);
-      await Swal.fire({
-        icon: 'success',
-        title: 'Ejercicio eliminado',
-        timer: 1500,
-        timerProgressBar: true,
-        showConfirmButton: false,
-      });
-      navigate('/exercises');
+      try {
+        await api.delete(`/workout/exercises/${exercise.id}`);
+        await Swal.fire({
+          icon: 'success',
+          title: t('exercises.delete.success_title'),
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+        navigate('/exercises');
+      } catch (error) {
+         console.warn('Backend delete failed, trying local', error);
+         const deleted = deleteExercise(exercise.id);
+         if (deleted) {
+            await Swal.fire({
+              icon: 'success',
+              title: t('exercises.detail.delete_local_success'),
+              timer: 1500,
+              timerProgressBar: true,
+              showConfirmButton: false,
+            });
+            navigate('/exercises');
+         } else {
+             await Swal.fire({
+              icon: 'error',
+              title: t('exercises.detail.delete_error_title'),
+              text: t('exercises.detail.delete_error_text'),
+            });
+         }
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!exercise) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <p className="text-gray-900 dark:text-white text-xl">Ejercicio no encontrado</p>
-        <Link to="/exercises" className="text-primary hover:underline">Volver a Ejercicios</Link>
+        <p className="text-gray-900 dark:text-white text-xl">{t('exercises.detail.not_found')}</p>
+        <Link to="/exercises" className="text-primary hover:underline">{t('exercises.detail.back_to_list')}</Link>
       </div>
     );
   }
@@ -70,7 +118,7 @@ const ExerciseDetail: React.FC = () => {
           <button 
             onClick={() => navigate('/exercises')}
             className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition focus-visible:outline-[3px] focus-visible:outline-primary focus-visible:outline-offset-2"
-            aria-label="Volver a ejercicios"
+            aria-label={t('exercises.detail.back_button_aria')}
           >
             <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
           </button>
@@ -79,21 +127,21 @@ const ExerciseDetail: React.FC = () => {
             <div className="flex items-center gap-2">
               {exercise.isPublic !== false ? (
                 <span className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/20 text-primary">
-                  <Eye size={14} /> Público
+                  <Eye size={14} /> {t('exercises.detail.public')}
                 </span>
               ) : (
                 <span className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-200 text-gray-800 dark:bg-white/10 dark:text-gray-300">
-                  <EyeOff size={14} /> Privado
+                  <EyeOff size={14} /> {t('exercises.detail.private')}
                 </span>
               )}
             </div>
           </div>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => navigate(`/exercises/${exercise.id}/edit`)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition text-gray-900 dark:text-white" aria-label="Editar ejercicio">
+          <button onClick={() => navigate(`/exercises/${exercise.id}/edit`)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition text-gray-900 dark:text-white" aria-label={t('exercises.detail.edit_label')}>
             <Edit size={20} />
           </button>
-          <button onClick={handleDelete} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition text-red-600 dark:text-red-400" aria-label="Eliminar ejercicio">
+          <button onClick={handleDelete} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition text-red-600 dark:text-red-400" aria-label={t('exercises.detail.delete_label')}>
             <Trash2 size={20} />
           </button>
         </div>
@@ -107,16 +155,16 @@ const ExerciseDetail: React.FC = () => {
               <Target size={24} className="text-primary" />
             </div>
             <div className="flex-1">
-              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-2">Grupos Musculares</p>
+              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-2">{t('exercises.detail.muscle_groups')}</p>
               <div className="flex flex-wrap gap-2">
                 {exercise.muscleTarget && exercise.muscleTarget.length > 0 ? (
                   exercise.muscleTarget.map(muscle => (
                     <span key={muscle} className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm font-semibold">
-                      {MuscleTargetLabels[muscle]}
+                      {t(`enums.muscle.${muscle}`, muscle)}
                     </span>
                   ))
                 ) : (
-                  <span className="text-gray-900 dark:text-white text-lg font-bold">No especificado</span>
+                  <span className="text-gray-900 dark:text-white text-lg font-bold">{t('exercises.detail.not_specified')}</span>
                 )}
               </div>
             </div>
@@ -127,8 +175,8 @@ const ExerciseDetail: React.FC = () => {
               <Dumbbell size={24} className="text-primary" />
             </div>
             <div>
-              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-1">Equipo</p>
-              <p className="text-gray-900 dark:text-white text-lg font-bold">{EquipmentLabels[exercise.equipment]}</p>
+              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-1">{t('exercises.detail.equipment')}</p>
+              <p className="text-gray-900 dark:text-white text-lg font-bold">{t(`enums.equipment.${exercise.equipment}`, exercise.equipment)}</p>
             </div>
           </div>
 
@@ -138,12 +186,12 @@ const ExerciseDetail: React.FC = () => {
                 <GitBranch size={24} className="text-primary" />
               </div>
               <div>
-                <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-1">Variante de</p>
+                <p className="text-gray-500 dark:text-gray-300 text-sm font-medium mb-1">{t('exercises.detail.variant_of')}</p>
                 <button 
                   onClick={() => navigate(`/exercises/${exercise.parentExerciseId}`)}
                   className="text-primary hover:underline text-lg font-bold text-left"
                 >
-                  {exercise.parentExercise.name} ({EquipmentLabels[exercise.parentExercise.equipment]})
+                  {exercise.parentExercise.name} ({t(`enums.equipment.${exercise.parentExercise.equipment}`, exercise.parentExercise.equipment)})
                 </button>
               </div>
             </div>
@@ -152,7 +200,7 @@ const ExerciseDetail: React.FC = () => {
 
         {exercise.description && (
           <div className="mt-6 pt-6 border-t border-[#326744]">
-            <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Descripción</p>
+            <p className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">{t('exercises.detail.description')}</p>
             <p className="text-gray-900 dark:text-white text-base leading-relaxed">{exercise.description}</p>
           </div>
         )}
@@ -163,7 +211,7 @@ const ExerciseDetail: React.FC = () => {
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
           <div className="flex items-center gap-2 mb-4">
             <Video size={20} className="text-primary" />
-            <h2 className="text-gray-900 dark:text-white text-xl font-bold">Contenido Multimedia</h2>
+            <h2 className="text-gray-900 dark:text-white text-xl font-bold">{t('exercises.detail.multimedia_title')}</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {exercise.mediaFiles.map((file: any, idx: number) => (
@@ -194,7 +242,7 @@ const ExerciseDetail: React.FC = () => {
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
           <div className="flex items-center gap-2 mb-4">
             <ListOrdered size={20} className="text-primary" />
-            <h2 className="text-gray-900 dark:text-white text-xl font-bold">Pasos de Ejecución</h2>
+            <h2 className="text-gray-900 dark:text-white text-xl font-bold">{t('exercises.detail.instructions_title')}</h2>
           </div>
           <ol className="space-y-3">
             {exercise.instructions.map((text: string, idx: number) => (
@@ -212,7 +260,7 @@ const ExerciseDetail: React.FC = () => {
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <Heart size={20} className="text-primary" />
-            <h2 className="text-gray-900 dark:text-white text-xl font-bold">Beneficios</h2>
+            <h2 className="text-gray-900 dark:text-white text-xl font-bold">{t('exercises.detail.benefits_title')}</h2>
           </div>
           <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg">
             <p className="text-gray-900 dark:text-white font-bold text-lg mb-2">{exercise.benefit.title}</p>
@@ -235,7 +283,7 @@ const ExerciseDetail: React.FC = () => {
         <section className="bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/10 shadow-card-md">
           <div className="flex items-center gap-2 mb-4">
             <GitBranch size={20} className="text-primary" />
-            <h2 className="text-gray-900 dark:text-white text-xl font-bold">Variantes del Ejercicio</h2>
+            <h2 className="text-gray-900 dark:text-white text-xl font-bold">{t('exercises.detail.variants_title')}</h2>
           </div>
           <ul className="space-y-3">
             {exercise.variants.map((v: any, idx: number) => (

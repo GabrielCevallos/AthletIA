@@ -18,10 +18,10 @@ import {
 } from 'react-native';
 
 export default function SplitDetailScreen() {
-  const { t } = useTranslation(['splits', 'common']);
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { fetchSplitById, updateSplit, loading } = useSplits();
+  const { fetchSplitById, updateSplit, loading } = useSplits({ autoFetch: false });
 
   const daysShort = t('splits.daysShort', { returnObjects: true }) as string[];
   const daysLong = t('splits.daysLong', { returnObjects: true }) as string[];

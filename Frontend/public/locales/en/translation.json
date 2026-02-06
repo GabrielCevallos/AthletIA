@@ -170,11 +170,11 @@
         "step1_header_edit": "Edit Exercise",
         "step1_header_create": "Create New Exercise",
         "step2_title": "Step 2: Muscle Groups",
-        "step2_desc": "Select one or more muscle groups involved.",
+        "step2_desc": "Select one or more involved muscle groups.",
         "step3_title": "Step 3: Exercise Types",
         "step3_desc": "Select one or more exercise types (e.g. Strength, Cardio, etc).",
         "step4_title": "Step 4: Multimedia Content",
-        "step4_desc": "Add a video (URL) or multimedia files (images/videos). You can use one or both options.",
+        "step4_desc": "Add a video (URL) or multimedia files (images/videos). You can use one or both.",
         "step5_title": "Step 5: Exercise Benefits",
         "step5_desc": "Define benefits and categories (Optional).",
         "step6_title": "Step 6: Visibility",
@@ -269,6 +269,27 @@
         "muscle_groups": "Muscle Groups",
         "exercise_types": "Exercise Types"
       }
+    },
+    "detail": {
+      "not_found": "Exercise not found",
+      "back_to_list": "Back to Exercises",
+      "back_button_aria": "Back to exercises",
+      "public": "Public",
+      "private": "Private",
+      "edit_label": "Edit exercise",
+      "delete_label": "Delete exercise",
+      "muscle_groups": "Muscle Groups",
+      "not_specified": "Not specified",
+      "equipment": "Equipment",
+      "variant_of": "Variant of",
+      "description": "Description",
+      "multimedia_title": "Multimedia Content",
+      "instructions_title": "Execution Steps",
+      "benefits_title": "Benefits",
+      "variants_title": "Exercise Variants",
+      "delete_local_success": "Exercise deleted (Local)",
+      "delete_error_title": "Delete error",
+      "delete_error_text": "Could not delete the exercise."
     }
   },
   "routines": {

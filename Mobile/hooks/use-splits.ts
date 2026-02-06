@@ -25,7 +25,11 @@ export type UseSplitsActions = {
 
 export type UseSplitsReturn = UseSplitsState & UseSplitsActions;
 
-export function useSplits(): UseSplitsReturn {
+type UseSplitsOptions = {
+  autoFetch?: boolean;
+};
+
+export function useSplits(options?: UseSplitsOptions): UseSplitsReturn {
   const { user } = useAuth();
   const [splits, setSplits] = useState<Split[]>([]);
   const [loading, setLoading] = useState(false);
@@ -208,10 +212,11 @@ export function useSplits(): UseSplitsReturn {
 
   // Initial load
   useEffect(() => {
+    if (options?.autoFetch === false) return;
     if (user?.token) {
       fetchSplits();
     }
-  }, [user?.token, fetchSplits]);
+  }, [user?.token, fetchSplits, options?.autoFetch]);
 
   return {
     splits,
